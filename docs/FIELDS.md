@@ -152,7 +152,7 @@ systems we cannot say.
 | 88 | +0x109 | `solar_wind_priority_V` | Solar & wind priority (sustain) voltage | u16 / 100 | V | MEDIUM | Reference: sustain voltage for solar & wind priority. | Reference; 52.00 V everywhere. NOTE: earlier notes decoded a 'VS SOC threshold = 20 %' at +0x10a. That byte is the high byte of this value (5200 = 0x1450). The Virtual Switch SoC threshold is NOT located; treat the old 'vs_soc_pct' field as a decode error. | 5200 |
 | 128 | +0x159 | `lom_config_a` | LOM configuration A | u16 |  | LOW | Loss-of-mains configuration (grid code related). 0xffff on bare blocks; the GUI ESS install writes 1 / 0x0101. | Reference name; observed transition. | 65535, 1, 257, 65281, 0 |
 
-IDs not listed read zero on every block (13, 14, 19–23, 31–36, 38–43, 61, 75–80, 82–84, 86, 89–127) or
+IDs not listed read zero on every block (19–23, 31–36, 38–43, 61, 75–80, 82–84, 86, 89–127) or
 0xffff (129–189 on bare blocks); they are omitted from the table but visible with `rvms decode --all`.
 
 ## How to add or promote a field
