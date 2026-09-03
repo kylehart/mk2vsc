@@ -25,9 +25,10 @@ built to do that, together with everything we learned about the file along the w
   * decodes the per-inverter settings array into labelled values with a confidence level per field,
   * compares two files by inverter serial and tells you whether they differ only in bookkeeping,
   * edits settings in place, self-verifies that nothing else changed, and never changes file length,
-  * qualifies a file against the values you intended before you upload and after you re-download.
+  * qualifies a file against the values you intended before you upload and after you re-download,
+  * mines a library of archived downloads into a dated, per-inverter change log (`rvms history`).
 * A corpus of 84 real device files with a manifest, and a test suite that checks every documented
-  claim against that corpus (451 tests).
+  claim against that corpus (453 tests).
 * A written account of the format as we understand it, and of what we do not understand.
 
 ## What this is not
@@ -59,7 +60,7 @@ docs/FIELDS.md. The writer edits CONFIRMED and HIGH fields; anything lower needs
 git clone <this repository>
 cd rvms-toolkit
 python3 -m venv .venv && .venv/bin/pip install -e ".[test]"
-.venv/bin/pytest          # 451 tests against the fixture corpus
+.venv/bin/pytest          # 453 tests against the fixture corpus
 ```
 
 Or run without installing: `PYTHONPATH=. python3 -m rvms.cli ...`.
@@ -109,6 +110,9 @@ wrote /tmp/prepared.rvms; verified: only the listed bytes and their section chec
   ok   absorption_V = 56.8 on all inverters
   ok   float_V = 54.0 on all inverters
 ```
+
+Every command: `info`, `validate`, `decode`, `diff`, `set`, `qualify`, `fix`, `fields`, `census`,
+`history`. `rvms --help` and `rvms <command> --help` describe the options.
 
 From Python:
 
@@ -170,7 +174,7 @@ things on your own system before trusting the tool with it.
 * We have no `.rvsc` single-unit files and no three-phase or three-plus-unit files.
 * About two thirds of the settings array is unnamed or named with low confidence. docs/FIELDS.md
   lists what each value looks like even where we cannot say what it does.
-* The assistant record bodies, the 0x0fb7-byte BareSettingInfo section and parts of the block header
+* The assistant record bodies, the 4001-byte BareSettingInfo section and parts of the block header
   are not understood. docs/FORMAT.md keeps an explicit Observed / Inferred / Unknown list.
 * Installing an assistant by file has never produced a running system for us. docs/ASSISTANTS.md
   records each attempt and its outcome so nobody has to repeat them on live hardware.
