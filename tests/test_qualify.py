@@ -1,5 +1,5 @@
-from rvms.qualify import Intent, qualify_bytes
-from rvms.writer import set_settings
+from mk2vsc.qualify import Intent, qualify_bytes
+from mk2vsc.writer import set_settings
 
 MISMATCHED = "guava/guava_2026-07-20_download_bare_deviceform_1.rvms"   # 56.0/54.0 vs 57.6/55.2 on the pair
 FIXED = "guava/guava_2026-07-20_prepared_bare_deviceform_1.rvms"
@@ -35,7 +35,7 @@ def test_the_rollback_that_bit_us(good_files):
     """A file can pass every structural check and still be wrong.  Reproduce the 2026-08-14 case: a
     rollback built from an old baseline carrying the pre-correction charge profile."""
     old = good_files[MISMATCHED]
-    from rvms.sections import RvmsFile
+    from mk2vsc.sections import RvmsFile
     assert RvmsFile.parse(old).all_checksums_ok                # structurally fine
     ok, res = qualify_bytes(old, Intent(settings={"absorption_V": 56.8, "float_V": 54.0}))
     fails = [m for l, m in res if l == "FAIL"]

@@ -101,7 +101,7 @@ a real defect (a block copied from a GUI export in upload form, so every field a
 "Unknown"; a GX reboot cleared it and the same construction was accepted. Then VEConfigure wrote a
 64-byte empty container on each inverter and discarded our 7049-byte payload. We rolled back. The
 re-download taught us that the two blocks swap file position between downloads, so every comparison must
-be by serial (see rvms/diff.py).
+be by serial (see mk2vsc/diff.py).
 
 **Guava, August.** On 2026-08-12 a graft with assistant records byte-identical to the working Papaya
 install was accepted and stubbed again, with a tunnel timeout mid-write and a VE.Bus reset. A second
@@ -155,7 +155,7 @@ the day it happened. Nobody looked. Detection without a review step is not prote
 
 The rollback file that reintroduced the error passed every structural check we had: valid checksums,
 diff limited to intended bytes, all 15 graft assertions. What it lacked was a comparison against what
-the settings were *supposed* to be. rvms/qualify.py keeps intended values outside the file under test
+the settings were *supposed* to be. mk2vsc/qualify.py keeps intended values outside the file under test
 and refuses any file that disagrees with them, and any file whose two inverters disagree with each
 other. Run before upload and again on the re-download.
 

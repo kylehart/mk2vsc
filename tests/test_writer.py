@@ -2,10 +2,10 @@ import os
 
 import pytest
 
-from rvms.sections import RvmsFile
-from rvms.units import units_by_serial
-from rvms.writer import set_settings, WriteRefused
-from rvms.diff import diff_bytes
+from mk2vsc.sections import RvmsFile
+from mk2vsc.units import units_by_serial
+from mk2vsc.writer import set_settings, WriteRefused
+from mk2vsc.diff import diff_bytes
 
 BARE = "guava/guava_2026-07-20_download_bare_deviceform_1.rvms"
 ESS = "guava/guava_2026-08-13_download_ess_deviceform_1.rvms"

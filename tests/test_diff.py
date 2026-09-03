@@ -1,4 +1,4 @@
-from rvms.diff import diff_bytes, render
+from mk2vsc.diff import diff_bytes, render
 
 # Two consecutive downloads of the same system with no configuration change (Mango, 2026-07-24).
 # (The swapped-order pair is found programmatically in the test below.)
@@ -19,8 +19,8 @@ def test_consecutive_downloads_differ_only_in_bookkeeping(good_files):
 
 def test_block_order_swap_is_invisible_when_comparing_by_serial(good_files):
     """Among the Mango bare downloads there is a pair whose two blocks swapped file position."""
-    from rvms.sections import RvmsFile
-    from rvms.units import unit_blocks
+    from mk2vsc.sections import RvmsFile
+    from mk2vsc.units import unit_blocks
     mango = {k: v for k, v in good_files.items() if k.startswith("mango/") and "download_bare" in k}
     orders = {k: [u.serial for u in unit_blocks(RvmsFile.parse(v))] for k, v in mango.items()}
     swapped = [(a, b) for a in orders for b in orders if a < b and orders[a] == orders[b][::-1]]

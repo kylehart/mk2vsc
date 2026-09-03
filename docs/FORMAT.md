@@ -65,7 +65,7 @@ The section table of that file as our parser reports it:
 **Observed.** The last four bytes of every section are the 32-bit little-endian word sum of the section
 from its length prefix up to those four bytes, modulo 2**32, with a trailing partial word zero-padded on
 the high side. This validates on all 107 files we have held (84 unique) and every section in them, with
-the three deliberately broken files in `fixtures/` as negative controls. `rvms.sections.sum32_le` is the
+the three deliberately broken files in `fixtures/` as negative controls. `mk2vsc.sections.sum32_le` is the
 whole implementation.
 
 History, because earlier write-ups describe the same thing differently. Our first solved formula was
@@ -154,7 +154,7 @@ first device). We have no three-unit file to see a third value.
 downloads taken minutes apart, and the length in the "B to next B" convention follows the position (484
 then 482 bytes) rather than the inverter. A positional byte diff of two consecutive downloads therefore
 shows dozens of differences; compared by serial there are exactly six bookkeeping bytes per block
-(pointer, timestamp) plus the checksum. `rvms diff` always compares by serial.
+(pointer, timestamp) plus the checksum. `mk2vsc diff` always compares by serial.
 
 ### 3.2 The timestamp
 
@@ -189,7 +189,7 @@ two GUI exports it is a few seconds before the per-block save stamps, so we read
 When VRM adopts an upload-form file and the device is next downloaded, the result is device form again,
 so the blob never survives a round trip.
 
-**Observed.** The two forms otherwise agree on every setting: `rvms diff` of a GUI export against the
+**Observed.** The two forms otherwise agree on every setting: `mk2vsc diff` of a GUI export against the
 subsequent device download reports no setting differences.
 
 Detection: `UnitBlock.is_upload_form` is true when any of the ten bytes at +0x45 is non-zero. The writer
@@ -233,7 +233,7 @@ the padding and ending `00 00 00`. **Unknown.** What any of it means.
 systems in at most one byte (a primary/secondary flag). **Inferred.** The assistant payload is a fixed
 program template chosen by VEConfigure for the installation type, not something compiled per unit.
 **Unknown.** The body's encoding. It has the statistics of code (entropy about 6.2 bits/byte, recurring
-2-3 byte patterns) and contains recognisable parameter values (48.00 V, 10 %). `rvms` reports the records;
+2-3 byte patterns) and contains recognisable parameter values (48.00 V, 10 %). `mk2vsc` reports the records;
 it does not author them, and `docs/ASSISTANTS.md` explains why we stopped trying.
 
 ## 6. Observed / Inferred / Unknown, collected
@@ -268,5 +268,5 @@ it does not author them, and `docs/ASSISTANTS.md` explains why we stopped trying
 * three-phase or 3+ unit files: we have none
 * any other firmware version or format version: we have none
 
-If you hold a file outside our envelope, `rvms validate` and `rvms info` on it are the most useful
+If you hold a file outside our envelope, `mk2vsc validate` and `mk2vsc info` on it are the most useful
 contributions you can make; see `CONTRIBUTING.md`.

@@ -1,4 +1,4 @@
-# rvms
+# mk2vsc
 
 Read, validate, decode, diff, edit and qualify Victron VEConfigure `.rvms` configuration files
 without VEConfigure, on any operating system, from Python or the command line.
@@ -20,13 +20,13 @@ built to do that, together with everything we learned about the file along the w
 
 ## What this is
 
-* A zero-dependency Python 3.9+ library and a CLI (`rvms`) that:
+* A zero-dependency Python 3.9+ library and a CLI (`mk2vsc`) that:
   * parses the file's section structure and verifies every integrity checksum,
   * decodes the per-inverter settings array into labelled values with a confidence level per field,
   * compares two files by inverter serial and tells you whether they differ only in bookkeeping,
   * edits settings in place, self-verifies that nothing else changed, and never changes file length,
   * qualifies a file against the values you intended before you upload and after you re-download,
-  * mines a library of archived downloads into a dated, per-inverter change log (`rvms history`).
+  * mines a library of archived downloads into a dated, per-inverter change log (`mk2vsc history`).
 * A corpus of 84 real device files with a manifest, and a test suite that checks every documented
   claim against that corpus (459 tests).
 * A written account of the format as we understand it, and of what we do not understand.
@@ -45,30 +45,30 @@ built to do that, together with everything we learned about the file along the w
 | Section grammar and integrity checksum | Proven | Validates on every section of all 84 fixture files (107 counting archive duplicates); edited files accepted by the device on 4 systems |
 | Settings array = VE.Bus setting IDs at +0x59 + 2n | High | Reference IDs reproduce 120 V output, 50.0 A limit, 95 %/98 % SoC, grid-code flag on all 162 blocks of the 81 well-formed fixtures |
 | Field table (190 entries) | Partial | 4 CONFIRMED, 10 HIGH, 9 MEDIUM, 19 LOW, 20 UNKNOWN named; the rest unnamed |
-| Guarded writer (`rvms set`) | Proven live | Absorption, float and Virtual Switch thresholds written and read back on 4 systems, July to August 2026 |
-| By-serial diff (`rvms diff`) | Proven | Consecutive downloads, including a pair whose blocks swapped position, classify as bookkeeping only |
-| Qualifier (`rvms qualify`) | Proven | Reproduces the incident that motivated it (a rollback that reverted a charge-voltage fix) |
+| Guarded writer (`mk2vsc set`) | Proven live | Absorption, float and Virtual Switch thresholds written and read back on 4 systems, July to August 2026 |
+| By-serial diff (`mk2vsc diff`) | Proven | Consecutive downloads, including a pair whose blocks swapped position, classify as bookkeeping only |
+| Qualifier (`mk2vsc qualify`) | Proven | Reproduces the incident that motivated it (a rollback that reverted a charge-voltage fix) |
 | Assistant area | Read only | Record structure and stub signature recognised; record bodies not understood |
 | Upload-form (GUI export) files | Read only, experimental | Detected and decoded; the writer refuses them |
 
-The confidence vocabulary (CONFIRMED, HIGH, MEDIUM, LOW, UNKNOWN) is defined in `rvms/fields.py` and
+The confidence vocabulary (CONFIRMED, HIGH, MEDIUM, LOW, UNKNOWN) is defined in `mk2vsc/fields.py` and
 docs/FIELDS.md. The writer edits CONFIRMED and HIGH fields; anything lower needs an explicit override.
 
 ## Install
 
 ```
 git clone <this repository>
-cd rvms-toolkit
+cd mk2vsc
 python3 -m venv .venv && .venv/bin/pip install -e ".[test]"
 .venv/bin/pytest          # 459 tests against the fixture corpus
 ```
 
-Or run without installing: `PYTHONPATH=. python3 -m rvms.cli ...`.
+Or run without installing: `PYTHONPATH=. python3 -m mk2vsc.cli ...`.
 
 ## Quickstart
 
 ```
-rvms info fixtures/mango/mango_2026-07-24_download_bare_deviceform_1.rvms
+mk2vsc info fixtures/mango/mango_2026-07-24_download_bare_deviceform_1.rvms
 ```
 ```
 format 1.33  length 5055  checksums OK
@@ -85,7 +85,7 @@ Two downloads of the same system a few minutes apart differ only in bookkeeping 
 timestamp, checksum), even though the two inverter blocks may have swapped position in the file:
 
 ```
-rvms diff fixtures/mango/mango_2026-07-24_download_bare_deviceform_1.rvms \
+mk2vsc diff fixtures/mango/mango_2026-07-24_download_bare_deviceform_1.rvms \
           fixtures/mango/mango_2026-07-24_download_bare_deviceform_2.rvms
 ```
 ```
@@ -97,9 +97,9 @@ lengths 5055 -> 5055; prologue same; verdict: ONLY BOOKKEEPING (settings verbati
 Edit a setting on every inverter, then check the result against what you intended:
 
 ```
-rvms set fixtures/guava/guava_2026-07-20_download_bare_deviceform_1.rvms /tmp/prepared.rvms \
+mk2vsc set fixtures/guava/guava_2026-07-20_download_bare_deviceform_1.rvms /tmp/prepared.rvms \
          absorption_V=56.8 float_V=54.0
-rvms qualify /tmp/prepared.rvms --intent examples/intent.example.json
+mk2vsc qualify /tmp/prepared.rvms --intent examples/intent.example.json
 ```
 ```
 HQ2414U6FVN  absorption_V  56.0 -> 56.8 V  (+0x05d / file 0x1056)
@@ -114,12 +114,12 @@ wrote /tmp/prepared.rvms; verified: only the listed bytes and their section chec
 ```
 
 Every command: `info`, `validate`, `decode`, `diff`, `set`, `qualify`, `fix`, `fields`, `census`,
-`history`. `rvms --help` and `rvms <command> --help` describe the options.
+`history`. `mk2vsc --help` and `mk2vsc <command> --help` describe the options.
 
 From Python:
 
 ```python
-from rvms import RvmsFile, units_by_serial, set_settings, diff_bytes
+from mk2vsc import RvmsFile, units_by_serial, set_settings, diff_bytes
 
 data = open("download.rvms", "rb").read()
 print(units_by_serial(RvmsFile.parse(data))["HQ2414U6FVN"].setting(2) / 100)   # absorption, volts
@@ -137,11 +137,11 @@ are how we make that safe; docs/CHANGE_CONTROL.md explains each one and the inci
 
 1. Download a fresh file from VRM (Remote VEConfigure) into `00_baseline/`. Never start from an
    archived copy: the device rejects stale save timestamps, and old files carry old values.
-2. `rvms set` the baseline into `01_prepared/`, then `rvms qualify` it against an intent file that
+2. `mk2vsc set` the baseline into `01_prepared/`, then `mk2vsc qualify` it against an intent file that
    lives outside the file under test.
 3. Upload `01_prepared/` through VRM.
 4. Download again into `02_downloaded/`.
-5. `rvms diff` prepared against downloaded (expect "ONLY BOOKKEEPING") and `rvms qualify` the
+5. `mk2vsc diff` prepared against downloaded (expect "ONLY BOOKKEEPING") and `mk2vsc qualify` the
    download. "Success" in the upload dialog is not the same as "the settings are right".
 
 ## Corpus and tests

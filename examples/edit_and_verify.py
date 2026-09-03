@@ -15,9 +15,9 @@ import tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
 
-from rvms import RvmsFile, units_by_serial, set_settings, diff_bytes, Intent  # noqa: E402
-from rvms.diff import render as render_diff  # noqa: E402
-from rvms.qualify import qualify_bytes, render as render_qual  # noqa: E402
+from mk2vsc import RvmsFile, units_by_serial, set_settings, diff_bytes, Intent  # noqa: E402
+from mk2vsc.diff import render as render_diff  # noqa: E402
+from mk2vsc.qualify import qualify_bytes, render as render_qual  # noqa: E402
 
 src = sys.argv[1] if len(sys.argv) > 1 else os.path.join(
     HERE, "..", "fixtures", "guava", "guava_2026-07-20_download_bare_deviceform_1.rvms")

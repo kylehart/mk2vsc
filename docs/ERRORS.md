@@ -50,7 +50,7 @@ the bus. *Observed* twice with different causes:
   enumeration and the same construction was accepted (Mango 2026-07-24, v3 then v4).
 
 Device state: nothing written. What to do: check the device list in VRM for an "Unknown" serial first;
-reboot the GX if so. Then check the file with `rvms validate` and `rvms info` (form must be "device").
+reboot the GX if so. Then check the file with `mk2vsc validate` and `mk2vsc info` (form must be "device").
 Confidence: observed.
 
 ### mk2vsc-49  "Number of units in file does not match number of units discovered"
@@ -58,10 +58,10 @@ Confidence: observed.
 A pre-write reject: the unit walk over the file found the wrong number of blocks. *Observed* four times,
 always with a hand-built file: a wrong next-section pointer, a block shorter than the canonical length,
 and blocks emitted in the wrong order so that the two-byte length prefix of the following section sat
-after the wrong block. `rvms validate` catches a broken pointer chain and bad checksums; it does not know the canonical block
+after the wrong block. `mk2vsc validate` catches a broken pointer chain and bad checksums; it does not know the canonical block
 length, so a structurally consistent but too-short block still passes it.
 
-Device state: nothing written. What to do: run `rvms validate`; if it passes and you still get this,
+Device state: nothing written. What to do: run `mk2vsc validate`; if it passes and you still get this,
 you have found a structural rule we do not know. Please open an issue with the file. Confidence: observed.
 
 ### mk2vsc-62  (download blocked)
@@ -79,7 +79,7 @@ device continued an install and telemetry stayed silent for twenty minutes. On M
 appeared after the inverter had already returned to inverting.
 
 Device state: unknown until you download. What to do: wait, then download fresh and diff against what
-you uploaded (`rvms diff uploaded.rvms fresh.rvms`). If the verdict is "only bookkeeping", the upload
+you uploaded (`mk2vsc diff uploaded.rvms fresh.rvms`). If the verdict is "only bookkeeping", the upload
 took. Confidence: observed.
 
 ### Error 1391  "Installation already executing another request"
@@ -148,8 +148,8 @@ Confidence: observed.
 
 ### "Success. The system has been configured."
 
-The upload was accepted. It is not proof the settings are right: download fresh and run `rvms diff`
-against what you uploaded, and `rvms qualify` against your intent file. On 2026-08-14 a file with this
+The upload was accepted. It is not proof the settings are right: download fresh and run `mk2vsc diff`
+against what you uploaded, and `mk2vsc qualify` against your intent file. On 2026-08-14 a file with this
 dialog reintroduced an out-of-spec charge voltage that went unnoticed for a month.
 
 ## Quick table
@@ -159,7 +159,7 @@ dialog reintroduced an out-of-spec charge voltage that went unnoticed for a mont
 | mk2vsc-36 (no reset dialog seen) | no | download fresh, rebuild edit on it | observed |
 | mk2vsc-36 (after "Resetting VE.Bus products") | possibly partial | stop, GX reboot, fresh known-good upload | observed |
 | mk2vsc-47 | no | check VRM device list for "Unknown"; GX reboot; check file form | observed |
-| mk2vsc-49 | no | `rvms validate`; fix pointers/order | observed |
+| mk2vsc-49 | no | `mk2vsc validate`; fix pointers/order | observed |
 | mk2vsc-62 | n/a | wait for re-enumeration | observed once |
 | Error 1303 | unknown | wait, download, diff | observed |
 | Error 1391 | in progress | wait | observed once |

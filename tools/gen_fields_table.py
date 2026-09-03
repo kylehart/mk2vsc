@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Print the settings table in docs/FIELDS.md as Markdown, generated from rvms/fields.py.
+"""Print the settings table in docs/FIELDS.md as Markdown, generated from mk2vsc/fields.py.
 
     PYTHONPATH=. python3 tools/gen_fields_table.py > /tmp/fields_table.md
 
@@ -7,7 +7,7 @@ The table in docs/FIELDS.md is pasted from this output so the document cannot dr
 """
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from rvms.fields import FIELDS  # noqa: E402
+from mk2vsc.fields import FIELDS  # noqa: E402
 
 
 def esc(s: str) -> str:

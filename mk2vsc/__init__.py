@@ -5,7 +5,7 @@ Zero dependencies. Python 3.9+.
 
 Quick tour::
 
-    from rvms import RvmsFile, units_by_serial, decode_file, set_settings, diff_files
+    from mk2vsc import RvmsFile, units_by_serial, decode_file, set_settings, diff_files
 
     f = RvmsFile.load("system.rvms")
     f.all_checksums_ok                      # every section's integrity trailer validates

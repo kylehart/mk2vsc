@@ -89,7 +89,7 @@ FIELDS: List[Field] = [
     Field(2, "absorption_V", "Absorption voltage", 100, "V", CONFIRMED,
           "Charger absorption (bulk end) voltage. With a CAN-bus BMS and DVCC active the BMS charge-voltage limit "
           "overrides this; it is the fallback used when the BMS link is absent.",
-          "Written by rvms_writer on four systems (2026-07-20) via Remote VEConfigure, read back correct on every "
+          "Written by the writer on four systems (2026-07-20) via Remote VEConfigure, read back correct on every "
           "inverter; matches VRM 'Absorption' and VEConfigure Charger tab.",
           "5600, 5650, 5680, 5760 (also 4800 on a mis-commissioned unit, 0 in stub blocks)", "ours + " + XC, lo=40.0, hi=66.0),
     Field(3, "float_V", "Float voltage", 100, "V", CONFIRMED,

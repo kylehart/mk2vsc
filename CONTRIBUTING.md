@@ -35,7 +35,7 @@ version 1.33, in a two-inverter split-phase pair. We would like to see:
 * any other firmware version or VEConfigure version,
 * a 230 V system.
 
-Run `rvms validate` and `rvms census` on the file first. If validation fails, that is already a
+Run `mk2vsc validate` and `mk2vsc census` on the file first. If validation fails, that is already a
 finding: it means the checksum model does not hold for your file, and we want to know.
 
 ### 3. Reproducing our claims on your own system
@@ -75,11 +75,11 @@ Then add an entry to `fixtures/manifest.json`:
 | `blocks` | one entry per inverter: `serial`, `length` (block length in the name-start-to-next-name convention), `flag` (the byte at +0x36) |
 | `notes` | free text: what the file is and why it matters |
 
-`rvms census <file>` prints the block lengths, flags, form and assistant kind you need for the entry.
+`mk2vsc census <file>` prints the block lengths, flags, form and assistant kind you need for the entry.
 `examples/gen_fixture_table.py` renders the manifest as the table in docs/FIXTURES.md.
 
 Run `pytest`. The tests in `tests/test_claims.py` check every documented claim against every fixture.
-If one of them fails on your file, do not weaken the test: open an issue with the `rvms census` output
+If one of them fails on your file, do not weaken the test: open an issue with the `mk2vsc census` output
 and, if you can share it, the file. A failing claim is the result we are looking for; it means the
 field table or the format description needs a revision, and the revision needs your file as evidence.
 
@@ -100,7 +100,7 @@ Wi-Fi settings or personal data. Even so:
 ## Code rules
 
 * No runtime dependencies. The library must stay importable on a bare Python 3.9.
-* Every offset or meaning asserted in `rvms/fields.py` or `rvms/units.py` needs a test in
+* Every offset or meaning asserted in `mk2vsc/fields.py` or `mk2vsc/units.py` needs a test in
   `tests/test_claims.py` that checks it against the corpus.
 * Every new `Field` needs `evidence` text if it is CONFIRMED or HIGH, and `observed` values if it is
   UNKNOWN. Do not promote a field's confidence without a controlled pair or a screenshot match.

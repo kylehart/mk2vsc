@@ -1,7 +1,7 @@
 import json
 import os
 
-from rvms.cli import main
+from mk2vsc.cli import main
 from tests.conftest import FIXTURES
 
 BARE = os.path.join(FIXTURES, "guava", "guava_2026-07-20_download_bare_deviceform_1.rvms")

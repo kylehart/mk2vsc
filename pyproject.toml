@@ -3,7 +3,7 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "rvms"
+name = "mk2vsc"
 version = "0.1.0"
 description = "Read, verify, edit and diff Victron VEConfigure .rvms configuration files without VEConfigure"
 readme = "README.md"
@@ -25,13 +25,13 @@ dependencies = []
 test = ["pytest>=7"]
 
 [project.scripts]
-rvms = "rvms.cli:main"
+mk2vsc = "mk2vsc.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/kylehart/rvms-toolkit"  # placeholder until the repository is created
+Homepage = "https://github.com/kylehart/mk2vsc"
 
 [tool.setuptools]
-packages = ["rvms"]
+packages = ["mk2vsc", "mk2vsc.experimental"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

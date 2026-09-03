@@ -6,9 +6,9 @@ the *table* is what needs revising.
 import collections
 import datetime as dt
 
-from rvms.sections import RvmsFile
-from rvms.units import unit_blocks, units_by_serial, N_SETTINGS
-from rvms.fields import BY_ID, FIELDS, CONFIRMED, HIGH, UNKNOWN
+from mk2vsc.sections import RvmsFile
+from mk2vsc.units import unit_blocks, units_by_serial, N_SETTINGS
+from mk2vsc.fields import BY_ID, FIELDS, CONFIRMED, HIGH, UNKNOWN
 
 
 def _units(good_files):

@@ -7,7 +7,7 @@ array is **VE.Bus setting ID n** as documented by the community MK2/MK3 protocol
 "Persistent Settings IDs 0-255"). The IDs, scales and flag bits below marked `xcellsior` come from that
 reference; the evidence that the file's array *is* that table is ours.
 
-The table is generated from `rvms/fields.py` by `tools/gen_fields_table.py`. Regenerate it after any
+The table is generated from `mk2vsc/fields.py` by `tools/gen_fields_table.py`. Regenerate it after any
 change to the code; the code is the source of truth.
 
 ## How the mapping was found
@@ -35,8 +35,8 @@ No single line is proof; the pattern is. `tests/test_claims.py` re-checks each r
 
 | Level | Meaning | What it permits |
 |---|---|---|
-| CONFIRMED | we wrote it, uploaded it, read it back on hardware, or matched it to a VEConfigure screen | edit with `rvms set` |
-| HIGH | reference ID and scale give a physically sensible value on every corpus block, tied to a known property of the installation | edit with `rvms set` (you are still the first to write it) |
+| CONFIRMED | we wrote it, uploaded it, read it back on hardware, or matched it to a VEConfigure screen | edit with `mk2vsc set` |
+| HIGH | reference ID and scale give a physically sensible value on every corpus block, tied to a known property of the installation | edit with `mk2vsc set` (you are still the first to write it) |
 | MEDIUM | reference ID exists; scale or meaning not checked against our systems | read; edit only with `--i-know-this-is-unverified` |
 | LOW | plausible meaning from context only | read |
 | UNKNOWN | observed values recorded, meaning unknown | read |
@@ -50,7 +50,7 @@ Our early notes listed a Virtual Switch SoC threshold of 20 % at block offset +0
 every system read 20 there and the installer's screenshot showed a 20 % SoC condition. Under the
 setting-ID mapping +0x10a is the **high byte of setting 88**, which reads 5200 (0x1450) on every block;
 0x14 is 20. A coincidence that survived a month. The Virtual Switch SoC threshold is **not located**. The
-old field name `vs_soc_pct` is retained in `rvms.fields.LEGACY_NAMES` only so that it raises a clear
+old field name `vs_soc_pct` is retained in `mk2vsc.fields.LEGACY_NAMES` only so that it raises a clear
 error.
 
 ## The Virtual Switch block (IDs 50–59)
@@ -91,7 +91,7 @@ systems we cannot say.
 |---:|:------:|------|-------------------|--------------|------|:----------:|----------------|----------|-----------------|
 | 0 | +0x059 | `flags0` | Primary flags register | u16 bitmask | bitmask | HIGH | Bit register of on/off options. Known bits (from the MK2 protocol reference): bit 3 SET = UPS function DISABLED; bit 5 SET = PowerAssist enabled; bit 11 SET = adaptive (lead-acid) charge curve, CLEAR = fixed (LiFePO4); bit 14 SET = Weak AC. Bits: bit 3 = UPS function disabled; bit 5 = PowerAssist enabled; bit 11 = Adaptive charge curve (lead-acid); bit 14 = Weak AC input enabled. | Reference bit table. On our fleet the ESS installs performed in the GUI changed 0x89xx -> 0x81xx, i.e. cleared bit 11 (adaptive charge) -- consistent with the GUI switching the charge curve to fixed for a lithium battery, and consistent with the reference. Not yet toggled by us. | 0x81f4 (most), 0x89f4, 0x89b4, 0x817c, 0x81b4 |
 | 1 | +0x05b | `flags1` | Secondary flags register | u16 bitmask | bitmask | HIGH | Second bit register. bit 11 SET = accept wide input frequency range; bit 12 SET = dynamic current limiter. Bits: bit 11 = Accept wide frequency range; bit 12 = Dynamic current limiter. | Reference bit table; value 0x4dfe on 202/214 blocks. Earlier tooling mistook the bytes 'fe 4d' here for a 'device descriptor marker'. | 0x4dfe (device form), 0x6a5f/0x6a55/0x6a7e in a few grafted files |
-| 2 | +0x05d | `absorption_V` | Absorption voltage | u16 / 100 | V | CONFIRMED | Charger absorption (bulk end) voltage. With a CAN-bus BMS and DVCC active the BMS charge-voltage limit overrides this; it is the fallback used when the BMS link is absent. | Written by rvms_writer on four systems (2026-07-20) via Remote VEConfigure, read back correct on every inverter; matches VRM 'Absorption' and VEConfigure Charger tab. | 5600, 5650, 5680, 5760 (also 4800 on a mis-commissioned unit, 0 in stub blocks) |
+| 2 | +0x05d | `absorption_V` | Absorption voltage | u16 / 100 | V | CONFIRMED | Charger absorption (bulk end) voltage. With a CAN-bus BMS and DVCC active the BMS charge-voltage limit overrides this; it is the fallback used when the BMS link is absent. | Written by the writer on four systems (2026-07-20) via Remote VEConfigure, read back correct on every inverter; matches VRM 'Absorption' and VEConfigure Charger tab. | 5600, 5650, 5680, 5760 (also 4800 on a mis-commissioned unit, 0 in stub blocks) |
 | 3 | +0x05f | `float_V` | Float voltage | u16 / 100 | V | CONFIRMED | Charger float voltage (after absorption). | First live proof of the whole toolchain: float 54.0 -> 54.1 V on both inverters of one system, uploaded, 'Success', read back 54.1 (2026-07-20). Later edits confirmed again. | 5400, 5410, 5420, 5520 |
 | 4 | +0x061 | `charge_current_A` | Charge current | u16 | A | HIGH | Maximum battery charge current from the charger. | Reference ID/scale; 35 on every device-form block (a deliberate installer limit, consistent across eight inverters). Not edited by us. | 35 |
 | 5 | +0x063 | `inverter_output_V` | Inverter output voltage | u16 | V | HIGH | Nominal AC output voltage of the inverter. | Reference; 120 on 202/214 blocks (these are 120 V units). Upload-form blocks read it at +10. | 120 |
@@ -153,24 +153,24 @@ systems we cannot say.
 | 128 | +0x159 | `lom_config_a` | LOM configuration A | u16 |  | LOW | Loss-of-mains configuration (grid code related). 0xffff on bare blocks; the GUI ESS install writes 1 / 0x0101. | Reference name; observed transition. | 65535, 1, 257, 65281, 0 |
 
 IDs not listed read zero on every block (19–23, 31–36, 38–43, 61, 75–80, 82–84, 86, 89–127) or
-0xffff (129–189 on bare blocks); they are omitted from the table but visible with `rvms decode --all`.
+0xffff (129–189 on bare blocks); they are omitted from the table but visible with `mk2vsc decode --all`.
 
 ## How to add or promote a field
 
 The differential method is what produced everything above; it needs no Windows and no source.
 
 1. **Bracket one change.** Download the file, make exactly one change in VEConfigure (or have your
-   installer make it), download again. `rvms diff before.rvms after.rvms` names the setting IDs that
+   installer make it), download again. `mk2vsc diff before.rvms after.rvms` names the setting IDs that
    moved. One change at a time, or you cannot tell which is which.
 2. **Look for lockstep.** A real setting changed by an installer's "configure properly" pass moves on
    both inverters of a pair at once and converges to the same standard value across systems. Timestamps,
-   pointers and checksums move on every save and are never settings (`rvms.units.VOLATILE_DEVICE`).
+   pointers and checksums move on every save and are never settings (`mk2vsc.units.VOLATILE_DEVICE`).
 3. **Anchor to a screen.** One screenshot of the VEConfigure tab showing the value turns a candidate into
    a CONFIRMED entry in seconds; it is how the Virtual Switch thresholds were pinned.
 4. **Check the scale on the corpus.** A voltage should decode to a voltage on every block, not just yours.
    `tests/test_claims.py::test_confirmed_and_high_fields_decode_to_sensible_values` is where such a
    check belongs.
-5. **Write it down with its evidence.** Add a `Field` to `rvms/fields.py` with `evidence` and `observed`
+5. **Write it down with its evidence.** Add a `Field` to `mk2vsc/fields.py` with `evidence` and `observed`
    filled in, regenerate this table, and say what you did not verify. A field promoted without evidence
    will be demoted in review.
 

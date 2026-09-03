@@ -1,7 +1,7 @@
 import glob
 import os
 
-from rvms.history import load_snapshots, changes
+from mk2vsc.history import load_snapshots, changes
 from tests.conftest import FIXTURES
 
 

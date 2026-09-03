@@ -8,7 +8,7 @@ import struct
 
 import pytest
 
-from rvms.sections import RvmsFile, RvmsParseError, sum32_le, MAGIC, SECTION_MK2, SECTION_INFO, SECTION_DATA, scan_unit_blocks
+from mk2vsc.sections import RvmsFile, RvmsParseError, sum32_le, MAGIC, SECTION_MK2, SECTION_INFO, SECTION_DATA, scan_unit_blocks
 
 
 def test_every_good_file_parses_and_validates(good_path):

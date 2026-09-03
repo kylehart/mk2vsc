@@ -1,8 +1,8 @@
 import collections
 
-from rvms.sections import RvmsFile
-from rvms.units import unit_blocks
-from rvms.assistants import parse_assistant_area
+from mk2vsc.sections import RvmsFile
+from mk2vsc.units import unit_blocks
+from mk2vsc.assistants import parse_assistant_area
 
 
 def test_bare_blocks_have_the_empty_header(good_files, manifest):

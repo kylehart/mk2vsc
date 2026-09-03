@@ -49,13 +49,13 @@ One paragraph. What is wrong, what the target value is, where the target comes f
 Intent file: intent.json (copied into this folder)
 
 ## Checklist
-- [ ] 00_baseline/ holds a download taken today (save timestamp checked with `rvms info`)
-- [ ] 01_prepared/ built from 00_baseline/ with `rvms set`; `rvms diff` shows only the intended settings
-- [ ] `rvms qualify 01_prepared/<file> --intent intent.json` exits 0
+- [ ] 00_baseline/ holds a download taken today (save timestamp checked with `mk2vsc info`)
+- [ ] 01_prepared/ built from 00_baseline/ with `mk2vsc set`; `mk2vsc diff` shows only the intended settings
+- [ ] `mk2vsc qualify 01_prepared/<file> --intent intent.json` exits 0
 - [ ] uploaded 01_prepared/<file> via VRM Remote VEConfigure; dialog result recorded here
 - [ ] re-downloaded into 02_downloaded/
-- [ ] `rvms diff 01_prepared/<file> 02_downloaded/<file>` says ONLY BOOKKEEPING
-- [ ] `rvms qualify 02_downloaded/<file> --intent intent.json` exits 0
+- [ ] `mk2vsc diff 01_prepared/<file> 02_downloaded/<file>` says ONLY BOOKKEEPING
+- [ ] `mk2vsc qualify 02_downloaded/<file> --intent intent.json` exits 0
 - [ ] live system checked (VRM device page shows the new value; no VE.Bus errors)
 - [ ] recorded in the change log / monitoring
 
@@ -75,7 +75,7 @@ full configurations to the same system for other reasons, each built from an old
 baseline that still carried the pre-correction values. On 2026-08-19 a routine decode showed the
 old values back in place. The battery had been charging above specification on one inverter for
 roughly a month. Our monitoring had logged the reversion the day it happened. Nobody looked.
-Detection without a review step is not protection. The qualifier (`rvms qualify`) exists because
+Detection without a review step is not protection. The qualifier (`mk2vsc qualify`) exists because
 of this: it checks a file against intended values that are kept outside the file, and it fails any
 file whose two inverters disagree on a confirmed setting.
 
@@ -103,31 +103,31 @@ are stale duplicates waiting to be uploaded by mistake. The naming convention in
 the settings are right, and it does not mean the settings landed on every inverter. On 2026-08-21
 a GUI session on Sugar Apple wrote seven settings to one inverter and none to the other, leaving
 the two legs of a shared battery 0.3 V apart. The only proof of a change is the re-download:
-`rvms diff` against the prepared file must report only bookkeeping bytes (pointer, save timestamp,
-checksum), and `rvms qualify` must pass on the re-download with the same intent file that passed
+`mk2vsc diff` against the prepared file must report only bookkeeping bytes (pointer, save timestamp,
+checksum), and `mk2vsc qualify` must pass on the re-download with the same intent file that passed
 on the prepared file.
 
 ## The CLI sequence for one change
 
 ```sh
 # 0. fresh download from VRM -> changes/<change>/00_baseline/system.rvms
-rvms validate 00_baseline/system.rvms                 # checksums OK on your firmware
-rvms info     00_baseline/system.rvms                 # confirm serials and today's save timestamp
+mk2vsc validate 00_baseline/system.rvms                 # checksums OK on your firmware
+mk2vsc info     00_baseline/system.rvms                 # confirm serials and today's save timestamp
 
 # 1. prepare (edits every inverter unless --serial is given)
-rvms set 00_baseline/system.rvms 01_prepared/system_charge-profile.rvms absorption_V=56.8 float_V=54.0
-rvms diff 00_baseline/system.rvms 01_prepared/system_charge-profile.rvms   # only the intended settings
-rvms qualify 01_prepared/system_charge-profile.rvms --intent intent.json    # exit 0
+mk2vsc set 00_baseline/system.rvms 01_prepared/system_charge-profile.rvms absorption_V=56.8 float_V=54.0
+mk2vsc diff 00_baseline/system.rvms 01_prepared/system_charge-profile.rvms   # only the intended settings
+mk2vsc qualify 01_prepared/system_charge-profile.rvms --intent intent.json    # exit 0
 
 # 2. upload 01_prepared/system_charge-profile.rvms via VRM -> Remote VEConfigure -> Upload
 
 # 3. re-download from VRM -> 02_downloaded/system.rvms
-rvms diff 01_prepared/system_charge-profile.rvms 02_downloaded/system.rvms  # expect: ONLY BOOKKEEPING
-rvms qualify 02_downloaded/system.rvms --intent intent.json                 # exit 0
+mk2vsc diff 01_prepared/system_charge-profile.rvms 02_downloaded/system.rvms  # expect: ONLY BOOKKEEPING
+mk2vsc qualify 02_downloaded/system.rvms --intent intent.json                 # exit 0
 ```
 
-`rvms diff` exits 0 when the two files are identical or differ only in bookkeeping, and 2 when
-content differs. `rvms qualify` exits 0 for QUALIFIED and 1 for NOT QUALIFIED. Both are usable in
+`mk2vsc diff` exits 0 when the two files are identical or differ only in bookkeeping, and 2 when
+content differs. `mk2vsc qualify` exits 0 for QUALIFIED and 1 for NOT QUALIFIED. Both are usable in
 scripts.
 
 ## Intent files
@@ -175,13 +175,13 @@ made ours useful:
   timestamp inside the file, origin is `download`, `prepared`, `gui-export` or `experiment`, and
   state is `bare`, `ess`, `half-ess` or `stub`.
 - Keep a manifest (`fixtures/manifest.json` is an example): sha256, size, serials, block lengths,
-  assistant flag, and a notes field. `rvms census FILE...` prints the one-line summary used to build it.
+  assistant flag, and a notes field. `mk2vsc census FILE...` prints the one-line summary used to build it.
 - Compare by serial, never by filename or file position. The two blocks of a pair swap position
-  between downloads of the same system. `rvms diff` does this for you.
+  between downloads of the same system. `mk2vsc diff` does this for you.
 - Mine the history. Decoding every archived download in date order dates when each setting
   changed, which is information the portal does not keep. The caveat: the save timestamp in a file
   is when the device last stored a configuration, and a download taken later brackets the change.
   Report changes as intervals between two downloads, not as points.
-  `rvms history FILE...` does this over a library of downloads, grouped by system and serial.
+  `mk2vsc history FILE...` does this over a library of downloads, grouped by system and serial.
 - Keep the deliberately broken files too, labelled. They are the negative controls that prove a
   validator actually validates.

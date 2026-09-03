@@ -1,16 +1,19 @@
 """
 Command-line interface.
 
-    rvms info      FILE...                 one-screen summary (structure, inverters, confirmed settings)
-    rvms validate  FILE...                 checksum + structure check; exit 1 on any failure
-    rvms decode    FILE [--json] [--all]   every setting with label/confidence
-    rvms diff      A B [--json]            by-serial comparison; says whether only bookkeeping changed
-    rvms set       IN OUT [--serial S] FIELD=VALUE ...      guarded edit (never uploads)
-    rvms qualify   FILE... --intent intent.json             check against intended values
-    rvms fix       IN OUT                  recompute every checksum (forensic use only)
-    rvms fields                            print the settings table
-    rvms census    FILE...                 one line per file (block lengths, flags, form, assistant kind)
-    rvms history   FILE...                 dated change log mined from a library of downloads (by system, by serial)
+    mk2vsc info      FILE...                 one-screen summary (structure, inverters, confirmed settings)
+    mk2vsc validate  FILE...                 checksum + structure check; exit 1 on any failure
+    mk2vsc decode    FILE [--json] [--all]   every setting with label/confidence
+    mk2vsc diff      A B [--json]            by-serial comparison; says whether only bookkeeping changed
+    mk2vsc set       IN OUT [--serial S] FIELD=VALUE ...      guarded edit (never uploads)
+    mk2vsc qualify   FILE... --intent intent.json             check against intended values
+    mk2vsc fix       IN OUT                  recompute every checksum (forensic use only)
+    mk2vsc fields                            print the settings table
+    mk2vsc census    FILE...                 one line per file (block lengths, flags, form, assistant kind)
+    mk2vsc history   FILE...                 dated change log mined from a library of downloads (by system, by serial)
+    mk2vsc experimental graft BASELINE TEMPLATE OUT [--install-state] [--capacity-ah N] --i-accept-the-risk
+    mk2vsc experimental to-upload-form DEVICE OUT [--reference GUI_EXPORT] --i-accept-the-risk
+                                            assistant-injection experiments; never produced a running system
 """
 from __future__ import annotations
 
@@ -114,7 +117,7 @@ def cmd_set(a):
         edits = set_settings_file(a.inp, a.out, changes, allow_unverified=a.i_know_this_is_unverified,
                                   allow_out_of_range=a.allow_out_of_range)
     except KeyError as e:
-        print(f"REFUSED: unknown field {e}; see `rvms fields`", file=sys.stderr)
+        print(f"REFUSED: unknown field {e}; see `mk2vsc fields`", file=sys.stderr)
         return 1
     except (WriteRefused, ValueError, RvmsParseError, OSError) as e:
         print(f"REFUSED: {e}", file=sys.stderr)
@@ -137,7 +140,7 @@ def cmd_qualify(a):
         try:
             ok, res = qualify_file(p, intent)
         except KeyError as e:
-            print(f"{p}: intent names an unknown field {e}; see `rvms fields`", file=sys.stderr)
+            print(f"{p}: intent names an unknown field {e}; see `mk2vsc fields`", file=sys.stderr)
             return 2
         print(render_qual(ok, res, p))
         rc |= 0 if ok else 1
@@ -188,8 +191,32 @@ def cmd_history(a):
     return 0
 
 
+def cmd_experimental(a):
+    if not a.i_accept_the_risk:
+        print("experimental commands have never produced a running ESS system and have disrupted live systems; "
+              "read docs/ESS_INJECTION.md, then pass --i-accept-the-risk", file=sys.stderr)
+        return 2
+    from .experimental import graft, to_upload_form, GraftRefused, TransformRefused
+    try:
+        if a.what == "graft":
+            out, checks = graft(open(a.baseline, "rb").read(), open(a.template, "rb").read(),
+                                install_state=a.install_state, capacity_ah=a.capacity_ah)
+            for k, v in checks.items():
+                print(f"  {k}: {v}")
+        else:
+            ref = open(a.reference, "rb").read() if a.reference else None
+            out = to_upload_form(open(a.device, "rb").read(), reference=ref)
+        with open(a.out, "wb") as fh:
+            fh.write(out)
+        print(f"wrote {a.out} ({len(out)} bytes). EXPERIMENTAL: see docs/ESS_INJECTION.md before uploading.")
+        return 0
+    except (GraftRefused, TransformRefused, RvmsParseError, OSError) as e:
+        print(f"REFUSED: {e}", file=sys.stderr)
+        return 1
+
+
 def main(argv=None):
-    ap = argparse.ArgumentParser(prog="rvms", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(prog="mk2vsc", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--version", action="version", version=__version__)
     sub = ap.add_subparsers(dest="cmd", required=True)
 
@@ -206,6 +233,13 @@ def main(argv=None):
     s = sub.add_parser("fields"); s.set_defaults(fn=cmd_fields)
     s = sub.add_parser("census"); s.add_argument("files", nargs="+"); s.set_defaults(fn=cmd_census)
     s = sub.add_parser("history"); s.add_argument("files", nargs="+"); s.add_argument("--json", action="store_true"); s.set_defaults(fn=cmd_history)
+    x = sub.add_parser("experimental", help="assistant-injection experiments (read docs/ESS_INJECTION.md)")
+    xs = x.add_subparsers(dest="what", required=True)
+    g = xs.add_parser("graft"); g.add_argument("baseline"); g.add_argument("template"); g.add_argument("out")
+    g.add_argument("--install-state", action="store_true"); g.add_argument("--capacity-ah", type=int, default=None)
+    g.add_argument("--i-accept-the-risk", action="store_true"); g.set_defaults(fn=cmd_experimental)
+    t = xs.add_parser("to-upload-form"); t.add_argument("device"); t.add_argument("out"); t.add_argument("--reference")
+    t.add_argument("--i-accept-the-risk", action="store_true"); t.set_defaults(fn=cmd_experimental)
 
     a = ap.parse_args(argv)
     return a.fn(a)

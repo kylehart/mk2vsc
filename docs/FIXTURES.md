@@ -80,7 +80,7 @@ Keep them. A parser that accepts these is wrong.
 * **The first live proof.** `sugar_apple/sugar_apple_2026-07-20_download_bare_deviceform_1.rvms` is
   the baseline, `sugar_apple_2026-07-20_prepared_bare_deviceform_1.rvms` is the file we produced with
   float raised from 54.0 V to 54.1 V on both inverters, and the later `download_bare_deviceform_*`
-  files of the same day are what the device sent back after the upload. `rvms diff` between the
+  files of the same day are what the device sent back after the upload. `mk2vsc diff` between the
   prepared file and the re-download shows only bookkeeping bytes.
 * **The swapped-order pair.** `mango/mango_2026-07-24_download_bare_deviceform_2.rvms` and
   `mango_2026-07-24_download_bare_deviceform_3.rvms` are consecutive downloads of the same

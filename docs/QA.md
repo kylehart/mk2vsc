@@ -12,7 +12,7 @@ synthetic fixtures for the format itself.
 | file | what it proves |
 |---|---|
 | `tests/test_sections.py` | Every good fixture parses, every section checksum validates, the pointer chain is contiguous and ends at EOF, parse then serialize is byte-exact, rebuilding pointers and checksums from payloads reproduces the input byte-for-byte, the historical formula (`sum32(block[2:]) + 0x6142000F`) equals the plain word sum, the header sections are identical across the corpus, and the three deliberately broken files are detected. |
-| `tests/test_claims.py` | Every checkable claim in docs/FIELDS.md and `rvms/units.py`, checked on all 162 inverter blocks of the 81 well-formed fixtures: serial position, firmware word, slot bytes, assistant-flag encoding, the +10 upload-form shift (setting 5 reads 120 V on every block under the offset model), timestamps are plausible unix times, CONFIRMED/HIGH fields decode to physically sensible values, grid-code flag tracks GUI-authored installs, the retracted SOC field is the high byte of setting 88, region 128 to 189 is unprogrammed on bare blocks, and the field table itself is internally consistent (every CONFIRMED/HIGH entry states evidence). |
+| `tests/test_claims.py` | Every checkable claim in docs/FIELDS.md and `mk2vsc/units.py`, checked on all 162 inverter blocks of the 81 well-formed fixtures: serial position, firmware word, slot bytes, assistant-flag encoding, the +10 upload-form shift (setting 5 reads 120 V on every block under the offset model), timestamps are plausible unix times, CONFIRMED/HIGH fields decode to physically sensible values, grid-code flag tracks GUI-authored installs, the retracted SOC field is the high byte of setting 88, region 128 to 189 is unprogrammed on bare blocks, and the field table itself is internally consistent (every CONFIRMED/HIGH entry states evidence). |
 | `tests/test_writer.py` | Edit then revert reproduces the original file byte-for-byte; an edit to all inverters changes only the intended bytes plus checksums; edits on ESS blocks leave the assistant area untouched; unverified fields, flag registers, unknown serials, out-of-range values, upload-form input and corrupt input are refused; the archived prepared files from the 2026-07-20 charge-profile corrections are reproduced exactly from their baselines. |
 | `tests/test_diff.py` | Two real consecutive downloads differ only in bookkeeping; the pair whose blocks swapped file position is invisible when compared by serial while a positional diff shows dozens of differences; a stub download is reported as a content change; a GUI export and the device's re-download of it agree on every setting. |
 | `tests/test_qualify.py` | Inverter disagreement fails; intended values pass on the corrected file and fail on the mismatched one; wrong-system serials fail; the stub fails; the rollback file that caused the month-long regression is caught. |
@@ -51,14 +51,14 @@ A claim test failing on a file from outside this envelope is the expected way to
 
 ## Verify it yourself before writing anything
 
-1. Download your system's file twice, a minute apart. `rvms diff a.rvms b.rvms` should say
+1. Download your system's file twice, a minute apart. `mk2vsc diff a.rvms b.rvms` should say
    ONLY BOOKKEEPING and exit 0. This checks that the parser, the by-serial comparison, and the
    bookkeeping model (pointer, save timestamp, checksum) hold on your firmware.
-2. `rvms validate a.rvms`. All checksums OK means the checksum model is exactly what your device
+2. `mk2vsc validate a.rvms`. All checksums OK means the checksum model is exactly what your device
    and your VEConfigure version compute. If any section reads BAD on a genuine download, stop: the
    integrity model does not hold for your files, and nothing else here should be trusted until it
    is understood.
-3. `rvms decode a.rvms`. Compare absorption, float, charge current and the AC input current limit
+3. `mk2vsc decode a.rvms`. Compare absorption, float, charge current and the AC input current limit
    with VEConfigure's Charger and General tabs or the VRM device page. If they match, the
    settings-array mapping holds for your block layout.
 4. Run the test suite with your file added to `fixtures/` (and to the manifest, see
@@ -67,8 +67,8 @@ A claim test failing on a file from outside this envelope is the expected way to
    docs/SAFETY.md and docs/CHANGE_CONTROL.md.
 
 When a claim test fails on your file, open an issue with the file (device downloads contain
-inverter serials and nothing else identifying) and the output of `rvms census` and
-`rvms decode --all --json`.
+inverter serials and nothing else identifying) and the output of `mk2vsc census` and
+`mk2vsc decode --all --json`.
 
 ## The live-verification protocol we used
 
