@@ -1,0 +1,1938 @@
+{
+ "generated": "2026-09-03",
+ "count": 84,
+ "entries": [
+  {
+   "file": "guava/guava_2026-06-18_experiment_bare_deviceform_1.rvms",
+   "sha256": "7b41bbea8e50283c3627268199dfbff3d9574e17131404d1b673dccde6d00c80",
+   "size": 5055,
+   "site": "guava",
+   "date": "2026-06-18",
+   "origin": "experiment",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 484,
+     "flag": "f5"
+    },
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 482,
+     "flag": "f4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-07-20_download_bare_deviceform_1.rvms",
+   "sha256": "46729f030d492b4650958616d831838ec67d2fb5a208daf9411f1ded025b2a13",
+   "size": 5055,
+   "site": "guava",
+   "date": "2026-07-20",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 484,
+     "flag": "f4"
+    },
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 482,
+     "flag": "f5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-07-20_prepared_bare_deviceform_1.rvms",
+   "sha256": "b44e22be2c9886b85aaa1852ca9c8cef5e1fde342cf738bff69e04c77b4e28c3",
+   "size": 5055,
+   "site": "guava",
+   "date": "2026-07-20",
+   "origin": "prepared",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 484,
+     "flag": "f4"
+    },
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 482,
+     "flag": "f5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-07-20_download_bare_deviceform_2.rvms",
+   "sha256": "d72c0f6a2905c74f892f6890d117c59de372c68af34724f2035e5792eb92ebfc",
+   "size": 5055,
+   "site": "guava",
+   "date": "2026-07-20",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 484,
+     "flag": "f4"
+    },
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 482,
+     "flag": "f5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "mango/mango_2026-07-20_download_bare_deviceform_1.rvms",
+   "sha256": "3a82397d1e8de60ecfef15d51ad15530ff293d42b8b99ec790eeddf93c182012",
+   "size": 5055,
+   "site": "mango",
+   "date": "2026-07-20",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ24149MY9U",
+     "length": 484,
+     "flag": "f5"
+    },
+    {
+     "serial": "HQ2240FKJDE",
+     "length": 482,
+     "flag": "f4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "mango/mango_2026-07-20_prepared_bare_deviceform_1.rvms",
+   "sha256": "21c4bd229c4f40b312f8fdafbc3aecdbb6e1110b4abaa4d5c30c30d6373203b5",
+   "size": 5055,
+   "site": "mango",
+   "date": "2026-07-20",
+   "origin": "prepared",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ24149MY9U",
+     "length": 484,
+     "flag": "f5"
+    },
+    {
+     "serial": "HQ2240FKJDE",
+     "length": 482,
+     "flag": "f4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "mango/mango_2026-07-20_download_bare_deviceform_2.rvms",
+   "sha256": "d9e8c455213ba5f39243f87a7f95f012e4501aa086de82774ad194a87293c85b",
+   "size": 5055,
+   "site": "mango",
+   "date": "2026-07-20",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ24149MY9U",
+     "length": 484,
+     "flag": "f5"
+    },
+    {
+     "serial": "HQ2240FKJDE",
+     "length": 482,
+     "flag": "f4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "papaya/papaya_2026-07-20_download_half-ess_deviceform_1.rvms",
+   "sha256": "62f23f8b7e075e5b7703b59ef1c03e541555652ca1b58cdd09f3c0ebe046e761",
+   "size": 6276,
+   "site": "papaya",
+   "date": "2026-07-20",
+   "origin": "download",
+   "state": "half-ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ24142MJUA",
+     "length": 1705,
+     "flag": "e4"
+    },
+    {
+     "serial": "HQ2414N7NAJ",
+     "length": 482,
+     "flag": "f5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "papaya/papaya_2026-07-20_prepared_half-ess_deviceform_1.rvms",
+   "sha256": "09dc02a5a148af4722bf69b66400ae0a534b57fc8bd94d889139cd2990afd7e3",
+   "size": 6276,
+   "site": "papaya",
+   "date": "2026-07-20",
+   "origin": "prepared",
+   "state": "half-ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ24142MJUA",
+     "length": 1705,
+     "flag": "e4"
+    },
+    {
+     "serial": "HQ2414N7NAJ",
+     "length": 482,
+     "flag": "f5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "papaya/papaya_2026-07-20_download_half-ess_deviceform_2.rvms",
+   "sha256": "3448f2425eee990b51d299609a8dea063a223961533409920e60216e41eb1400",
+   "size": 6276,
+   "site": "papaya",
+   "date": "2026-07-20",
+   "origin": "download",
+   "state": "half-ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ24142MJUA",
+     "length": 1705,
+     "flag": "e4"
+    },
+    {
+     "serial": "HQ2414N7NAJ",
+     "length": 482,
+     "flag": "f5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "papaya/papaya_2026-07-20_prepared_half-ess_deviceform_2.rvms",
+   "sha256": "dfc52763f76afe55e4567f2651d34814693a4a3e981464546b437fac2e9dbe3b",
+   "size": 6276,
+   "site": "papaya",
+   "date": "2026-07-20",
+   "origin": "prepared",
+   "state": "half-ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ24142MJUA",
+     "length": 1705,
+     "flag": "e4"
+    },
+    {
+     "serial": "HQ2414N7NAJ",
+     "length": 482,
+     "flag": "f5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "papaya/papaya_2026-07-20_download_half-ess_deviceform_3.rvms",
+   "sha256": "871afeea1f5526e671b658330c1dd5559796d078a1714b4426988b3d726605f3",
+   "size": 6276,
+   "site": "papaya",
+   "date": "2026-07-20",
+   "origin": "download",
+   "state": "half-ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414N7NAJ",
+     "length": 484,
+     "flag": "f5"
+    },
+    {
+     "serial": "HQ24142MJUA",
+     "length": 1703,
+     "flag": "e4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "papaya/papaya_2026-07-20_prepared_half-ess_deviceform_3.rvms",
+   "sha256": "b21395d10f9b11ec5ef5abee4a5b4560159b94cef7663a9a7561d542526defd2",
+   "size": 7497,
+   "site": "papaya",
+   "date": "2026-07-20",
+   "origin": "prepared",
+   "state": "half-ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414N7NAJ",
+     "length": 1705,
+     "flag": "e4"
+    },
+    {
+     "serial": "HQ24142MJUA",
+     "length": 1703,
+     "flag": "e4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "papaya/papaya_2026-07-20_prepared_ess_deviceform_1.rvms",
+   "sha256": "08127e410cf899a4b88d1a0ff470cf9cf8c8a8638850c99982b6b89a19e230f4",
+   "size": 7495,
+   "site": "papaya",
+   "date": "2026-07-20",
+   "origin": "prepared",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414N7NAJ",
+     "length": 1703,
+     "flag": "e4"
+    },
+    {
+     "serial": "HQ24142MJUA",
+     "length": 1703,
+     "flag": "e4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "papaya/papaya_2026-07-20_prepared_half-ess_deviceform_4.rvms",
+   "sha256": "b153d2f8a21fa71de44706b986cc7206d411e92753de578bf9bd6b3db0effff3",
+   "size": 5055,
+   "site": "papaya",
+   "date": "2026-07-20",
+   "origin": "prepared",
+   "state": "half-ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ24142MJUA",
+     "length": 484,
+     "flag": "e4"
+    },
+    {
+     "serial": "HQ2414N7NAJ",
+     "length": 482,
+     "flag": "f5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "papaya/papaya_2026-07-20_download_half-ess_deviceform_4.rvms",
+   "sha256": "72ebbf9a3294d4ebaf284e94d3bea4ff266ef5dc65b90fd6314da292c7be9b9d",
+   "size": 6276,
+   "site": "papaya",
+   "date": "2026-07-20",
+   "origin": "download",
+   "state": "half-ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ24142MJUA",
+     "length": 1705,
+     "flag": "e4"
+    },
+    {
+     "serial": "HQ2414N7NAJ",
+     "length": 482,
+     "flag": "f5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "sugar_apple/sugar_apple_2026-07-20_download_bare_deviceform_1.rvms",
+   "sha256": "4019396e6e134b0d6bae3c77eb7aa6c2f39963a6355f8d3952f7aeae97e03753",
+   "size": 5055,
+   "site": "sugar_apple",
+   "date": "2026-07-20",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2240PY7CF",
+     "length": 484,
+     "flag": "f5"
+    },
+    {
+     "serial": "HQ22407X3WT",
+     "length": 482,
+     "flag": "f4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "sugar_apple/sugar_apple_2026-07-20_prepared_bare_deviceform_1.rvms",
+   "sha256": "2c7f9875c59977e41cfba407e05da9571870239c5ff0fe588317f2e7d710bf09",
+   "size": 5055,
+   "site": "sugar_apple",
+   "date": "2026-07-20",
+   "origin": "prepared",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2240PY7CF",
+     "length": 484,
+     "flag": "f5"
+    },
+    {
+     "serial": "HQ22407X3WT",
+     "length": 482,
+     "flag": "f4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "sugar_apple/sugar_apple_2026-07-20_download_bare_deviceform_2.rvms",
+   "sha256": "7e21a8f75c7ed1636937c0ce85bbf152681d98101e61efabdb1d1d547f3e34b7",
+   "size": 5055,
+   "site": "sugar_apple",
+   "date": "2026-07-20",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2240PY7CF",
+     "length": 484,
+     "flag": "f5"
+    },
+    {
+     "serial": "HQ22407X3WT",
+     "length": 482,
+     "flag": "f4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-07-13_prepared_half-ess_uploadform_1.rvms",
+   "sha256": "b083ad08d4b1c1833b51aae0f7e30ee925ba67a5c86d833fa2e16f941971a724",
+   "size": 6182,
+   "site": "guava",
+   "date": "2026-07-13",
+   "origin": "prepared",
+   "state": "half-ess",
+   "form": "uploadform",
+   "blocks": [
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 484,
+     "flag": "f4"
+    },
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 1609,
+     "flag": "e4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-07-13_prepared_half-ess_uploadform_2.rvms",
+   "sha256": "2042663d56f4b3eaec9d798f88556a7ae0a475e12a3159be86bf7b0ec50086a6",
+   "size": 6182,
+   "site": "guava",
+   "date": "2026-07-13",
+   "origin": "prepared",
+   "state": "half-ess",
+   "form": "uploadform",
+   "blocks": [
+    {
+     "serial": "HQ24149MY9U",
+     "length": 484,
+     "flag": "f5"
+    },
+    {
+     "serial": "HQ2240FKJDE",
+     "length": 1609,
+     "flag": "e4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "mango/mango_2026-07-20_prepared_half-ess_deviceform_1.rvms",
+   "sha256": "58e44360abfee7d47319ff2bcb68789c5915e60d1df6dbbdf1576ff2ce443b1c",
+   "size": 7497,
+   "site": "mango",
+   "date": "2026-07-20",
+   "origin": "prepared",
+   "state": "half-ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2240FKJDE",
+     "length": 1705,
+     "flag": "e4"
+    },
+    {
+     "serial": "HQ24149MY9U",
+     "length": 1703,
+     "flag": "e4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "papaya/papaya_2026-07-13_gui-export_half-ess_uploadform_1.rvms",
+   "sha256": "6a0724bf23cf703a5841a26c4fc7deae3dfb2d498d269cc804264bdd1833282c",
+   "size": 6182,
+   "site": "papaya",
+   "date": "2026-07-13",
+   "origin": "gui-export",
+   "state": "half-ess",
+   "form": "uploadform",
+   "blocks": [
+    {
+     "serial": "HQ2414N7NAJ",
+     "length": 484,
+     "flag": "f5"
+    },
+    {
+     "serial": "HQ24142MJUA",
+     "length": 1609,
+     "flag": "e4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "sugar_apple/sugar_apple_2026-07-23_download_bare_deviceform_1.rvms",
+   "sha256": "bc7a00a3de93efff97cc3ce4aabae7542083d40b2c0e48ac4e84bab9caa70ee8",
+   "size": 5055,
+   "site": "sugar_apple",
+   "date": "2026-07-23",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ22407X3WT",
+     "length": 484,
+     "flag": "f4"
+    },
+    {
+     "serial": "HQ2240PY7CF",
+     "length": 482,
+     "flag": "f5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "sugar_apple/sugar_apple_2026-07-23_prepared_bare_deviceform_1.rvms",
+   "sha256": "30fe4103b30344c16df0057a6a664bde9995b9dbb628c14004773bc2278d2254",
+   "size": 5055,
+   "site": "sugar_apple",
+   "date": "2026-07-23",
+   "origin": "prepared",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ22407X3WT",
+     "length": 484,
+     "flag": "f4"
+    },
+    {
+     "serial": "HQ2240PY7CF",
+     "length": 482,
+     "flag": "f5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "mango/mango_2026-07-24_download_bare_deviceform_1.rvms",
+   "sha256": "b422bb22711d096eeed2f1a364053c27ba257ac41e2f03a6369ce3e5129b769a",
+   "size": 5055,
+   "site": "mango",
+   "date": "2026-07-24",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ24149MY9U",
+     "length": 484,
+     "flag": "f5"
+    },
+    {
+     "serial": "HQ2240FKJDE",
+     "length": 482,
+     "flag": "f4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "mango/mango_2026-07-24_download_bare_deviceform_2.rvms",
+   "sha256": "dcbe876826493b8daa50e95acc2654c6f0b939401cd456dc244a42562dbeb70f",
+   "size": 5055,
+   "site": "mango",
+   "date": "2026-07-24",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ24149MY9U",
+     "length": 484,
+     "flag": "f5"
+    },
+    {
+     "serial": "HQ2240FKJDE",
+     "length": 482,
+     "flag": "f4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "mango/mango_2026-07-21_prepared_ess_uploadform_1.rvms",
+   "sha256": "7993f99ad0df4b4a91b7635019cc28e93c3afcdba1ab01a6898103f91867186c",
+   "size": 6877,
+   "site": "mango",
+   "date": "2026-07-21",
+   "origin": "prepared",
+   "state": "ess",
+   "form": "uploadform",
+   "blocks": [
+    {
+     "serial": "HQ24149MY9U",
+     "length": 1179,
+     "flag": "e5"
+    },
+    {
+     "serial": "HQ2240FKJDE",
+     "length": 1609,
+     "flag": "e4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "mango/mango_2026-07-24_prepared_ess_deviceform_1.rvms",
+   "sha256": "2980666304244d5605bb1b89b0b5ee22dae2c532f046c36220288d80495ca722",
+   "size": 7049,
+   "site": "mango",
+   "date": "2026-07-24",
+   "origin": "prepared",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ24149MY9U",
+     "length": 1257,
+     "flag": "e5"
+    },
+    {
+     "serial": "HQ2240FKJDE",
+     "length": 1703,
+     "flag": "e4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "mango/mango_2026-07-24_prepared_ess_deviceform_2.rvms",
+   "sha256": "15cd164d57d7b76f2208e14a43ea2dfe9c40c05589a435f02b9cbeace7b8a1b0",
+   "size": 7049,
+   "site": "mango",
+   "date": "2026-07-24",
+   "origin": "prepared",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ24149MY9U",
+     "length": 1257,
+     "flag": "e5"
+    },
+    {
+     "serial": "HQ2240FKJDE",
+     "length": 1703,
+     "flag": "e4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "mango/mango_2026-07-24_download_bare_deviceform_3.rvms",
+   "sha256": "d6e9f468bfdfaf0c00b7ca5aa8e5fd504362bd08e0115ce9d5c9c42ecfe79164",
+   "size": 5055,
+   "site": "mango",
+   "date": "2026-07-24",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2240FKJDE",
+     "length": 484,
+     "flag": "f4"
+    },
+    {
+     "serial": "HQ24149MY9U",
+     "length": 482,
+     "flag": "f5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "mango/mango_2026-07-24_download_stub_deviceform_1.rvms",
+   "sha256": "f3682b432dc474e45359bb6e184f3eda0e182ab736e0cc3ffbeb94fae4be66b0",
+   "size": 5183,
+   "site": "mango",
+   "date": "2026-07-24",
+   "origin": "download",
+   "state": "stub",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ24149MY9U",
+     "length": 548,
+     "flag": "e5"
+    },
+    {
+     "serial": "HQ2240FKJDE",
+     "length": 546,
+     "flag": "e4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-08-13_prepared_bare_deviceform_1.rvms",
+   "sha256": "6269f3bd4b5e7c71b5cab9fde67dde5593d9e26b644a05662cf23868840dc012",
+   "size": 5055,
+   "site": "guava",
+   "date": "2026-08-13",
+   "origin": "prepared",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 484,
+     "flag": "f4"
+    },
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 482,
+     "flag": "f5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-08-13_download_ess_deviceform_1.rvms",
+   "sha256": "b0a66df194882aa034dc9b3772454ecdd60c4bab6ec75a8dedc6752f2ae2910e",
+   "size": 7049,
+   "site": "guava",
+   "date": "2026-08-13",
+   "origin": "download",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 1257,
+     "flag": "e5"
+    },
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 1703,
+     "flag": "e4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-08-14_download_ess_deviceform_1.rvms",
+   "sha256": "14c83b7112cea35185f797585fc917049c722dfe3fe5c31a6c3707b33bfe8740",
+   "size": 7049,
+   "site": "guava",
+   "date": "2026-08-14",
+   "origin": "download",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 1705,
+     "flag": "e4"
+    },
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 1255,
+     "flag": "e5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-08-14_prepared_bare_deviceform_1.rvms",
+   "sha256": "cc56c3845fe58e84127ed1dfe355d1781fc09c41568765ca52402f5d17020562",
+   "size": 5055,
+   "site": "guava",
+   "date": "2026-08-14",
+   "origin": "prepared",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 484,
+     "flag": "f4"
+    },
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 482,
+     "flag": "f5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-08-14_prepared_bare_deviceform_2.rvms",
+   "sha256": "60043d4dc5a6eca5d89c101fdaa209a7f01e269a78e64886526712bf096de49b",
+   "size": 5055,
+   "site": "guava",
+   "date": "2026-08-14",
+   "origin": "prepared",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 484,
+     "flag": "f4"
+    },
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 482,
+     "flag": "f5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "sugar_apple/sugar_apple_2026-08-14_download_ess_deviceform_1.rvms",
+   "sha256": "8d2f5adefc9f5fdbcb41d1e126590d7b51f80bbc26a1d25075e8042bf9d7f493",
+   "size": 7049,
+   "site": "sugar_apple",
+   "date": "2026-08-14",
+   "origin": "download",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2240PY7CF",
+     "length": 1257,
+     "flag": "e5"
+    },
+    {
+     "serial": "HQ22407X3WT",
+     "length": 1703,
+     "flag": "e4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "sugar_apple/sugar_apple_2026-08-13_download_bare_deviceform_1.rvms",
+   "sha256": "c2350152acbe61de3f031343e56935826753254188b1a8b30eb26269a9284652",
+   "size": 5055,
+   "site": "sugar_apple",
+   "date": "2026-08-13",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ22407X3WT",
+     "length": 484,
+     "flag": "f4"
+    },
+    {
+     "serial": "HQ2240PY7CF",
+     "length": 482,
+     "flag": "f5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "sugar_apple/sugar_apple_2026-08-14_prepared_bare_deviceform_1.rvms",
+   "sha256": "82bba4fc0bd4855f7acc70275dfa8aa8bcd480014df6e13913240443e992e0bf",
+   "size": 5055,
+   "site": "sugar_apple",
+   "date": "2026-08-14",
+   "origin": "prepared",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ22407X3WT",
+     "length": 484,
+     "flag": "f4"
+    },
+    {
+     "serial": "HQ2240PY7CF",
+     "length": 482,
+     "flag": "f5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "sugar_apple/sugar_apple_2026-08-14_prepared_bare_deviceform_2.rvms",
+   "sha256": "fc2f74731546275cefb17604c77b84d5da66c33be82a6259bc1c41cce9635fef",
+   "size": 5055,
+   "site": "sugar_apple",
+   "date": "2026-08-14",
+   "origin": "prepared",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2240PY7CF",
+     "length": 484,
+     "flag": "f5"
+    },
+    {
+     "serial": "HQ22407X3WT",
+     "length": 482,
+     "flag": "f4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-08-19_download_bare_deviceform_1.rvms",
+   "sha256": "0b8aa874f56d245d2ec460c81a63d153700b90286b51928e52c947dd080fcc4d",
+   "size": 5055,
+   "site": "guava",
+   "date": "2026-08-19",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 484,
+     "flag": "f4"
+    },
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 482,
+     "flag": "f5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-09-03_download_ess_deviceform_1.rvms",
+   "sha256": "4cc5a0e7fd4e4bf4f7a9592793ef8431aa6ac2fff26c9cc1f0eb5f0a2cf6cf90",
+   "size": 7049,
+   "site": "guava",
+   "date": "2026-09-03",
+   "origin": "download",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 1257,
+     "flag": "e5"
+    },
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 1703,
+     "flag": "e4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "papaya/papaya_2026-07-21_gui-export_ess_uploadform_1.rvms",
+   "sha256": "afc57ba6ce26305450720f0d239ac284167388ba3e50148406c624b3be1684dd",
+   "size": 6877,
+   "site": "papaya",
+   "date": "2026-07-21",
+   "origin": "gui-export",
+   "state": "ess",
+   "form": "uploadform",
+   "blocks": [
+    {
+     "serial": "HQ24142MJUA",
+     "length": 1611,
+     "flag": "e4"
+    },
+    {
+     "serial": "HQ2414N7NAJ",
+     "length": 1177,
+     "flag": "e5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "papaya/papaya_2026-07-24_download_ess_deviceform_1.rvms",
+   "sha256": "32b2516d6918f00578a1660ff893faf85b0d4da785e20e62dd361864f2e5ea38",
+   "size": 7049,
+   "site": "papaya",
+   "date": "2026-07-24",
+   "origin": "download",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414N7NAJ",
+     "length": 1257,
+     "flag": "e5"
+    },
+    {
+     "serial": "HQ24142MJUA",
+     "length": 1703,
+     "flag": "e4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "mango/mango_2026-06-08_download_bare_deviceform_1.rvms",
+   "sha256": "d9d51950196769d9771d12df3642b05b429c9dc74d3ba81efd1499901870f283",
+   "size": 5067,
+   "site": "mango",
+   "date": "2026-06-08",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2240FKJDE",
+     "length": 490,
+     "flag": "f4"
+    },
+    {
+     "serial": "HQ24149MY9U",
+     "length": 488,
+     "flag": "f5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "mango/mango_2026-06-08_download_bare_deviceform_2.rvms",
+   "sha256": "2747225c847b667ac93cab8be9ab7b5135551cd05f0b0cab7f221d29289e3f79",
+   "size": 5067,
+   "site": "mango",
+   "date": "2026-06-08",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2240FKJDE",
+     "length": 490,
+     "flag": "f4"
+    },
+    {
+     "serial": "HQ24149MY9U",
+     "length": 488,
+     "flag": "f5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-06-19_download_bare_deviceform_1.rvms",
+   "sha256": "18eef9f346f50a3ffadbdc0f7b24fbe8d6624a5ddf976c50b1a9e21b35f62e9b",
+   "size": 5055,
+   "site": "guava",
+   "date": "2026-06-19",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 484,
+     "flag": "f4"
+    },
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 482,
+     "flag": "f5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-07-20_download_bare_deviceform_3.rvms",
+   "sha256": "0bc1416e36d944bdc983bdf3ac86f1e59359210d55849cbc105bc44420feface",
+   "size": 5055,
+   "site": "guava",
+   "date": "2026-07-20",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 484,
+     "flag": "f4"
+    },
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 482,
+     "flag": "f5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-06-18_download_bare_deviceform_1.rvms",
+   "sha256": "c49cfb226900276cf831d8e692d16cadce005f6ff384d788c95eac9622022d28",
+   "size": 5055,
+   "site": "guava",
+   "date": "2026-06-18",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 484,
+     "flag": "f5"
+    },
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 482,
+     "flag": "f4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "mango/mango_2026-07-20_download_bare_deviceform_3.rvms",
+   "sha256": "9a8178be50fe705b676a00475cce8b24aa8ba2070a2a2cce235e27274823c5e9",
+   "size": 5055,
+   "site": "mango",
+   "date": "2026-07-20",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2240FKJDE",
+     "length": 484,
+     "flag": "f4"
+    },
+    {
+     "serial": "HQ24149MY9U",
+     "length": 482,
+     "flag": "f5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "mango/mango_2026-06-18_download_bare_deviceform_1.rvms",
+   "sha256": "7549994dac068843efa87bff31695761a832d6dc928dfb4d50edbfbbf1a677ad",
+   "size": 5055,
+   "site": "mango",
+   "date": "2026-06-18",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ24149MY9U",
+     "length": 484,
+     "flag": "f5"
+    },
+    {
+     "serial": "HQ2240FKJDE",
+     "length": 482,
+     "flag": "f4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "papaya/papaya_2026-07-20_download_half-ess_deviceform_5.rvms",
+   "sha256": "488aa69691f660937944be555ed5bd6b672a8ded85d3d186f04e0303a57c45d2",
+   "size": 6276,
+   "site": "papaya",
+   "date": "2026-07-20",
+   "origin": "download",
+   "state": "half-ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414N7NAJ",
+     "length": 484,
+     "flag": "f5"
+    },
+    {
+     "serial": "HQ24142MJUA",
+     "length": 1703,
+     "flag": "e4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "papaya/papaya_2026-06-23_download_bare_deviceform_1.rvms",
+   "sha256": "fc11e50c283efe973f95ecd31b209313e7757c22e40b9667b9d1f507a4bc3e2d",
+   "size": 5055,
+   "site": "papaya",
+   "date": "2026-06-23",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414N7NAJ",
+     "length": 484,
+     "flag": "f5"
+    },
+    {
+     "serial": "HQ24142MJUA",
+     "length": 482,
+     "flag": "f4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "papaya/papaya_2026-07-17_download_half-ess_deviceform_1.rvms",
+   "sha256": "520afcf1752fe4f8145194513483bf156cd78e1664f31a288baa5a8e30dbcd42",
+   "size": 6276,
+   "site": "papaya",
+   "date": "2026-07-17",
+   "origin": "download",
+   "state": "half-ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414N7NAJ",
+     "length": 484,
+     "flag": "f5"
+    },
+    {
+     "serial": "HQ24142MJUA",
+     "length": 1703,
+     "flag": "e4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "papaya/papaya_2026-07-20_download_half-ess_deviceform_6.rvms",
+   "sha256": "dbacf0deec32641cbc330334329c0532d428b09d0c38585cb68f96853e6ca837",
+   "size": 6276,
+   "site": "papaya",
+   "date": "2026-07-20",
+   "origin": "download",
+   "state": "half-ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ24142MJUA",
+     "length": 1705,
+     "flag": "e4"
+    },
+    {
+     "serial": "HQ2414N7NAJ",
+     "length": 482,
+     "flag": "f5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "papaya/papaya_2026-06-18_download_bare_deviceform_1.rvms",
+   "sha256": "d2b78ca6e324c82f0870104f28fa088eb42ac0932812291d482ffd1bdd26b333",
+   "size": 5055,
+   "site": "papaya",
+   "date": "2026-06-18",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ24142MJUA",
+     "length": 484,
+     "flag": "f4"
+    },
+    {
+     "serial": "HQ2414N7NAJ",
+     "length": 482,
+     "flag": "f5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "sugar_apple/sugar_apple_2026-07-20_download_bare_deviceform_3.rvms",
+   "sha256": "c40522bb0d10ba3d14c938e3a17199b21ee488fdbdcd94cdc08c0060d4a5b938",
+   "size": 5055,
+   "site": "sugar_apple",
+   "date": "2026-07-20",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2240PY7CF",
+     "length": 484,
+     "flag": "f5"
+    },
+    {
+     "serial": "HQ22407X3WT",
+     "length": 482,
+     "flag": "f4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "sugar_apple/sugar_apple_2026-07-20_download_bare_deviceform_4.rvms",
+   "sha256": "c51a76d7d445aa9d1f046707549763b7bf754bba5fe9deef5b084244a54dab60",
+   "size": 5055,
+   "site": "sugar_apple",
+   "date": "2026-07-20",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2240PY7CF",
+     "length": 484,
+     "flag": "f5"
+    },
+    {
+     "serial": "HQ22407X3WT",
+     "length": 482,
+     "flag": "f4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "sugar_apple/sugar_apple_2026-06-18_download_bare_deviceform_1.rvms",
+   "sha256": "cb75c318d8985cdf41219ad5d0221d9bc43f4cda86a5bdf925317301f97b6b79",
+   "size": 5055,
+   "site": "sugar_apple",
+   "date": "2026-06-18",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ22407X3WT",
+     "length": 484,
+     "flag": "f4"
+    },
+    {
+     "serial": "HQ2240PY7CF",
+     "length": 482,
+     "flag": "f5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-08-12_download_bare_deviceform_1.rvms",
+   "sha256": "e52bd5331738dc0eef1f6b80db716f2b18b90db6da9059d770a4bf75d84647d1",
+   "size": 5055,
+   "site": "guava",
+   "date": "2026-08-12",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 484,
+     "flag": "f5"
+    },
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 482,
+     "flag": "f4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-08-12_prepared_ess_deviceform_1.rvms",
+   "sha256": "9f0a8c58e5a88ba4a8f06c8ad2952d3dc95e568f94f8f1e245815799893a011f",
+   "size": 7049,
+   "site": "guava",
+   "date": "2026-08-12",
+   "origin": "prepared",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 1257,
+     "flag": "e5"
+    },
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 1703,
+     "flag": "e4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-08-12_download_bare_deviceform_2.rvms",
+   "sha256": "8f54aebc71f3cd91a2db29f5c6a7db6303e0022b8724377bde31c078f14eef79",
+   "size": 5055,
+   "site": "guava",
+   "date": "2026-08-12",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 484,
+     "flag": "f5"
+    },
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 482,
+     "flag": "f4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-08-12_download_bare_deviceform_3.rvms",
+   "sha256": "85232dc474f96c6d5895d6429558d586020de710c34fdeab9750889c0f49cb79",
+   "size": 5055,
+   "site": "guava",
+   "date": "2026-08-12",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 484,
+     "flag": "f4"
+    },
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 482,
+     "flag": "f5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-08-12_download_bare_deviceform_4.rvms",
+   "sha256": "fc3b6978eb4fcfb497f228f67c056c5dd9925704266857e37bac8700f7b3c5d3",
+   "size": 5055,
+   "site": "guava",
+   "date": "2026-08-12",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 484,
+     "flag": "f4"
+    },
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 482,
+     "flag": "f5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-08-12_prepared_ess_deviceform_2.rvms",
+   "sha256": "6cc42d8577f174cc4ca48563ba5a4f1679356aa252d456e2176721d4e31ce104",
+   "size": 7049,
+   "site": "guava",
+   "date": "2026-08-12",
+   "origin": "prepared",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 1705,
+     "flag": "e4"
+    },
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 1255,
+     "flag": "e5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-08-12_download_stub_deviceform_1.rvms",
+   "sha256": "35a90ae828f9bb2530d1dab9bf58abb615158a883ce950eca0e16996eebcbcc0",
+   "size": 5183,
+   "site": "guava",
+   "date": "2026-08-12",
+   "origin": "download",
+   "state": "stub",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 548,
+     "flag": "e5"
+    },
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 546,
+     "flag": "e4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-08-12_download_stub_deviceform_2.rvms",
+   "sha256": "76c67561a2db917250d0c2e9da11d8e7b8a340abbbde60a68c4db7de506f98c1",
+   "size": 5183,
+   "site": "guava",
+   "date": "2026-08-12",
+   "origin": "download",
+   "state": "stub",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 548,
+     "flag": "e4"
+    },
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 546,
+     "flag": "e5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "sugar_apple/sugar_apple_2026-08-12_download_bare_deviceform_1.rvms",
+   "sha256": "677c9619a7c46bb3e21bd7117b87c84299013ac358c8efe4c01785d53a694dcc",
+   "size": 5055,
+   "site": "sugar_apple",
+   "date": "2026-08-12",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2240PY7CF",
+     "length": 484,
+     "flag": "f5"
+    },
+    {
+     "serial": "HQ22407X3WT",
+     "length": 482,
+     "flag": "f4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "sugar_apple/sugar_apple_2026-08-12_prepared_ess_deviceform_1.rvms",
+   "sha256": "0bf8031727250f7e13a0a9bbee0a1fdcb58cf39ac494f63afb42ddacb2892b46",
+   "size": 7049,
+   "site": "sugar_apple",
+   "date": "2026-08-12",
+   "origin": "prepared",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2240PY7CF",
+     "length": 1257,
+     "flag": "e5"
+    },
+    {
+     "serial": "HQ22407X3WT",
+     "length": 1703,
+     "flag": "e4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-08-12_prepared_ess_deviceform_3.rvms",
+   "sha256": "7afef65069760933ee86baa3331e74584871de813bf260aa43ff0ec09af3ae12",
+   "size": 7049,
+   "site": "guava",
+   "date": "2026-08-12",
+   "origin": "prepared",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 1705,
+     "flag": "e4"
+    },
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 1255,
+     "flag": "e5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-08-13_download_ess_deviceform_2.rvms",
+   "sha256": "75cc1e5f4c6e663f0cc0775adf6faae4bd4812ea6b5dddd7bcd80add87b067ab",
+   "size": 7049,
+   "site": "guava",
+   "date": "2026-08-13",
+   "origin": "download",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 1257,
+     "flag": "e5"
+    },
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 1703,
+     "flag": "e4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-07-21_prepared_ess_uploadform_1.rvms",
+   "sha256": "57199c62a582b3f6b952ce34b177b2db93febedc1c4bd7150baf2eca39709ac0",
+   "size": 6877,
+   "site": "guava",
+   "date": "2026-07-21",
+   "origin": "prepared",
+   "state": "ess",
+   "form": "uploadform",
+   "blocks": [
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 1177,
+     "flag": "e5"
+    },
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 1611,
+     "flag": "e4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-08-13_prepared_ess_uploadform_1.rvms",
+   "sha256": "a533233bec98f1731d377ff30118b490f0dd4f5e75cbc8b802a121cf10674008",
+   "size": 6877,
+   "site": "guava",
+   "date": "2026-08-13",
+   "origin": "prepared",
+   "state": "ess",
+   "form": "uploadform",
+   "blocks": [
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 1611,
+     "flag": "e4"
+    },
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 1177,
+     "flag": "e5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-08-13_download_ess_deviceform_3.rvms",
+   "sha256": "28373a016743f241b4b528a8bea280ff4dc3fe0e55eef8720e1c88c60ae05393",
+   "size": 7049,
+   "site": "guava",
+   "date": "2026-08-13",
+   "origin": "download",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 1705,
+     "flag": "e4"
+    },
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 1255,
+     "flag": "e5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-08-13_prepared_ess_deviceform_1.rvms",
+   "sha256": "d6b5e013267f01f72724a7b207f8d3bfddae89a11c4a17f90c0b75cbd266fe0f",
+   "size": 7049,
+   "site": "guava",
+   "date": "2026-08-13",
+   "origin": "prepared",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 1705,
+     "flag": "e4"
+    },
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 1255,
+     "flag": "e5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-08-13_prepared_ess_deviceform_2.rvms",
+   "sha256": "f530748733fd1ab657191f40bd8f1f734e9feead056c318cb6ba3698ded28a66",
+   "size": 7049,
+   "site": "guava",
+   "date": "2026-08-13",
+   "origin": "prepared",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 1705,
+     "flag": "e4"
+    },
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 1255,
+     "flag": "e5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-08-13_download_ess_deviceform_4.rvms",
+   "sha256": "8cdd27d7268c7d04c9752ea1ed5679cffbe6546399e5d6f6355176723dc029e2",
+   "size": 7049,
+   "site": "guava",
+   "date": "2026-08-13",
+   "origin": "download",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 1257,
+     "flag": "e5"
+    },
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 1703,
+     "flag": "e4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-08-13_download_ess_deviceform_5.rvms",
+   "sha256": "d59a7cc2de48761d1cb6604e3d871e21ebf7d94d8886d142211675e76c0e7a91",
+   "size": 7049,
+   "site": "guava",
+   "date": "2026-08-13",
+   "origin": "download",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 1705,
+     "flag": "e4"
+    },
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 1255,
+     "flag": "e5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-08-13_download_ess_deviceform_6.rvms",
+   "sha256": "9fd483bd1bba055f69ccb13f76f66c429c4bd96616765e81138fd8d628bfe8df",
+   "size": 7049,
+   "site": "guava",
+   "date": "2026-08-13",
+   "origin": "download",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 1705,
+     "flag": "e4"
+    },
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 1255,
+     "flag": "e5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "guava/guava_2026-08-13_download_ess_deviceform_7.rvms",
+   "sha256": "7ce04c05fa213f1e64245529e18648c4a0048f6c6ff42969ae40d906b97f45e6",
+   "size": 7049,
+   "site": "guava",
+   "date": "2026-08-13",
+   "origin": "download",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2414AXENJ",
+     "length": 1257,
+     "flag": "e5"
+    },
+    {
+     "serial": "HQ2414U6FVN",
+     "length": 1703,
+     "flag": "e4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "sugar_apple/sugar_apple_2026-08-13_prepared_ess_deviceform_1.rvms",
+   "sha256": "92e4dd55580638902c908e924eefd12b773756e8fe5fc24da271c87053388b23",
+   "size": 7049,
+   "site": "sugar_apple",
+   "date": "2026-08-13",
+   "origin": "prepared",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ22407X3WT",
+     "length": 1705,
+     "flag": "e4"
+    },
+    {
+     "serial": "HQ2240PY7CF",
+     "length": 1255,
+     "flag": "e5"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "sugar_apple/sugar_apple_2026-08-13_download_ess_deviceform_1.rvms",
+   "sha256": "5c6926621d0d2bf653d324266abc8a1ebca1e38a8e5324d37b9e15954400209a",
+   "size": 7049,
+   "site": "sugar_apple",
+   "date": "2026-08-13",
+   "origin": "download",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2240PY7CF",
+     "length": 1257,
+     "flag": "e5"
+    },
+    {
+     "serial": "HQ22407X3WT",
+     "length": 1703,
+     "flag": "e4"
+    }
+   ],
+   "notes": ""
+  },
+  {
+   "file": "mango/mango_2026-08-12_download_ess_deviceform_1.rvms",
+   "sha256": "a7fa185b08df75ec48d88aa7d6a7fd8339d51b34cfb44ba7ce0f5caf106fdb48",
+   "size": 7049,
+   "site": "mango",
+   "date": "2026-08-12",
+   "origin": "download",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ2240FKJDE",
+     "length": 1705,
+     "flag": "e4"
+    },
+    {
+     "serial": "HQ24149MY9U",
+     "length": 1255,
+     "flag": "e5"
+    }
+   ],
+   "notes": ""
+  }
+ ]
+}
