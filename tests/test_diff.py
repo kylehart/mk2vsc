@@ -51,7 +51,7 @@ def test_identical(good_files):
 
 
 def test_cross_form_diff_compares_settings_by_id(good_files):
-    dev = "papaya/papaya_2026-07-21_download_ess_deviceform_1.rvms"   # device download after Rob's install
+    dev = "papaya/papaya_2026-07-21_download_ess_deviceform_1.rvms"   # device download after the installer's GUI install
     up = "papaya/papaya_2026-07-21_gui-export_ess_uploadform_1.rvms"    # the GUI export that was uploaded
     if dev not in good_files or up not in good_files:
         return

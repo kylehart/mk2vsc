@@ -86,7 +86,7 @@ the pointer and checksum, and uploaded. Two earlier versions were cleanly reject
 us the pointer and framing rules. The third was accepted, and the running assistant became corrupt:
 VE.Bus error 6 (DDC program error), the system dropped from ESS to pass-through, the inverter went off.
 The stored file still showed the assistant present. Recovery was a baseline re-upload and a GX reboot;
-the battery was full and the tenant never lost power. Lesson: file validity is necessary, not
+the battery was full and the building never lost power. Lesson: file validity is necessary, not
 sufficient. An assistant is a program with internal consistency, and truncation breaks it.
 
 **Load-both v3, 2026-07-20 evening.** A transplanted assistant block for the second inverter was
@@ -199,7 +199,7 @@ The SoC threshold's true location is not known.
 
 - The ESS record body (704 and 1152 bytes) is a program we cannot read.
 - The 72-byte tail after the records on device-form ESS blocks is unparsed.
-- The BareSettingInfo section (4023 bytes, identical in every file) is presumably a schema; we have not
+- The BareSettingInfo section (4001 bytes, identical in every file) is presumably a schema; we have not
   decoded it.
 - Whether a device-form to upload-form transform produces an install that starts on a system with a
   healthy BMS.

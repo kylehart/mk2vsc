@@ -13,7 +13,7 @@ Observed file grammar (every file in the 84-file corpus, no exceptions)::
 Sections seen, always in this order:
 
     Mk2vscInfo       payload: u32 (=1) | u16 len | "1.33"          -- format/tool version
-    BareSettingInfo  payload: 0x0fb7 bytes, byte-identical across every file we hold (a template/schema)
+    BareSettingInfo  payload: 4001 bytes (0xfa1), byte-identical across every file we hold (a template/schema)
     BareSettingData  one per inverter in the VE.Bus system (our systems are pairs -> two sections)
 
 Notes on history, because earlier tooling used a different (equivalent) description:

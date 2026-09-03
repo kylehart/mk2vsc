@@ -177,5 +177,6 @@ made ours useful:
   changed, which is information the portal does not keep. The caveat: the save timestamp in a file
   is when the device last stored a configuration, and a download taken later brackets the change.
   Report changes as intervals between two downloads, not as points.
+  `rvms history FILE...` does this over a library of downloads, grouped by system and serial.
 - Keep the deliberately broken files too, labelled. They are the negative controls that prove a
   validator actually validates.
