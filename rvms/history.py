@@ -61,6 +61,9 @@ def load_snapshots(paths: List[str]) -> Tuple[List[Snapshot], List[Tuple[str, st
         if not units:
             skipped.append((p, "no unit blocks"))
             continue
+        if not f.all_checksums_ok:
+            skipped.append((p, "invalid checksum(s); not a device file"))
+            continue
         ts = max(u.save_timestamp for u in units)
         snaps.append(Snapshot(p, ts, tuple(sorted(u.serial for u in units)), f))
     return snaps, skipped
@@ -74,6 +77,12 @@ def changes(snaps: List[Snapshot]) -> List[Change]:
     for system, seq in by_system.items():
         seq.sort(key=lambda s: (s.timestamp, s.path))
         for a, b in zip(seq, seq[1:]):
+            if a.timestamp == b.timestamp:
+                # same save stamp = one of them is not a device download (a prepared/edited copy); the order
+                # between them is unknowable, so record the ambiguity instead of a phantom change
+                out.append(Change(system, "*", "AMBIGUOUS: two files share the save timestamp",
+                                  a.path.split("/")[-1], b.path.split("/")[-1], "n/a", b, a))
+                continue
             ua, ub = units_by_serial(a.file), units_by_serial(b.file)
             for serial in system:
                 x, y = ua[serial], ub[serial]

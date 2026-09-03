@@ -16,7 +16,7 @@ Two values were pinned early, independently of any reference: absorption voltage
 voltage at +0x5f, confirmed by editing them, uploading through VRM, and reading them back on live
 systems. When we later compared the array against the reference's setting IDs, those two sit exactly
 where IDs 2 and 3 would if ID 0 started at +0x59. Reading the rest of the array under that assumption
-across all 214 blocks in the corpus gave values that only make sense if the mapping is right:
+across all 162 blocks of the well-formed corpus gave values that only make sense if the mapping is right:
 
 | ID | reads | meaning under the reference | why that is convincing |
 |---:|---|---|---|
@@ -75,7 +75,7 @@ ID 0 reads 0x81f4 on most blocks and 0x89f4 / 0x89b4 on older ones. The differen
 which the reference identifies as *adaptive charge curve (lead-acid) when set, fixed (LiFePO4) when
 clear*. Every GUI ESS install in our corpus cleared it. For weeks we tracked this as "the 0x5a byte,
 89 → 81", one of the install-state mysteries; it is the GUI switching a lithium system to a fixed charge
-curve. ID 1 reads 0x4dfe on 202 of 214 blocks; bits 11 and 12 (wide frequency range, dynamic current
+curve. ID 1 reads 0x4dfe on every device-form block; bits 11 and 12 (wide frequency range, dynamic current
 limiter) are set. Earlier tooling mistook the bytes `fe 4d` at this position for a "device descriptor
 marker" and built a check on it.
 

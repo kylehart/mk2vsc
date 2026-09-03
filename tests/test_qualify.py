@@ -35,8 +35,21 @@ def test_the_rollback_that_bit_us(good_files):
     """A file can pass every structural check and still be wrong.  Reproduce the 2026-08-14 case: a
     rollback built from an old baseline carrying the pre-correction charge profile."""
     old = good_files[MISMATCHED]
-    ok, _ = qualify_bytes(old, Intent(settings={}))          # structure fine? (checksums valid)
-    assert any(True for _ in [ok])                            # (may fail only on agreement, which is the point)
+    from rvms.sections import RvmsFile
+    assert RvmsFile.parse(old).all_checksums_ok                # structurally fine
     ok, res = qualify_bytes(old, Intent(settings={"absorption_V": 56.8, "float_V": 54.0}))
     fails = [m for l, m in res if l == "FAIL"]
     assert len(fails) >= 3, fails
+
+
+def test_agreement_fields_extend_the_default_set(good_files):
+    """agreement_fields must ADD to the CONFIRMED set, never replace it (review finding, 2026-09-03)."""
+    intent = Intent(settings={}, agreement_fields=["float_V"])
+    ok, res = qualify_bytes(good_files[MISMATCHED], intent)
+    fails = [m for l, m in res if l == "FAIL"]
+    assert any("absorption_V" in m for m in fails), fails
+    assert any("float_V" in m for m in fails), fails
+    # a HIGH field promoted to must-agree turns its WARN into a FAIL
+    intent = Intent(settings={}, agreement_fields=["soc_at_bulk_end_pct"])
+    ok, res = qualify_bytes(good_files[FIXED], intent)
+    assert any(l == "FAIL" and "soc_at_bulk_end_pct" in m for l, m in res)

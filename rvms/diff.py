@@ -39,7 +39,8 @@ class UnitDiff:
 
     @property
     def only_bookkeeping(self) -> bool:
-        return not self.settings and not self.header and self.assistant == 0 and self.length_a == self.length_b
+        same_len = self.length_a == self.length_b or self.form_a != self.form_b
+        return not self.settings and not self.header and self.assistant == 0 and same_len
 
 
 @dataclass
@@ -73,10 +74,12 @@ def _classify(a: UnitBlock, b: UnitBlock) -> UnitDiff:
     d = UnitDiff(a.serial, len(a.raw), len(b.raw), "upload" if a.is_upload_form else "device",
                  "upload" if b.is_upload_form else "device")
     ra, rb = a.raw, b.raw
-    if a.is_upload_form != b.is_upload_form:
-        d.note = "different forms (device vs upload); byte offsets shift by 10 after +0x45, compared by field"
-    if len(ra) != len(rb):
-        d.note = (d.note + "; " if d.note else "") + "block length differs (assistant area changed)"
+    cross_form = a.is_upload_form != b.is_upload_form
+    if cross_form:
+        d.note = ("different forms (device vs upload): offsets shift by 10 after +0x45 and the GUI writes compact "
+                  "assistant records, so lengths differ by form; settings compared by id")
+    elif len(ra) != len(rb):
+        d.note = "block length differs (assistant area changed)"
     # settings compared by id regardless of form
     sa, sb = a.settings(), b.settings()
     for sid, (x, y) in enumerate(zip(sa, sb)):
@@ -100,7 +103,11 @@ def _classify(a: UnitBlock, b: UnitBlock) -> UnitDiff:
         if aa != ab:
             d.assistant = sum(1 for x, y in zip(aa, ab) if x != y) + abs(len(aa) - len(ab))
     else:
-        d.assistant = 0 if a.assistant_area == b.assistant_area else -1
+        # cannot compare assistant bytes across forms (padding differs); compare record structure instead
+        from .assistants import parse_assistant_area
+        ka = [(r["marker"], r["subtype"]) for r in parse_assistant_area(a)["records"]]
+        kb = [(r["marker"], r["subtype"]) for r in parse_assistant_area(b)["records"]]
+        d.assistant = 0 if ka == kb else 1
     # checksum trailer counted as bookkeeping when it differs
     if ra[-4:] != rb[-4:]:
         d.bookkeeping.extend(range(len(ra) - 4, len(ra)))

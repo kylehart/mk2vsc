@@ -171,7 +171,7 @@ Preparing this release, we asked where the two confirmed charge voltages sit rel
 and to the block. Absorption is at +0x5d and float at +0x5f, and in the public MK2 protocol reference
 they are VE.Bus settings 2 and 3. If the block holds the settings as a flat u16 array starting at
 +0x59, setting n is at +0x59 + 2n. We checked the rest of the array against that reference across all
-214 blocks: setting 5 reads 120 (these are 120 V inverters) on every device-form block, 6 reads 500
+every block in the corpus: setting 5 reads 120 (these are 120 V inverters) on every device-form block, 6 reads 500
 (50.0 A input limit), 65 reads 190 or 196 (95 % or 98 %, exactly the reference's LiFePO4 example),
 81 reads 0 on bare blocks and 1 on grid-coded ones, 73 reads 63.00 V (a protection threshold we had
 seen in the alarm history). Several bytes we had chased for weeks as "install state" turned out to be

@@ -28,7 +28,7 @@ test = ["pytest>=7"]
 rvms = "rvms.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/PLACEHOLDER/rvms-toolkit"
+Homepage = "https://github.com/kylehart/rvms-toolkit"  # placeholder until the repository is created
 
 [tool.setuptools]
 packages = ["rvms"]

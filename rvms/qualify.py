@@ -38,7 +38,7 @@ class Intent:
     serials: Optional[List[str]] = None
     system: str = ""
     require_agreement: bool = True
-    agreement_fields: Optional[List[str]] = None   # fields that MUST agree (default: CONFIRMED ones; HIGH ones only warn)
+    agreement_fields: Optional[List[str]] = None   # ADDITIONAL fields that must agree (CONFIRMED always must; HIGH only warns)
 
     @classmethod
     def load(cls, path: str) -> "Intent":
@@ -77,7 +77,10 @@ def qualify_bytes(data: bytes, intent: Intent) -> Tuple[bool, List[Tuple[str, st
             ok = False
             results.append(("FAIL", f"{u.serial}: empty assistant STUB present (failed by-file install signature)"))
 
-    agree_names = intent.agreement_fields or [x.name for x in FIELDS if x.confidence in (CONFIRMED, HIGH) and x.bits is None]
+    agree_names = [x.name for x in FIELDS if x.confidence in (CONFIRMED, HIGH) and x.bits is None]
+    for extra in intent.agreement_fields or []:
+        if lookup(extra).name not in agree_names:
+            agree_names.append(lookup(extra).name)
     if intent.require_agreement and len(units) > 1:
         for name in agree_names:
             fld = lookup(name)

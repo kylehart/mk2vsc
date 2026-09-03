@@ -28,7 +28,7 @@ built to do that, together with everything we learned about the file along the w
   * qualifies a file against the values you intended before you upload and after you re-download,
   * mines a library of archived downloads into a dated, per-inverter change log (`rvms history`).
 * A corpus of 84 real device files with a manifest, and a test suite that checks every documented
-  claim against that corpus (453 tests).
+  claim against that corpus (459 tests).
 * A written account of the format as we understand it, and of what we do not understand.
 
 ## What this is not
@@ -42,8 +42,8 @@ built to do that, together with everything we learned about the file along the w
 
 | Capability | Status | Evidence |
 |---|---|---|
-| Section grammar and integrity checksum | Proven | Validates on 107/107 files, every section; edited files accepted by the device on 4 systems |
-| Settings array = VE.Bus setting IDs at +0x59 + 2n | High | Reference IDs reproduce 120 V output, 50.0 A limit, 95 %/98 % SoC, grid-code flag on 214 blocks |
+| Section grammar and integrity checksum | Proven | Validates on every section of all 84 fixture files (107 counting archive duplicates); edited files accepted by the device on 4 systems |
+| Settings array = VE.Bus setting IDs at +0x59 + 2n | High | Reference IDs reproduce 120 V output, 50.0 A limit, 95 %/98 % SoC, grid-code flag on all 162 blocks of the 81 well-formed fixtures |
 | Field table (190 entries) | Partial | 4 CONFIRMED, 10 HIGH, 9 MEDIUM, 19 LOW, 20 UNKNOWN named; the rest unnamed |
 | Guarded writer (`rvms set`) | Proven live | Absorption, float and Virtual Switch thresholds written and read back on 4 systems, July to August 2026 |
 | By-serial diff (`rvms diff`) | Proven | Consecutive downloads, including a pair whose blocks swapped position, classify as bookkeeping only |
@@ -60,7 +60,7 @@ docs/FIELDS.md. The writer edits CONFIRMED and HIGH fields; anything lower needs
 git clone <this repository>
 cd rvms-toolkit
 python3 -m venv .venv && .venv/bin/pip install -e ".[test]"
-.venv/bin/pytest          # 453 tests against the fixture corpus
+.venv/bin/pytest          # 459 tests against the fixture corpus
 ```
 
 Or run without installing: `PYTHONPATH=. python3 -m rvms.cli ...`.
@@ -73,6 +73,8 @@ rvms info fixtures/mango/mango_2026-07-24_download_bare_deviceform_1.rvms
 ```
 format 1.33  length 5055  checksums OK
   HQ24149MY9U  fw 2729560  form=device  flag=f5  saved 2026-07-24T22:49:20+00:00  assistant: no assistant
+      flags0                          33268 bitmask [HIGH] (+0x059)
+      flags1                          19966 bitmask [HIGH] (+0x05b)
       absorption_V                     56.8 V    [CONFIRMED] (+0x05d)
       float_V                          54.0 V    [CONFIRMED] (+0x05f)
       charge_current_A                   35 A    [HIGH] (+0x061)

@@ -44,7 +44,8 @@ def parse_records(area: bytes):
         body = area[pos + 6: pos + 6 + length]
         records.append({"offset": pos, "marker": marker.hex(), "subtype": f"{subtype:04x}", "length": length,
                         "body_sha8": _sha8(body) if length else "", "nonpad_bytes": sum(1 for b in body if b != 0xFF),
-                        "container_signature": body.startswith(CONTAINER_SIG)})
+                        "container_signature": body.startswith(CONTAINER_SIG),
+                        "truncated": len(body) < length})
         pos += 6 + length
     return records, pos
 
@@ -76,6 +77,10 @@ def parse_assistant_area(u: UnitBlock) -> Dict:
         out["free"] = struct.unpack_from("<H", tail, len(tail) - 2)[0]
         out["used"] = tail_off
         out["free_plus_used"] = out["free"] + tail_off
+    if any(r["truncated"] for r in records):
+        out["kind"] = "malformed"
+        out["summary"] = "record length exceeds the area (malformed)"
+        return out
     real = [r for r in records if r["marker"] == "f5ff" and r["length"] > 0]
     containers = [r for r in records if r["marker"] == "ffff" and r["length"] > 0]
     if any(r["length"] >= 64 and r["container_signature"] for r in containers):

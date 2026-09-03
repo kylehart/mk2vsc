@@ -22,7 +22,8 @@ from typing import Dict, Iterable, List, Optional, Tuple
 
 from .sections import RvmsFile
 from .units import units_by_serial, unit_blocks
-from .fields import lookup, CONFIRMED, HIGH, Field
+from .fields import lookup, CONFIRMED, HIGH, Field, BY_NAME
+from .assistants import parse_assistant_area
 
 
 class WriteRefused(RuntimeError):
@@ -46,7 +47,7 @@ class Edit:
 
 
 def set_settings(data: bytes, changes: Iterable[Tuple[Optional[str], object, object]],
-                 allow_unverified: bool = False) -> Tuple[bytes, List[Edit]]:
+                 allow_unverified: bool = False, allow_out_of_range: bool = False) -> Tuple[bytes, List[Edit]]:
     """Apply ``changes`` = [(serial_or_None, field_name_or_id, value)] and return ``(new_bytes, edits)``.
 
     ``serial=None`` means every inverter in the file (the common case: charge voltages must match on
@@ -60,6 +61,10 @@ def set_settings(data: bytes, changes: Iterable[Tuple[Optional[str], object, obj
     by_serial = units_by_serial(f)
     if any(u.is_upload_form for u in by_serial.values()):
         raise WriteRefused("input is in GUI upload form (blob at +0x45); edit a device download instead")
+    stubbed = [u.serial for u in by_serial.values() if parse_assistant_area(u)["stub"]]
+    if stubbed:
+        raise WriteRefused(f"{stubbed} carry the empty assistant STUB of a failed by-file install; restore the "
+                           "system from a fresh bare download before editing settings")
 
     payloads = [s.payload for s in f.sections]
     edits: List[Edit] = []
@@ -73,6 +78,11 @@ def set_settings(data: bytes, changes: Iterable[Tuple[Optional[str], object, obj
         new_raw = fld.encode(value) if not isinstance(value, int) or fld.scale != 1.0 else int(value)
         if not 0 <= new_raw <= 0xFFFF:
             raise WriteRefused(f"{fld.name}={value} does not fit u16")
+        if fld.scale == 1.0 and float(value) != new_raw:
+            raise WriteRefused(f"{fld.name} is an integer field; {value} would be rounded to {new_raw}")
+        if not allow_out_of_range and fld.lo is not None and not (fld.lo <= fld.decode(new_raw) <= fld.hi):
+            raise WriteRefused(f"{fld.name}={fld.decode(new_raw)} {fld.unit} is outside the plausible range "
+                               f"{fld.lo}..{fld.hi} for a 48 V system; pass allow_out_of_range=True if you mean it")
         targets = list(by_serial.values()) if serial is None else [by_serial[serial]] if serial in by_serial else None
         if targets is None:
             raise WriteRefused(f"serial {serial} not in file (have {sorted(by_serial)})")
@@ -91,6 +101,13 @@ def set_settings(data: bytes, changes: Iterable[Tuple[Optional[str], object, obj
 
     new_file = f.rebuild(payloads)
     out = new_file.to_bytes()
+
+    # ---- cross-field sanity on the RESULT: float must not exceed absorption on any inverter ----
+    if not allow_out_of_range:
+        for u in units_by_serial(new_file).values():
+            a, fl = u.setting(BY_NAME["absorption_V"].id) / 100, u.setting(BY_NAME["float_V"].id) / 100
+            if fl > a + 0.005 and a > 0:
+                raise WriteRefused(f"{u.serial}: float {fl} V would exceed absorption {a} V; refusing")
 
     # ---- verification: length, checksums, and a byte-diff limited to what we intended ----
     if len(out) != len(data):
@@ -114,10 +131,11 @@ def set_settings(data: bytes, changes: Iterable[Tuple[Optional[str], object, obj
     return out, edits
 
 
-def set_settings_file(in_path: str, out_path: str, changes, allow_unverified: bool = False) -> List[Edit]:
+def set_settings_file(in_path: str, out_path: str, changes, allow_unverified: bool = False,
+                      allow_out_of_range: bool = False) -> List[Edit]:
     with open(in_path, "rb") as fh:
         data = fh.read()
-    out, edits = set_settings(data, changes, allow_unverified=allow_unverified)
+    out, edits = set_settings(data, changes, allow_unverified=allow_unverified, allow_out_of_range=allow_out_of_range)
     with open(out_path, "wb") as fh:
         fh.write(out)
     return edits

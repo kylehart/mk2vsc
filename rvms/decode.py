@@ -25,11 +25,11 @@ def decode_bytes(data: bytes, include_unknown: bool = True, include_raw_settings
         "all_checksums_ok": f.all_checksums_ok,
         "units": [],
     }
-    mk = f.section(b"Mk2vscInfo")
     try:
+        mk = f.section(b"Mk2vscInfo")
         vlen = int.from_bytes(mk.payload[4:6], "little")
         out["format_version"] = mk.payload[6: 6 + vlen].decode()
-    except Exception:  # pragma: no cover - malformed header
+    except Exception:  # malformed or missing header
         out["format_version"] = None
 
     for u in unit_blocks(f):

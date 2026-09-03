@@ -1,6 +1,6 @@
 """
 Shared fixtures.  Every test in this suite runs against the real device files in ``fixtures/``
-(see fixtures/manifest.json and docs/FIXTURES.md).  Two files there are deliberately malformed and are
+(see fixtures/manifest.json and docs/FIXTURES.md).  Three files there are deliberately malformed and are
 listed in KNOWN_BAD with the reason; tests assert that they *fail* the way the device rejected them.
 """
 import glob

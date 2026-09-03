@@ -103,7 +103,7 @@ def test_retracted_vs_soc_field_is_the_high_byte_of_setting_88(good_files):
             assert u.raw[u.setting_offset(88) + 1] == 0x14 == 20
 
 
-def test_settings_region_128_to_189_is_unprogrammed_on_bare_blocks(good_files):
+def test_settings_region_129_to_189_is_unprogrammed_on_bare_blocks(good_files):
     for name, u in _units(good_files):
         if not u.has_assistant_flag:
             assert all(v == 0xFFFF for v in u.settings()[129:N_SETTINGS]), name
@@ -119,3 +119,8 @@ def test_field_table_is_consistent():
             assert f.evidence, f"{f.name}: a CONFIRMED/HIGH field must state its evidence"
         if f.confidence == UNKNOWN:
             assert f.observed, f"{f.name}: an UNKNOWN field must at least record observed values"
+
+
+def test_word_0x0180_precedes_the_settings_array(good_files):
+    for name, u in _units(good_files):
+        assert u.u16(u.settings_offset - 2) == 0x0180, name

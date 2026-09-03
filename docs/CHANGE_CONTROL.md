@@ -137,9 +137,14 @@ file under test. `examples/intent.example.json`:
 
 ```json
 {
-  "system": "guava",
+  "system": "house-1",
   "serials": ["HQ2414U6FVN", "HQ2414AXENJ"],
-  "settings": {"absorption_V": 56.8, "float_V": 54.0, "vs_accept_battery_above_V": 52.5},
+  "settings": {
+    "absorption_V": 56.8,
+    "float_V": 54.0,
+    "vs_ignore_ac_below_V": 51.0,
+    "vs_accept_battery_above_V": 52.5
+  },
   "require_agreement": true,
   "agreement_fields": ["absorption_V", "float_V"]
 }

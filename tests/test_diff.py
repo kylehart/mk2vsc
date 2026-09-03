@@ -1,7 +1,7 @@
 from rvms.diff import diff_bytes, render
 
 # Two consecutive downloads of the same system with no configuration change (Mango, 2026-07-24).
-# The two blocks SWAPPED file position between these downloads.
+# (The swapped-order pair is found programmatically in the test below.)
 A = "mango/mango_2026-07-24_download_bare_deviceform_1.rvms"
 B = "mango/mango_2026-07-24_download_bare_deviceform_2.rvms"
 STUB = "mango/mango_2026-07-24_download_stub_deviceform_1.rvms"
@@ -51,11 +51,12 @@ def test_identical(good_files):
 
 
 def test_cross_form_diff_compares_settings_by_id(good_files):
-    dev = "papaya/papaya_2026-07-21_download_ess_deviceform_1.rvms"   # device download after the installer's GUI install
+    dev = "papaya/papaya_2026-07-24_download_ess_deviceform_1.rvms"   # device download after the installer's GUI install
     up = "papaya/papaya_2026-07-21_gui-export_ess_uploadform_1.rvms"    # the GUI export that was uploaded
-    if dev not in good_files or up not in good_files:
-        return
     d = diff_bytes(good_files[up], good_files[dev])
+    assert len(d.units) == 2
     for u in d.units:
         assert u.form_a == "upload" and u.form_b == "device"
         assert u.settings == [], "GUI export and the device's re-download must agree on every setting"
+        assert u.assistant == 0, "same assistant record structure in both forms"
+        assert "different forms" in u.note

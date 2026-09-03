@@ -6,7 +6,7 @@ block offset +0x59 (device form).  Entry *n* of that array is VE.Bus **setting I
 the community MK2/MK3 protocol work (github.com/xcellsior/ve-bus-programming, "Persistent Settings
 IDs 0-255").  We established the mapping by noticing that the two fields we had confirmed
 independently (absorption at +0x5d, float at +0x5f) sit exactly where setting IDs 2 and 3 land,
-then checking the rest of the array against that reference across the whole corpus (214 blocks):
+then checking the rest of the array against that reference across the whole corpus (162 blocks in 81 well-formed files):
 
 * ID 5 reads 120 in every device-form block (our inverters are 120 V units)
 * ID 6 reads 500 = 50.0 A (AC input current limit, /10)
@@ -49,6 +49,8 @@ class Field:
     observed: str = ""           # values seen in the corpus
     source: str = ""             # 'xcellsior' (public MK2 protocol reference) / 'ours' / both
     bits: Optional[Dict[int, str]] = None   # for flag registers: bit -> meaning when SET
+    lo: Optional[float] = None   # plausibility range in engineering units (48 V systems); writer refuses outside
+    hi: Optional[float] = None
 
     @property
     def offset(self) -> int:
@@ -80,7 +82,7 @@ FIELDS: List[Field] = [
                     14: "Weak AC input enabled"}),
     Field(1, "flags1", "Secondary flags register", 1, "bitmask", HIGH,
           "Second bit register. bit 11 SET = accept wide input frequency range; bit 12 SET = dynamic current limiter.",
-          "Reference bit table; value 0x4dfe on 202/214 blocks. Earlier tooling mistook the bytes 'fe 4d' here for a "
+          "Reference bit table; value 0x4dfe on every device-form block. Earlier tooling mistook the bytes 'fe 4d' here for a "
           "'device descriptor marker'.",
           "0x4dfe (device form), 0x6a5f/0x6a55/0x6a7e in a few grafted files",
           XC, bits={11: "Accept wide frequency range", 12: "Dynamic current limiter"}),
@@ -89,22 +91,22 @@ FIELDS: List[Field] = [
           "overrides this; it is the fallback used when the BMS link is absent.",
           "Written by rvms_writer on four systems (2026-07-20) via Remote VEConfigure, read back correct on every "
           "inverter; matches VRM 'Absorption' and VEConfigure Charger tab.",
-          "5600, 5650, 5680, 5760 (also 4800 on a mis-commissioned unit, 0 in stub blocks)", "ours + " + XC),
+          "5600, 5650, 5680, 5760 (also 4800 on a mis-commissioned unit, 0 in stub blocks)", "ours + " + XC, lo=40.0, hi=66.0),
     Field(3, "float_V", "Float voltage", 100, "V", CONFIRMED,
           "Charger float voltage (after absorption).",
           "First live proof of the whole toolchain: float 54.0 -> 54.1 V on both inverters of one system, "
           "uploaded, 'Success', read back 54.1 (2026-07-20). Later edits confirmed again.",
-          "5400, 5410, 5420, 5520", "ours + " + XC),
+          "5400, 5410, 5420, 5520", "ours + " + XC, lo=40.0, hi=66.0),
     Field(4, "charge_current_A", "Charge current", 1, "A", HIGH,
           "Maximum battery charge current from the charger.",
           "Reference ID/scale; 35 on every device-form block (a deliberate installer limit, consistent across "
-          "eight inverters). Not edited by us.", "35", XC),
+          "eight inverters). Not edited by us.", "35", XC, lo=0, hi=300),
     Field(5, "inverter_output_V", "Inverter output voltage", 1, "V", HIGH,
           "Nominal AC output voltage of the inverter.",
-          "Reference; 120 on 202/214 blocks (these are 120 V units). Upload-form blocks read it at +10.", "120", XC),
+          "Reference; 120 on every block (these are 120 V units). Upload-form blocks read it at +10.", "120", XC, lo=100, hi=250),
     Field(6, "ac1_input_limit_A", "AC input 1 current limit", 10, "A", HIGH,
           "Shore/grid input current limit for AC input 1 (the persistent value; the GX can override at runtime).",
-          "Reference; 500 = 50.0 A on every device-form block, matching the installation's breaker sizing.", "500", XC),
+          "Reference; 500 = 50.0 A on every device-form block, matching the installation's breaker sizing.", "500", XC, lo=0, hi=200),
     Field(7, "repeated_absorption_time", "Repeated absorption time", 1, "", MEDIUM,
           "Duration of a periodic re-absorption cycle (lead-acid curve).", "Reference name only.", "2, 4", XC),
     Field(8, "repeated_absorption_interval", "Repeated absorption interval", 1, "", MEDIUM,
@@ -118,10 +120,10 @@ FIELDS: List[Field] = [
           "Battery voltage at which the inverter shuts down (low-battery cutoff).",
           "Reference ID/scale. Our differential decode saw this move 37.20 -> 48.50 V on two systems during the "
           "installer's 'properly configure' pass and it reads 48.50 on all current blocks; 48.5 V is a sane LFP "
-          "floor. Labelled '?vs_restart_or_sustain_V' in earlier notes.", "4850, 3720, 4800", "ours + " + XC),
+          "floor. Labelled '?vs_restart_or_sustain_V' in earlier notes.", "4850, 3720, 4800", "ours + " + XC, lo=36.0, hi=56.0),
     Field(12, "dc_low_restart_offset_V", "DC input low restart offset", 100, "V", HIGH,
           "Voltage above the shut-down level at which the inverter restarts.",
-          "Reference; 2.00 V fleet-wide (was '?field_71' in earlier notes).", "200, 640", XC),
+          "Reference; 2.00 V fleet-wide (was '?field_71' in earlier notes).", "200, 640", XC, lo=0.0, hi=12.0),
     Field(13, "unknown_13", "", 1, "", UNKNOWN, "", "", "0"),
     Field(14, "unknown_14", "", 1, "", UNKNOWN, "", "", "0"),
     Field(15, "unknown_toggle_15", "Unknown toggle", 1, "", LOW,
@@ -160,7 +162,7 @@ FIELDS: List[Field] = [
           "DC voltage drops below this (for the configured time). Entry-to-passthrough threshold.",
           "Matched byte-for-byte to a VEConfigure Virtual Switch tab screenshot (51.40 V) and to the installer's "
           "note of lowering it to 51.0 at all sites; later GUI changes landed here. Written by us (rollback files).",
-          "5100 (current), 4700 (old)", "ours"),
+          "5100 (current), 4700 (old)", "ours", lo=40.0, hi=60.0),
     Field(55, "vs_param55", "Virtual Switch parameter", 1, "", LOW, "Time-like (20 s?).", "", "21, 6, 0"),
     Field(56, "vs_param56", "Virtual Switch parameter", 1, "", LOW, "Earlier notes read 15.00 V; unverified.",
           "", "1500, 531, 625"),
@@ -170,7 +172,7 @@ FIELDS: List[Field] = [
           "above what the battery can reach (64.00 V on a 48 V LFP) makes passthrough permanent -- the root cause "
           "of a 5.6-day stuck-on-grid episode on one system.",
           "Screenshot match (53.00 V); the installer's per-site values (53.0 / 52.5) appear here; edited by us.",
-          "5250, 5300, 6400 (old, unreachable)", "ours"),
+          "5250, 5300, 6400 (old, unreachable)", "ours", lo=40.0, hi=66.0),
     Field(59, "vs_param59", "Virtual Switch parameter", 1, "", LOW, "", "", "2, 0"),
     Field(60, "solar_wind_priority_flags", "Solar & wind priority flags", 1, "bitmask", MEDIUM,
           "Reference: bit 4 (16) = off, 528 = on.", "Reference; 16 on bare blocks, 48 after GUI ESS install.",
@@ -180,11 +182,11 @@ FIELDS: List[Field] = [
     Field(64, "battery_capacity_Ah", "Battery capacity", 1, "Ah", HIGH,
           "Capacity used by the inverter's built-in battery monitor; 0 disables the monitor.",
           "Reference; 200 / 300 Ah match the installed EG4 module counts (2 x 100 Ah vs 3 x 100 Ah).",
-          "200, 300, 0", XC),
+          "200, 300, 0", XC, lo=0, hi=10000),
     Field(65, "soc_at_bulk_end_pct", "SoC when bulk finished", 2, "%", HIGH,
           "State of charge the built-in monitor assumes at the end of bulk (x0.5 %).",
           "Reference: '190 = 95 % for LiFePO4'; we see 190 and 196 (98 %) -- the one-byte difference between "
-          "systems that puzzled us for a week ('+0xdb be vs c4').", "190, 196, 170", XC),
+          "systems that puzzled us for a week ('+0xdb be vs c4').", "190, 196, 170", XC, lo=0, hi=100),
     Field(66, "param66_V", "", 100, "V?", LOW, "57.72 V -- voltage-like; possibly a second (lead-acid default) "
           "charge profile paired with 68.", "", "5772"),
     Field(67, "param67", "", 1, "", LOW, "Changed 04 -> 02 by the GUI ESS install on one inverter.", "", "3, 2, 4"),
@@ -203,7 +205,7 @@ FIELDS: List[Field] = [
     Field(81, "grid_code_active", "Grid code active flag", 1, "flag", HIGH,
           "1 when a grid code (country standard) has been set with the dealer password in VEConfigure.",
           "Reference; 0 on every bare block, 1 on every GUI-authored ESS block. Part of the 'grid-code "
-          "fingerprint' our failed grafts tried to stamp.", "0, 1", XC),
+          "fingerprint' our failed grafts tried to stamp.", "0, 1", XC, lo=0, hi=1),
     Field(85, "param85", "", 1, "", UNKNOWN, "", "", "65535"),
     Field(87, "param87", "", 1, "", UNKNOWN, "", "", "829"),
     Field(88, "solar_wind_priority_V", "Solar & wind priority (sustain) voltage", 100, "V", MEDIUM,

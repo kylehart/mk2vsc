@@ -68,7 +68,11 @@ def cmd_validate(a):
 
 
 def cmd_decode(a):
-    d = decode_file(a.file, include_unknown=a.all)
+    try:
+        d = decode_file(a.file, include_unknown=a.all)
+    except (RvmsParseError, OSError) as e:
+        print(f"{a.file}: {e}", file=sys.stderr)
+        return 1
     if a.json:
         print(json.dumps(d, indent=1, default=str))
     else:
@@ -84,7 +88,11 @@ def cmd_decode(a):
 
 
 def cmd_diff(a):
-    d = diff_files(a.a, a.b)
+    try:
+        d = diff_files(a.a, a.b)
+    except (RvmsParseError, OSError, ValueError) as e:
+        print(f"cannot diff: {e}", file=sys.stderr)
+        return 1
     print(json.dumps(d.as_dict(), indent=1) if a.json else render_diff(d))
     return 0 if (d.identical or d.only_bookkeeping) else 2
 
@@ -97,13 +105,18 @@ def cmd_set(a):
             return 2
         k, v = kv.split("=", 1)
         try:
-            val = float(v)
+            val = int(v, 0) if v.strip().lstrip("-").isdigit() or v.startswith("0x") else float(v)
         except ValueError:
-            val = int(v, 0)
+            print(f"bad value {v!r} for {k}; expected a number", file=sys.stderr)
+            return 2
         changes.append((a.serial, k, val))
     try:
-        edits = set_settings_file(a.inp, a.out, changes, allow_unverified=a.i_know_this_is_unverified)
-    except (WriteRefused, KeyError, ValueError) as e:
+        edits = set_settings_file(a.inp, a.out, changes, allow_unverified=a.i_know_this_is_unverified,
+                                  allow_out_of_range=a.allow_out_of_range)
+    except KeyError as e:
+        print(f"REFUSED: unknown field {e}; see `rvms fields`", file=sys.stderr)
+        return 1
+    except (WriteRefused, ValueError, RvmsParseError, OSError) as e:
         print(f"REFUSED: {e}", file=sys.stderr)
         return 1
     for e in edits:
@@ -114,10 +127,18 @@ def cmd_set(a):
 
 
 def cmd_qualify(a):
-    intent = Intent.load(a.intent) if a.intent else Intent(settings={})
+    try:
+        intent = Intent.load(a.intent) if a.intent else Intent(settings={})
+    except (OSError, ValueError) as e:
+        print(f"cannot load intent {a.intent}: {e}", file=sys.stderr)
+        return 2
     rc = 0
     for p in a.files:
-        ok, res = qualify_file(p, intent)
+        try:
+            ok, res = qualify_file(p, intent)
+        except KeyError as e:
+            print(f"{p}: intent names an unknown field {e}; see `rvms fields`", file=sys.stderr)
+            return 2
         print(render_qual(ok, res, p))
         rc |= 0 if ok else 1
     return rc
@@ -178,6 +199,7 @@ def main(argv=None):
     s = sub.add_parser("diff"); s.add_argument("a"); s.add_argument("b"); s.add_argument("--json", action="store_true"); s.set_defaults(fn=cmd_diff)
     s = sub.add_parser("set"); s.add_argument("inp"); s.add_argument("out"); s.add_argument("--serial", default=None, help="edit one inverter only (default: all)")
     s.add_argument("--i-know-this-is-unverified", action="store_true", help="allow MEDIUM/LOW/UNKNOWN fields")
+    s.add_argument("--allow-out-of-range", action="store_true", help="skip the plausibility range and float<=absorption checks")
     s.add_argument("assignments", nargs="+", metavar="FIELD=VALUE"); s.set_defaults(fn=cmd_set)
     s = sub.add_parser("qualify"); s.add_argument("files", nargs="+"); s.add_argument("--intent", help="intent JSON"); s.set_defaults(fn=cmd_qualify)
     s = sub.add_parser("fix"); s.add_argument("inp"); s.add_argument("out"); s.set_defaults(fn=cmd_fix)

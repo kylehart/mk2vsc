@@ -15,7 +15,7 @@ MultiPlus systems between June and September 2026.
   that byte is the high byte of setting 88.
 * Decoder, by-serial diff with bookkeeping classification, guarded length-preserving writer,
   intent-based qualifier, read-only assistant-area parser, and the `rvms` CLI.
-* Corpus of 84 unique fixture files with manifest, and 451 tests that check every documented claim
+* Corpus of 84 unique fixture files with manifest, and 459 tests that check every documented claim
   against it.
 * Documentation: FORMAT, FIELDS, CHANGE_CONTROL, WORKFLOW, SAFETY, QA, ASSISTANTS, ERRORS, HISTORY,
   FIXTURES.

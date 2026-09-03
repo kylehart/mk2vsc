@@ -93,3 +93,25 @@ def test_reproduces_the_archived_prepared_files(good_files, manifest):
             pytest.skip("fixture missing")
         out, _ = set_settings(good_files[base], changes)
         assert out == good_files[prepared], f"{prepared} is not baseline+edits"
+
+
+def test_refuses_implausible_voltages_and_float_above_absorption(good_files):
+    data = good_files[BARE]
+    with pytest.raises(WriteRefused):
+        set_settings(data, [(None, "absorption_V", 5.68)])          # forgot the decimal place
+    with pytest.raises(WriteRefused):
+        set_settings(data, [(None, "float_V", 60.0), (None, "absorption_V", 50.0)])
+    out, _ = set_settings(data, [(None, "absorption_V", 5.68)], allow_out_of_range=True)
+    first = sorted(units_by_serial(RvmsFile.parse(out)))[0]
+    assert units_by_serial(RvmsFile.parse(out))[first].setting(2) == 568
+
+
+def test_refuses_stub_downloads(good_files):
+    stub = "guava/guava_2026-08-12_download_stub_deviceform_1.rvms"
+    with pytest.raises(WriteRefused):
+        set_settings(good_files[stub], [(None, "float_V", 54.0)])
+
+
+def test_refuses_fractional_value_for_integer_field(good_files):
+    with pytest.raises(WriteRefused):
+        set_settings(good_files[BARE], [(None, "charge_current_A", 35.7)])

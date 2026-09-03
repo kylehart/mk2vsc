@@ -25,7 +25,7 @@ Notes on history, because earlier tooling used a different (equivalent) descript
 * The "``0f 00`` framing" that ended every block but the last is the *next section's* name-length
   prefix (15 = len("BareSettingData")).  It belongs to the next section, not to the block.
 * The checksum applies to every section (Mk2vscInfo, BareSettingInfo, BareSettingData), not only the
-  per-unit blocks.  All 107 files x all sections validate.
+  per-unit blocks.  All 84 unique files (107 with archive duplicates) x all sections validate.
 
 This module does not know what the payloads mean.  See ``units.py`` for the per-inverter block layout
 and ``fields.py`` for the settings table.
@@ -149,7 +149,7 @@ class RvmsFile:
             if ptr_at + 4 > len(data):
                 raise RvmsParseError(f"truncated next-pointer for {name!r} at {pos:#x}")
             nxt = struct.unpack_from("<I", data, ptr_at)[0]
-            if nxt <= ptr_at + 4 + 4 or nxt > len(data):
+            if nxt < ptr_at + 4 + 4 or nxt > len(data):
                 raise RvmsParseError(
                     f"section {name!r} at {pos:#x} has next-pointer {nxt:#x} outside [{ptr_at+8:#x}, {len(data):#x}]"
                 )

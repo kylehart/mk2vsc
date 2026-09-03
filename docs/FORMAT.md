@@ -65,7 +65,7 @@ The section table of that file as our parser reports it:
 **Observed.** The last four bytes of every section are the 32-bit little-endian word sum of the section
 from its length prefix up to those four bytes, modulo 2**32, with a trailing partial word zero-padded on
 the high side. This validates on all 107 files we have held (84 unique) and every section in them, with
-the two deliberately broken files in `fixtures/` as negative controls. `rvms.sections.sum32_le` is the
+the three deliberately broken files in `fixtures/` as negative controls. `rvms.sections.sum32_le` is the
 whole implementation.
 
 History, because earlier write-ups describe the same thing differently. Our first solved formula was
@@ -214,7 +214,7 @@ Every block in the corpus fits one of these shapes:
 
 | Shape | Bytes | Where seen |
 |---|---|---|
-| bare | `ff ff ff ff 00 00` + `ff 00 0b` | every block without an assistant (74 blocks) |
+| bare | `ff ff ff ff 00 00` + `ff 00 0b` | every well-formed block without an assistant (89 blocks; a few show the residue or legacy shapes below) |
 | residue | `f5 ff 00 ff 00 00` + `ff 00 0b` (also `ff ff 00 00 00 00`, `f5 ff 00 00 00 00`) | downloads taken after a rejected or rolled-back assistant upload; functionally bare |
 | legacy container | `ff ff ff ff 06 00` + `a7 fe 00 00 57 01` + `ff fa 0a` | the two June 2026 files written by an older tool build |
 | stub | `ff ff ff ff 40 00` + `a7 fe 00 00 57 01` + 56 × `ff` + `c0 0a`, then `ff 40 0a` | what VEConfigure wrote on both inverters after accepting a transplanted assistant and discarding it |

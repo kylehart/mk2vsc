@@ -58,7 +58,8 @@ Confidence: observed.
 A pre-write reject: the unit walk over the file found the wrong number of blocks. *Observed* four times,
 always with a hand-built file: a wrong next-section pointer, a block shorter than the canonical length,
 and blocks emitted in the wrong order so that the two-byte length prefix of the following section sat
-after the wrong block. `rvms validate` catches all of these (pointer chain, section lengths, checksums).
+after the wrong block. `rvms validate` catches a broken pointer chain and bad checksums; it does not know the canonical block
+length, so a structurally consistent but too-short block still passes it.
 
 Device state: nothing written. What to do: run `rvms validate`; if it passes and you still get this,
 you have found a structural rule we do not know. Please open an issue with the file. Confidence: observed.

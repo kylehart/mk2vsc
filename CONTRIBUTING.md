@@ -4,6 +4,13 @@ This project advances one controlled experiment at a time. The most valuable con
 files and observations, not code. Everything below is about making those contributions safe for
 you, for the systems involved, and for the people who rely on the field table.
 
+## A note on what the fixtures disclose
+
+The fixtures carry the eight inverter serial numbers of our systems and their save timestamps. Victron
+and its dealers can resolve a serial to an installation; we chose to publish them because the files are
+useless as evidence without them. Nothing else identifying is in the files: no VRM identifiers, no
+credentials, no names.
+
 ## The three contributions we need most
 
 ### 1. A controlled pair
