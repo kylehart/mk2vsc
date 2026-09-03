@@ -10,6 +10,7 @@ Command-line interface.
     rvms fix       IN OUT                  recompute every checksum (forensic use only)
     rvms fields                            print the settings table
     rvms census    FILE...                 one line per file (block lengths, flags, form, assistant kind)
+    rvms history   FILE...                 dated change log mined from a library of downloads (by system, by serial)
 """
 from __future__ import annotations
 
@@ -26,6 +27,7 @@ from .writer import set_settings_file, WriteRefused
 from .qualify import Intent, qualify_file, render as render_qual
 from .fields import FIELDS
 from .assistants import parse_assistant_area
+from .history import load_snapshots, changes as history_changes, render as render_history
 
 
 def _load(path):
@@ -153,6 +155,18 @@ def cmd_census(a):
     return 0
 
 
+def cmd_history(a):
+    snaps, skipped = load_snapshots(a.files)
+    chs = history_changes(snaps)
+    if a.json:
+        print(json.dumps([{"system": c.system, "serial": c.serial, "what": c.what, "old": c.old, "new": c.new,
+                           "confidence": c.confidence, "after": c.after.when, "before": c.before.when,
+                           "file_after": c.after.path, "file_before": c.before.path} for c in chs], indent=1, default=str))
+    else:
+        print(render_history(snaps, chs, skipped))
+    return 0
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="rvms", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--version", action="version", version=__version__)
@@ -169,6 +183,7 @@ def main(argv=None):
     s = sub.add_parser("fix"); s.add_argument("inp"); s.add_argument("out"); s.set_defaults(fn=cmd_fix)
     s = sub.add_parser("fields"); s.set_defaults(fn=cmd_fields)
     s = sub.add_parser("census"); s.add_argument("files", nargs="+"); s.set_defaults(fn=cmd_census)
+    s = sub.add_parser("history"); s.add_argument("files", nargs="+"); s.add_argument("--json", action="store_true"); s.set_defaults(fn=cmd_history)
 
     a = ap.parse_args(argv)
     return a.fn(a)
