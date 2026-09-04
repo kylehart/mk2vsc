@@ -128,8 +128,9 @@ FIELDS: List[Field] = [
     Field(15, "unknown_toggle_15", "Unknown toggle", 1, "", LOW,
           "The reference notes this 'differs between units'.",
           "Values track the installer's configuration pass (3 on configured, 1/0 on older).", "0, 1, 3", XC),
-    Field(16, "param16", "", 1, "", UNKNOWN, "First of a repeated parameter block (16-18 / 28-30 have the same shape).",
-          "", "2125"),
+    Field(16, "param16", "", 1, "", LOW, "First of a repeated block (16-18 and 28-30) whose values equal the Virtual "
+          "Switch load-high, Udc-high and Udc-low settings of an untouched system (2125 / 6400 / 4700 and 531 / 6400 / "
+          "4700): probably the same conditions for another context (second AC input, or defaults).", "", "2125"),
     Field(17, "param17_V", "", 100, "V?", LOW, "Reads 64.00 -- voltage-like; possibly a DC high alarm/threshold.",
           "Same value as ID 29 and as the unreachable 64.00 V VS-return threshold once set on two systems.", "6400"),
     Field(18, "param18_V", "", 100, "V?", LOW, "Reads 47.00 -- voltage-like.", "Same value as ID 30.", "4700"),
@@ -148,31 +149,48 @@ FIELDS: List[Field] = [
     Field(48, "param48", "", 1, "", UNKNOWN, "", "", "32"),
     Field(49, "ac2_input_limit_A", "AC input 2 current limit", 10, "A", MEDIUM,
           "Quattro only; 0 on MultiPlus.", "Reference; 0 on all our MultiPlus blocks.", "0", XC),
-    Field(50, "vs_param50", "Virtual Switch parameter", 1, "", LOW,
-          "IDs 50-59 hold the Virtual Switch 'ignore AC input' parameters (the reference lists 50-59 as a "
-          "parameter block). 60 and 40 look like time constants in seconds (1 min / 40 s).", "", "60"),
-    Field(51, "vs_param51", "Virtual Switch parameter", 1, "", LOW, "", "", "40"),
-    Field(52, "vs_param52", "Virtual Switch parameter", 1, "", LOW,
-          "Moves with the VS thresholds across the installer's configuration pass (833/2125 -> 1750); "
-          "scale unknown (volts x100, watts, or something else).", "", "1750, 2125, 833"),
-    Field(53, "vs_param53", "Virtual Switch parameter", 1, "", LOW, "", "", "4, 0, 6"),
+    # Virtual Switch "Ignore AC input" tab.  Layout: SoC pair (50, 51), then four threshold/duration pairs
+    # (52/53 load high, 54/55 Udc low, 56/57 load low, 58/59 Udc high).  Load thresholds are stored as
+    # current in 0.01 A; the tab shows watts (W = A x inverter output voltage).
+    Field(50, "vs_ignore_soc_above_pct", "VS: ignore AC input when SoC higher than", 2, "%", LOW,
+          "Alternative battery condition for returning to battery (the drop-down next to 'Udc higher than').",
+          "Adjacent to the SoC-lower setting and identical (60 = 30 %) on every block; not seen on a screenshot.",
+          "60"),
+    Field(51, "vs_dont_ignore_soc_below_pct", "VS: do not ignore AC input when SoC lower than", 2, "%", MEDIUM,
+          "Battery condition for accepting the grid: SoC below this (x0.5 %, the scale setting 65 uses).",
+          "40 = 20.0 % on every block, matching the 20.0 % shown on the VEConfigure tab; a single value, so the "
+          "scale rests on one data point plus the setting-65 convention.", "40"),
+    Field(52, "vs_dont_ignore_load_above_A", "VS: do not ignore AC input when load higher than", 100, "A", HIGH,
+          "Load condition for accepting the grid: AC load above this current (VEConfigure shows watts; "
+          "W = A x inverter output voltage, 120 V here).",
+          "The tab showed 1000 W while the same-period download held 833 = 8.33 A = 1000 W / 120 V; the 750 W "
+          "field matched setting 56 the same way. Current values 1750 = 17.5 A = 2100 W.", "833, 1750, 2125", "ours",
+          lo=0, hi=100),
+    Field(53, "vs_load_above_for", "VS: ... for (seconds)", 1, "", LOW,
+          "Duration for the load-high condition (1 second on the tab). Encoding unknown.",
+          "Adjacent to setting 52.", "0, 4, 6"),
     Field(54, "vs_ignore_ac_below_V", "VS: do not ignore AC input when Udc lower than", 100, "V", CONFIRMED,
-          "Virtual Switch 'Ignore AC input' battery condition: leave battery operation and accept the grid when "
-          "DC voltage drops below this (for the configured time). Entry-to-passthrough threshold.",
-          "Matched byte-for-byte to a VEConfigure Virtual Switch tab screenshot (51.40 V) and to the installer's "
-          "note of lowering it to 51.0 at all sites; later GUI changes landed here. Written by us (rollback files).",
-          "5100 (current), 4700 (old)", "ours", lo=40.0, hi=60.0),
-    Field(55, "vs_param55", "Virtual Switch parameter", 1, "", LOW, "Time-like (20 s?).", "", "21, 6, 0"),
-    Field(56, "vs_param56", "Virtual Switch parameter", 1, "", LOW, "Scale unknown.",
-          "", "1500, 531, 625"),
-    Field(57, "vs_param57", "Virtual Switch parameter", 1, "", LOW, "", "", "2, 0"),
-    Field(58, "vs_accept_battery_above_V", "VS: ignore AC input again when Udc higher than", 100, "V", CONFIRMED,
-          "Virtual Switch return condition: go back to battery (ignore AC) when DC voltage exceeds this. A value "
-          "above what the battery can reach (64.00 V on a 48 V LFP) makes passthrough permanent -- the root cause "
-          "of a 5.6-day stuck-on-grid episode on one system.",
-          "Screenshot match (53.00 V); the installer's per-site values (53.0 / 52.5) appear here; edited by us.",
-          "5250, 5300, 6400 (old, unreachable)", "ours", lo=40.0, hi=66.0),
-    Field(59, "vs_param59", "Virtual Switch parameter", 1, "", LOW, "", "", "2, 0"),
+          "Battery condition for accepting the grid: DC voltage below this for the configured time.",
+          "Matched to the VEConfigure tab (51.40 V) and to the installer's note of lowering it to 51.0 at all "
+          "sites; later GUI changes landed here; written by us.", "5100 (current), 4700 (old)", "ours"),
+    Field(55, "vs_udc_below_for", "VS: ... for (seconds)", 1, "", LOW,
+          "Duration for the Udc-low condition (20 seconds on the tab). Encoding unknown.",
+          "Adjacent to setting 54; 21 on current blocks.", "0, 6, 21"),
+    Field(56, "vs_ignore_load_below_A", "VS: when accepting AC due to load, ignore AC when load lower than", 100, "A", HIGH,
+          "Load condition for returning to battery: AC load below this current (tab shows watts).",
+          "750 W on the tab; 625 = 6.25 A = 750 W / 120 V in the same-period download. Current 1500 = 15 A = 1800 W.",
+          "625, 1500, 531", "ours", lo=0, hi=100),
+    Field(57, "vs_load_below_for", "VS: ... for (minutes)", 1, "", LOW,
+          "Duration for the load-low condition (1 minute on the tab). Encoding unknown.",
+          "Adjacent to setting 56.", "0, 2"),
+    Field(58, "vs_accept_battery_above_V", "VS: when accepting AC due to a battery condition, ignore AC when Udc higher than", 100, "V", CONFIRMED,
+          "Battery condition for returning to battery: DC voltage above this. A value the battery cannot reach "
+          "(64.00 V on a 48 V LFP) makes grid pass-through permanent.",
+          "Tab match (53.00 V); the installer's per-site values (53.0 / 52.5) appear here; written by us.",
+          "5250, 5300, 6400 (unreachable)", "ours"),
+    Field(59, "vs_udc_above_for", "VS: ... for (minutes)", 1, "", LOW,
+          "Duration for the Udc-high condition (1 minute on the tab). Encoding unknown.",
+          "Adjacent to setting 58.", "0, 2"),
     Field(60, "solar_wind_priority_flags", "Solar & wind priority flags", 1, "bitmask", MEDIUM,
           "Reference: bit 4 (16) = off, 528 = on.", "Reference; 16 on bare blocks, 48 after GUI ESS install.",
           "16, 48, 0", XC),
@@ -233,6 +251,9 @@ ALIASES = {
     "restart_offset": "dc_low_restart_offset_V",
     "vs_entry": "vs_ignore_ac_below_V",
     "vs_return": "vs_accept_battery_above_V",
+    "vs_load_high": "vs_dont_ignore_load_above_A",
+    "vs_load_low": "vs_ignore_load_below_A",
+    "vs_soc": "vs_dont_ignore_soc_below_pct",
     "capacity": "battery_capacity_Ah",
     "soc_bulk_end": "soc_at_bulk_end_pct",
     "grid_code": "grid_code_active",

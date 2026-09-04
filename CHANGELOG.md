@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1 (2026-09-04)
+
+* Virtual Switch block decoded from the VEConfigure tab and the same-period download (issue #8): load thresholds are current in 0.01 A (`vs_load_high`, `vs_load_low`, HIGH, editable), SoC-lower is setting 51 at x0.5 % (MEDIUM), SoC-higher 50 (LOW), durations 53/55/57/59 located but encoding unknown. Settings 16 to 18 and 28 to 30 identified as a second copy of the same conditions.
+
 ## Unreleased
 
 * Installations are referred to by public aliases System A to D. Fixture directories and files are

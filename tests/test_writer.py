@@ -47,9 +47,9 @@ def test_edit_works_on_ess_blocks_and_leaves_assistant_untouched(good_files):
 def test_refuses_unverified_field_without_override(good_files):
     data = good_files[BARE]
     with pytest.raises(WriteRefused):
-        set_settings(data, [(None, "vs_param52", 1000)])
-    out, edits = set_settings(data, [(None, "vs_param52", 1000)], allow_unverified=True)
-    assert edits[0].new_raw == 1000
+        set_settings(data, [(None, "vs_load_above_for", 4)])
+    out, edits = set_settings(data, [(None, "vs_load_above_for", 4)], allow_unverified=True)
+    assert edits[0].new_raw == 4
 
 
 def test_refuses_flag_registers_unknown_serial_and_bad_values(good_files):

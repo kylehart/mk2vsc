@@ -22,7 +22,7 @@ def test_load_read_aliases_and_ids():
     assert cfg.value("absorption") == {"HQ2414AXENJ": 57.6, "HQ2414U6FVN": 56.0}
     assert not cfg.agree("absorption") and cfg.agree("inverter_output_V")
     assert "no assistant" in u.assistant
-    assert "absorption_V" in u.as_dict() and "vs_param52" not in u.as_dict()
+    assert "absorption_V" in u.as_dict() and "vs_load_above_for" not in u.as_dict()
 
 
 def test_set_save_verify_check(tmp_path):
@@ -55,7 +55,7 @@ def test_refusals_surface_through_the_facade():
     with pytest.raises(WriteRefused):
         cfg.set("absorption", 5.68)
     with pytest.raises(WriteRefused):
-        cfg.set("vs_param52", 1)
+        cfg.set("vs_load_above_for", 1)
     with pytest.raises(KeyError):
         cfg.set("vs_soc_pct", 20)
     with pytest.raises(KeyError):
@@ -66,7 +66,7 @@ def test_refusals_surface_through_the_facade():
 def test_summary_text():
     s = mk2vsc.load(BARE).summary()
     assert "Charger" in s and "Absorption voltage" in s and "inverters differ" in s and "Legend" in s
-    assert "vs_param52" not in s and "vs_param52" in mk2vsc.load(BARE).summary(include_unknown=True)
+    assert "vs_load_above_for" not in s and "vs_load_above_for" in mk2vsc.load(BARE).summary(include_unknown=True)
 
 
 def test_loads_bytes():

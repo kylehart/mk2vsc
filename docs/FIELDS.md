@@ -44,20 +44,31 @@ No single line is proof; the pattern is. `tests/test_claims.py` re-checks each r
 Flag registers (IDs 0 and 1) are never edited by the writer regardless of level; we have not toggled a bit
 on hardware.
 
-## The Virtual Switch block (IDs 50–59)
+## The Virtual Switch block (IDs 50 to 59)
 
-The reference lists 50–59 as a parameter block. Two of them are CONFIRMED against a VEConfigure
-"Virtual Switch → Ignore AC input" screenshot from the installer:
+The "Virtual switch > Ignore AC input" tab in VEConfigure holds eight values and a drop-down. Settings 50
+to 59 hold them in this layout:
 
-* the screen showed *do not ignore AC input when Udc lower than 51.40 V for 20 s* and *ignore AC input
-  again when Udc higher than 53.00 V for 1 min*; the array held 5140 at ID 54 and 5300 at ID 58 on that
-  system at that time, and the installer's later per-site values (51.00; 52.50 / 53.00) appeared at the
-  same IDs. A 64.00 V value at ID 58 on two systems was the unreachable return threshold behind a 5.6-day
-  stuck-on-grid episode.
-* the same screen showed load conditions of *1000 W for 1 s* and *750 W for 1 min*. We have **not**
-  located those. IDs 50 (60), 51 (40), 52 (1750 / 2125 / 833), 53 (4 / 6 / 0), 55 (21 / 6 / 0), 56 (1500 / 625 / 531),
-  57 and 59 (2 / 0) are the candidates; 52 and 56 move together with the thresholds across the
-  installer's configuration passes and may be watts, tenths of seconds, or something else. 50 V and 15.00 V; that is no better supported.
+| IDs | Tab field | Storage |
+|---|---|---|
+| 50 | ignore AC when SoC higher than (drop-down alternative) | x0.5 %, LOW: 60 = 30 % on every block, never seen on a screen |
+| 51 | do not ignore AC when SoC lower than | x0.5 %, MEDIUM: 40 = 20.0 %, the value on the tab |
+| 52, 53 | do not ignore AC when load higher than ... W for ... s | current in 0.01 A (HIGH), duration encoding unknown (LOW) |
+| 54, 55 | do not ignore AC when Udc lower than ... V for ... s | volts x100 (CONFIRMED), duration unknown |
+| 56, 57 | ignore AC when load lower than ... W for ... min | current in 0.01 A (HIGH), duration unknown |
+| 58, 59 | ignore AC when Udc higher than ... V for ... min | volts x100 (CONFIRMED), duration unknown |
+
+The load thresholds are stored as current, not watts: the tab showed 1000 W and 750 W on a 120 V inverter,
+and the download from the same period holds 833 and 625, which are 8.33 A and 6.25 A. Every load value in
+the corpus is a round number of watts at 120 V (1750 = 2100 W, 1250 = 1500 W, 1208 = 1450 W). To set a
+threshold in watts, divide by the inverter output voltage: `mk2vsc edit f.rvms vs_load_high=17.5` is
+2100 W on a 120 V system.
+
+The four durations (53, 55, 57, 59) sit next to their thresholds and read 4 / 21 / 2 / 2 on current blocks
+and 6 / 6 / 2 / 2 on the early-June blocks, against 1 s / 20 s / 1 min / 1 min on the tab. The encoding is
+not established; a controlled pair that changes one duration would settle it (issue #8). Settings 16 to 18
+and 28 to 30 hold a second copy of load-high / Udc-high / Udc-low values that never changed when 50 to 59
+did; probably the same conditions for another context.
 
 ## The flag registers (IDs 0 and 1)
 
@@ -94,7 +105,7 @@ systems we cannot say.
 | 13 | +0x073 | `unknown_13` |  | u16 |  | UNKNOWN |  |  | 0 |
 | 14 | +0x075 | `unknown_14` |  | u16 |  | UNKNOWN |  |  | 0 |
 | 15 | +0x077 | `unknown_toggle_15` | Unknown toggle | u16 |  | LOW | The reference notes this 'differs between units'. | Values track the installer's configuration pass (3 on configured, 1/0 on older). | 0, 1, 3 |
-| 16 | +0x079 | `param16` |  | u16 |  | UNKNOWN | First of a repeated parameter block (16-18 / 28-30 have the same shape). |  | 2125 |
+| 16 | +0x079 | `param16` |  | u16 |  | LOW | First of a repeated block (16-18 and 28-30) whose values equal the Virtual Switch load-high, Udc-high and Udc-low settings of an untouched system (2125 / 6400 / 4700 and 531 / 6400 / 4700): probably the same conditions for another context (second AC input, or defaults). |  | 2125 |
 | 17 | +0x07b | `param17_V` |  | u16 / 100 | V? | LOW | Reads 64.00 -- voltage-like; possibly a DC high alarm/threshold. | Same value as ID 29 and as the unreachable 64.00 V VS-return threshold once set on two systems. | 6400 |
 | 18 | +0x07d | `param18_V` |  | u16 / 100 | V? | LOW | Reads 47.00 -- voltage-like. | Same value as ID 30. | 4700 |
 | 24 | +0x089 | `param24` |  | u16 |  | UNKNOWN |  |  | 2 |
@@ -111,16 +122,16 @@ systems we cannot say.
 | 47 | +0x0b7 | `param47` |  | u16 |  | UNKNOWN |  |  | 5 |
 | 48 | +0x0b9 | `param48` |  | u16 |  | UNKNOWN |  |  | 32 |
 | 49 | +0x0bb | `ac2_input_limit_A` | AC input 2 current limit | u16 / 10 | A | MEDIUM | Quattro only; 0 on MultiPlus. | Reference; 0 on all our MultiPlus blocks. | 0 |
-| 50 | +0x0bd | `vs_param50` | Virtual Switch parameter | u16 |  | LOW | IDs 50-59 hold the Virtual Switch 'ignore AC input' parameters (the reference lists 50-59 as a parameter block). 60 and 40 look like time constants in seconds (1 min / 40 s). |  | 60 |
-| 51 | +0x0bf | `vs_param51` | Virtual Switch parameter | u16 |  | LOW |  |  | 40 |
-| 52 | +0x0c1 | `vs_param52` | Virtual Switch parameter | u16 |  | LOW | Moves with the VS thresholds across the installer's configuration pass (833/2125 -> 1750); scale unknown (volts x100, watts, or something else). |  | 1750, 2125, 833 |
-| 53 | +0x0c3 | `vs_param53` | Virtual Switch parameter | u16 |  | LOW |  |  | 4, 0, 6 |
-| 54 | +0x0c5 | `vs_ignore_ac_below_V` | VS: do not ignore AC input when Udc lower than | u16 / 100 | V | CONFIRMED | Virtual Switch 'Ignore AC input' battery condition: leave battery operation and accept the grid when DC voltage drops below this (for the configured time). Entry-to-passthrough threshold. | Matched byte-for-byte to a VEConfigure Virtual Switch tab screenshot (51.40 V) and to the installer's note of lowering it to 51.0 at all sites; later GUI changes landed here. Written by us (rollback files). | 5100 (current), 4700 (old) |
-| 55 | +0x0c7 | `vs_param55` | Virtual Switch parameter | u16 |  | LOW | Time-like (20 s?). |  | 21, 6, 0 |
-| 56 | +0x0c9 | `vs_param56` | Virtual Switch parameter | u16 |  | LOW | Scale unknown. |  | 1500, 531, 625 |
-| 57 | +0x0cb | `vs_param57` | Virtual Switch parameter | u16 |  | LOW |  |  | 2, 0 |
-| 58 | +0x0cd | `vs_accept_battery_above_V` | VS: ignore AC input again when Udc higher than | u16 / 100 | V | CONFIRMED | Virtual Switch return condition: go back to battery (ignore AC) when DC voltage exceeds this. A value above what the battery can reach (64.00 V on a 48 V LFP) makes passthrough permanent -- the root cause of a 5.6-day stuck-on-grid episode on one system. | Screenshot match (53.00 V); the installer's per-site values (53.0 / 52.5) appear here; edited by us. | 5250, 5300, 6400 (old, unreachable) |
-| 59 | +0x0cf | `vs_param59` | Virtual Switch parameter | u16 |  | LOW |  |  | 2, 0 |
+| 50 | +0x0bd | `vs_ignore_soc_above_pct` | VS: ignore AC input when SoC higher than | u16 / 2 | % | LOW | Alternative battery condition for returning to battery (the drop-down next to 'Udc higher than'). | Adjacent to the SoC-lower setting and identical (60 = 30 %) on every block; not seen on a screenshot. | 60 |
+| 51 | +0x0bf | `vs_dont_ignore_soc_below_pct` | VS: do not ignore AC input when SoC lower than | u16 / 2 | % | MEDIUM | Battery condition for accepting the grid: SoC below this (x0.5 %, the scale setting 65 uses). | 40 = 20.0 % on every block, matching the 20.0 % shown on the VEConfigure tab; a single value, so the scale rests on one data point plus the setting-65 convention. | 40 |
+| 52 | +0x0c1 | `vs_dont_ignore_load_above_A` | VS: do not ignore AC input when load higher than | u16 / 100 | A | HIGH | Load condition for accepting the grid: AC load above this current (VEConfigure shows watts; W = A x inverter output voltage, 120 V here). | The tab showed 1000 W while the same-period download held 833 = 8.33 A = 1000 W / 120 V; the 750 W field matched setting 56 the same way. Current values 1750 = 17.5 A = 2100 W. | 833, 1750, 2125 |
+| 53 | +0x0c3 | `vs_load_above_for` | VS: ... for (seconds) | u16 |  | LOW | Duration for the load-high condition (1 second on the tab). Encoding unknown. | Adjacent to setting 52. | 0, 4, 6 |
+| 54 | +0x0c5 | `vs_ignore_ac_below_V` | VS: do not ignore AC input when Udc lower than | u16 / 100 | V | CONFIRMED | Battery condition for accepting the grid: DC voltage below this for the configured time. | Matched to the VEConfigure tab (51.40 V) and to the installer's note of lowering it to 51.0 at all sites; later GUI changes landed here; written by us. | 5100 (current), 4700 (old) |
+| 55 | +0x0c7 | `vs_udc_below_for` | VS: ... for (seconds) | u16 |  | LOW | Duration for the Udc-low condition (20 seconds on the tab). Encoding unknown. | Adjacent to setting 54; 21 on current blocks. | 0, 6, 21 |
+| 56 | +0x0c9 | `vs_ignore_load_below_A` | VS: when accepting AC due to load, ignore AC when load lower than | u16 / 100 | A | HIGH | Load condition for returning to battery: AC load below this current (tab shows watts). | 750 W on the tab; 625 = 6.25 A = 750 W / 120 V in the same-period download. Current 1500 = 15 A = 1800 W. | 625, 1500, 531 |
+| 57 | +0x0cb | `vs_load_below_for` | VS: ... for (minutes) | u16 |  | LOW | Duration for the load-low condition (1 minute on the tab). Encoding unknown. | Adjacent to setting 56. | 0, 2 |
+| 58 | +0x0cd | `vs_accept_battery_above_V` | VS: when accepting AC due to a battery condition, ignore AC when Udc higher than | u16 / 100 | V | CONFIRMED | Battery condition for returning to battery: DC voltage above this. A value the battery cannot reach (64.00 V on a 48 V LFP) makes grid pass-through permanent. | Tab match (53.00 V); the installer's per-site values (53.0 / 52.5) appear here; written by us. | 5250, 5300, 6400 (unreachable) |
+| 59 | +0x0cf | `vs_udc_above_for` | VS: ... for (minutes) | u16 |  | LOW | Duration for the Udc-high condition (1 minute on the tab). Encoding unknown. | Adjacent to setting 58. | 0, 2 |
 | 60 | +0x0d1 | `solar_wind_priority_flags` | Solar & wind priority flags | u16 | bitmask | MEDIUM | Reference: bit 4 (16) = off, 528 = on. | Reference; 16 on bare blocks, 48 after GUI ESS install. | 16, 48, 0 |
 | 62 | +0x0d5 | `param62` |  | u16 |  | UNKNOWN |  |  | 41667, 41666 |
 | 63 | +0x0d7 | `param63` |  | u16 |  | UNKNOWN |  |  | 32668, 32768 |
