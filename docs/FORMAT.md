@@ -13,7 +13,7 @@ one of three labels:
 * **Inferred**: the narrowest reading of the observations that we have not verified independently.
 * **Unknown**: bytes we can locate but cannot explain.
 
-The corpus behind every claim: 84 unique files (`fixtures/`, see `docs/FIXTURES.md`), 8 inverters
+The corpus behind every claim: 88 unique files (`fixtures/`, see `docs/FIXTURES.md`), 8 inverters
 (MultiPlus-II class, 48 V battery, 120 V output) in 4 two-inverter split-phase systems, a single firmware
 version (2729560, shown as "v560" in VRM), a single format version ("1.33"). We have no `.rvsc`
 (single-unit) file, no three-phase or 3+ unit file, and no file from any other firmware or tool version.
@@ -37,7 +37,7 @@ The sections always appear in this order:
 | Section | Payload | Count |
 |---|---|---|
 | `Mk2vscInfo` | 10 bytes: `u32 1`, `u16 4`, `"1.33"` | 1 |
-| `BareSettingInfo` | 4001 bytes, byte-identical across all 84 files: the settings schema (scale, offset, default, min, max per setting) | 1 |
+| `BareSettingInfo` | 4001 bytes, byte-identical across all 88 files: the settings schema (scale, offset, default, min, max per setting) | 1 |
 | `BareSettingData` | one inverter's configuration | one per inverter (2 in every corpus file) |
 
 A real header, from `fixtures/system_a/system_a_2026-07-20_download_bare_deviceform_1.rvms`:
@@ -69,7 +69,7 @@ The section table of that file as our parser reports it:
 
 **Observed.** The last four bytes of every section are the 32-bit little-endian word sum of the section
 from its length prefix up to those four bytes, modulo 2**32, with a trailing partial word zero-padded on
-the high side. This validates on all 107 files we have held (84 unique) and every section in them, with
+the high side. This validates on all 111 files we have held (88 unique) and every section in them, with
 the three deliberately broken files in `fixtures/` as negative controls. `mk2vsc.sections.sum32_le` is the
 whole implementation.
 

@@ -17,7 +17,6 @@ def test_remove_reproduces_the_accepted_file_byte_for_byte(good_files):
     """Same export timestamp as the file the device accepted -> identical bytes (serials are pseudonyms in both)."""
     import struct
     acc = good_files[ACCEPTED_BARE]
-    ts = struct.unpack_from("<I", acc, 0x00)  # placeholder, replaced below
     first = unit_blocks(RvmsFile.parse(acc))[0]
     ts = struct.unpack_from("<I", first.raw, 0x45 + 12)[0]         # export timestamp in the upload-form blob
     out = remove_assistant(good_files[SRC], timestamp=ts)
@@ -67,6 +66,11 @@ def test_remove_works_on_every_ess_download_in_the_corpus(good_files, manifest):
         out = remove_assistant(data, timestamp=1_788_000_000)
         f = RvmsFile.parse(out)
         assert f.all_checksums_ok and len(unit_blocks(f)) == 2
-        assert diff_bytes(data, out).header == [] if hasattr(diff_bytes(data, out), "header") else True
+        # every setting except the grid-code words (81, 128, 190, 191) is carried verbatim, per serial
+        src = {u.serial: u for u in unit_blocks(RvmsFile.parse(data))}
+        for v in unit_blocks(f):
+            u = src[v.serial]
+            assert [x for i, x in enumerate(u.settings()) if i not in (81, 128, 190, 191)] == \
+                   [x for i, x in enumerate(v.settings()) if i not in (81, 128, 190, 191)], (name, v.serial)
         n += 1
     assert n >= 10

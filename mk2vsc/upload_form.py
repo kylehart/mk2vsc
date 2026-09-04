@@ -1,13 +1,12 @@
 """
-EXPERIMENTAL: convert a device-form download into the GUI's *upload form*, the byte layout VEConfigure /
-VE.Bus System Configurator writes when it exports a file for Remote VEConfigure upload.
+Convert a device-form download into the GUI's *upload form*: the byte layout VEConfigure / VE.Bus System
+Configurator writes when it exports a file for Remote VEConfigure upload.
 
-Why anyone would want this: GUI-authored upload-form files install assistants that RUN; our device-form
-the transform is proven: `mk2vsc.assistant` uses it to remove and reinstall assistants (2026-09-04, System D).  One hypothesis (docs/ESS_INJECTION.md, H2) was
-that the upload form itself is what triggers the device-side install procedure.  This transform was
-built to test that.  Result on 2026-08-13: the device ACCEPTED a transformed file (after two fixes that
-this module now contains), stored the configuration, and the system still did not start.  The
-hypothesis is weakened, not dead: the target system had a broken BMS bus at the time (H3).
+The form selects the device procedure.  A device-form upload with an unchanged assistant area is a settings
+write; an upload-form upload runs the install procedure ("Resetting VE.Bus products", inverters off for its
+duration).  ``mk2vsc.assistant`` builds on this transform to remove an assistant and to reinstall one from
+the system's own earlier download; both were verified on a live system on 2026-09-04 (docs/ASSISTANTS.md).
+Installing an assistant on a system that never had one is a different question and stays experimental.
 
 Derivation.  We hold one matched pair: the installer's real GUI export for System C (upload form) and
 System C's own device download taken after that upload succeeded (device form).  Per block, upload =

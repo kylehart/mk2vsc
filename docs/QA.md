@@ -17,7 +17,7 @@ synthetic fixtures for the format itself.
 | file | what it proves |
 |---|---|
 | `tests/test_sections.py` | Every good fixture parses, every section checksum validates, the pointer chain is contiguous and ends at EOF, parse then serialize is byte-exact, rebuilding pointers and checksums from payloads reproduces the input byte-for-byte, the historical formula (`sum32(block[2:]) + 0x6142000F`) equals the plain word sum, the header sections are identical across the corpus, and the three deliberately broken files are detected. |
-| `tests/test_claims.py` | Every checkable claim in docs/FIELDS.md and `mk2vsc/units.py`, checked on all 162 inverter blocks of the 81 well-formed fixtures: serial position, firmware word, slot bytes, assistant-flag encoding, the +10 upload-form shift (setting 5 reads 120 V on every block under the offset model), timestamps are plausible unix times, CONFIRMED/HIGH fields decode to physically sensible values, grid-code flag tracks GUI-authored installs, the retracted SOC field is the high byte of setting 88, region 128 to 189 is unprogrammed on bare blocks, and the field table itself is internally consistent (every CONFIRMED/HIGH entry states evidence). |
+| `tests/test_claims.py` | Every checkable claim in docs/FIELDS.md and `mk2vsc/units.py`, checked on all 170 inverter blocks of the 85 well-formed fixtures: serial position, firmware word, slot bytes, assistant-flag encoding, the +10 upload-form shift (setting 5 reads 120 V on every block under the offset model), timestamps are plausible unix times, CONFIRMED/HIGH fields decode to physically sensible values, grid-code flag tracks GUI-authored installs, the retracted SOC field is the high byte of setting 88, region 128 to 189 is unprogrammed on bare blocks, and the field table itself is internally consistent (every CONFIRMED/HIGH entry states evidence). |
 | `tests/test_writer.py` | Edit then revert reproduces the original file byte-for-byte; an edit to all inverters changes only the intended bytes plus checksums; edits on ESS blocks leave the assistant area untouched; unverified fields, flag registers, unknown serials, out-of-range values, upload-form input and corrupt input are refused; the archived prepared files from the 2026-07-20 charge-profile corrections are reproduced exactly from their baselines. |
 | `tests/test_diff.py` | Two real consecutive downloads differ only in bookkeeping; the pair whose blocks swapped file position is invisible when compared by serial while a positional diff shows dozens of differences; a stub download is reported as a content change; a GUI export and the device's re-download of it agree on every setting. |
 | `tests/test_qualify.py` | Inverter disagreement fails; intended values pass on the corrected file and fail on the mismatched one; wrong-system serials fail; the stub fails; the rollback file that caused the month-long regression is caught. |
@@ -33,7 +33,7 @@ python -m venv .venv
 .venv/bin/pytest
 ```
 
-475 tests, under a second.
+528 tests, under two seconds.
 
 ## The corpus and its limits
 
@@ -120,6 +120,6 @@ matching GUI screenshot.
 | Guarded writer | proven for its surface | edit-and-revert byte identity on every fixture; reproduces the archived prepared files; 4 live uploads |
 | By-serial diff and bookkeeping model | proven | real consecutive downloads, including the swapped-order pair |
 | Qualifier | proven against its motivating incident | catches the 2026-08-14 rollback file (fixture); the 2026-08-21 one-inverter GUI write is the case the agreement check was written for, but we hold no fixture from that day |
-| Assistant records | read-only, structure only | record framing, sizes and the stub signature; the record body and the 72-byte ESS tail are not understood |
-| ESS injection (graft, upload-form transform) | experimental, gated | shipped under `mk2vsc.experimental` behind `--i-accept-the-risk`; reproduces every August 2026 attempt file byte-for-byte; the device accepted and stored them; no system ever started (docs/ESS_INJECTION.md) |
+| Assistant records | read; remove and reinstall | record framing, sizes and the stub signature; `mk2vsc assistant` removed and reinstalled ESS on one live system (2026-09-04) with re-downloads verified; the record body and the 72-byte ESS tail are not understood |
+| First-time assistant install (graft) | experimental, gated | `mk2vsc.experimental` behind `--i-accept-the-risk`; reproduces every August 2026 attempt file byte-for-byte; the device stored them and no system started (docs/ESS_INJECTION.md) |
 | Grid code | not touched | flag read only; the dealer password is out of scope by policy |

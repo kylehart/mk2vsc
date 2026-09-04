@@ -6,6 +6,5 @@ up, reviewed, or corrected.  Read docs/ESS_INJECTION.md first.  The CLI exposes 
 ``mk2vsc experimental ... --i-accept-the-risk``.
 """
 from .ess_graft import graft, GraftRefused, INSTALL_STATE
-from ..upload_form import to_upload_form, compare_per_slot, TransformRefused, BLOB12   # proven; lives in mk2vsc.upload_form
 
-__all__ = ["graft", "GraftRefused", "INSTALL_STATE", "to_upload_form", "compare_per_slot", "TransformRefused", "BLOB12"]
+__all__ = ["graft", "GraftRefused", "INSTALL_STATE"]

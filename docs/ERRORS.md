@@ -76,6 +76,12 @@ Seen when trying to *download* while the VE.Bus was re-enumerating after an inte
 inverters again, or reboot the GX. Device state: unchanged by the download attempt. Confidence: observed
 once.
 
+### Error 745  "Cannot find VE.Bus system" (on download)
+
+The GX cannot see the inverters over VE.Bus at this moment. Seen immediately after an upload that reset
+the VE.Bus (an assistant change from any source): the bus is re-enumerating. Nothing is wrong with the
+file. Wait a few minutes and download again; if it persists, check the VE.Bus cabling and the GX.
+
 ### Error 1303  "VRM connection stopped responding"
 
 A VRM tunnel timeout, not a verdict on the file. *Observed* on both successful and failed uploads. The

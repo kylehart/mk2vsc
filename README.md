@@ -34,7 +34,7 @@ built to do that, together with everything we learned about the file along the w
   * qualifies a file against the values you intended before you upload and after you re-download,
   * mines a library of archived downloads into a dated, per-inverter change log (`mk2vsc history`).
 * A corpus of 88 real device files with a manifest, and a test suite that checks every documented
-  claim against that corpus (475 tests).
+  claim against that corpus (528 tests).
 * A written account of the format as we understand it, and of what we do not understand.
 
 ## What this is not
@@ -51,7 +51,7 @@ built to do that, together with everything we learned about the file along the w
 | Capability | Status | Evidence |
 |---|---|---|
 | Section grammar and integrity checksum | Proven | Validates on every section of all 88 fixture files (111 counting archive duplicates); edited files accepted by the device on 4 systems |
-| Settings array = VE.Bus setting IDs at +0x59 + 2n | High | Reference IDs reproduce 120 V output, 50.0 A limit, 95 %/98 % SoC, grid-code flag on all 162 blocks of the 81 well-formed fixtures |
+| Settings array = VE.Bus setting IDs at +0x59 + 2n | High | Reference IDs reproduce 120 V output, 50.0 A limit, 95 %/98 % SoC, grid-code flag on all 170 blocks of the 85 well-formed fixtures |
 | Field table (192 entries) | Partial | every ID carries VEConfigure's identifier; 94 settings and bits placed on VEConfigure's tabs (`mk2vsc fields --by-tab`); decode confidence 4 CONFIRMED, 68 HIGH, 9 MEDIUM, 12 LOW, 99 UNKNOWN (reserved and grid-code slots) |
 | Guarded writer (`mk2vsc edit`) | Proven live | Absorption, float and Virtual Switch thresholds written and read back on 4 systems, July to August 2026 |
 | By-serial diff (`mk2vsc diff`) | Proven | Consecutive downloads, including a pair whose blocks swapped position, classify as bookkeeping only |
@@ -74,7 +74,7 @@ Or from source, with the fixture corpus and tests:
 ```
 git clone https://github.com/kylehart/mk2vsc.git && cd mk2vsc
 python3 -m venv .venv && .venv/bin/pip install -e ".[test]"
-.venv/bin/pytest          # 475 tests against the fixture corpus
+.venv/bin/pytest          # 528 tests against the fixture corpus
 ```
 
 ## Quickstart: one download, one change

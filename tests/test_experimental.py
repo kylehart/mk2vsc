@@ -7,7 +7,8 @@ import pytest
 
 from mk2vsc.sections import RvmsFile
 from mk2vsc.units import unit_blocks, units_by_serial
-from mk2vsc.experimental import graft, GraftRefused, to_upload_form, compare_per_slot, TransformRefused
+from mk2vsc.experimental import graft, GraftRefused
+from mk2vsc.upload_form import to_upload_form, compare_per_slot, TransformRefused
 from mk2vsc.assistants import parse_assistant_area
 from mk2vsc.diff import diff_bytes
 

@@ -7,7 +7,7 @@ schema says absorption may be 48.00 to 64.00 V, the default is 57.60 V, and a fi
 schema (``BareSettingInfo``) gives every setting's min, max and default, so this check needs no
 table of our own.
 
-The rule is deliberately narrow.  On the fixture corpus (162 inverter blocks) a naive "raw == min or
+The rule is deliberately narrow.  On the fixture corpus (170 inverter blocks) a naive "raw == min or
 raw == max" fires on every block: a dozen Virtual Switch timers default to 0 (their minimum), charge
 current defaults to its maximum, and the grid-code slots are 0xffff.  Requiring all of the following
 leaves exactly the mis-commissioned blocks:

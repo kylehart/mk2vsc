@@ -331,20 +331,17 @@ def cmd_experimental(a):
         return _fail("experimental: the graft (installing an assistant on a system that never had one) has never produced a "
                      "running system and has disrupted live systems; for removing or reinstalling an assistant use "
                      "`mk2vsc assistant`. Read docs/ESS_INJECTION.md, then pass --i-accept-the-risk", 2)
-    from .experimental import graft, GraftRefused, TransformRefused
+    from .experimental import graft, GraftRefused
     try:
-        if a.what == "graft":
-            out, checks = graft(open(a.baseline, "rb").read(), open(a.template, "rb").read(),
-                                install_state=a.install_state, capacity_ah=a.capacity_ah)
-            for k, v in checks.items():
-                print(f"  {k}: {v}")
-        else:
-            return _fail("use `mk2vsc assistant remove|reinstall`", 2)
+        out, checks = graft(open(a.baseline, "rb").read(), open(a.template, "rb").read(),
+                            install_state=a.install_state, capacity_ah=a.capacity_ah)
+        for k, v in checks.items():
+            print(f"  {k}: {v}")
         with open(a.out, "wb") as fh:
             fh.write(out)
         print(f"wrote {a.out} ({len(out)} bytes). EXPERIMENTAL: see docs/ESS_INJECTION.md before uploading.")
         return 0
-    except (GraftRefused, TransformRefused, RvmsParseError, OSError) as e:
+    except (GraftRefused, RvmsParseError, OSError) as e:
         return _fail(f"REFUSED: {e}")
 
 
@@ -408,7 +405,7 @@ def build_parser() -> argparse.ArgumentParser:
     for what, hlp in (("remove", "upload-form file that removes the assistant from every inverter"),
                       ("reinstall", "upload-form file that reinstalls the assistant carried by an earlier download of the same system")):
         p = ss.add_parser(what, help=hlp)
-        p.add_argument("file", help="a fresh device download")
+        p.add_argument("file", help="remove: a fresh device download; reinstall: the earlier device download of the same system that carries the assistant")
         p.add_argument("-o", "--out", required=True)
         p.add_argument("--overwrite", action="store_true")
         p.add_argument("--resets-the-vebus", action="store_true", help="acknowledge that uploading the result resets the VE.Bus")

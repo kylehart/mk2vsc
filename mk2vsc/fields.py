@@ -6,7 +6,7 @@ block offset +0x59 (device form).  Entry *n* of that array is VE.Bus **setting I
 the community MK2/MK3 protocol work (github.com/xcellsior/ve-bus-programming, "Persistent Settings
 IDs 0-255").  We established the mapping by noticing that the two fields we had confirmed
 independently (absorption at +0x5d, float at +0x5f) sit exactly where setting IDs 2 and 3 land,
-then checking the rest of the array against that reference across the whole corpus (162 blocks in 81 well-formed files):
+then checking the rest of the array against that reference across the whole corpus (170 blocks in 85 well-formed files):
 
 * ID 5 reads 120 in every device-form block (our inverters are 120 V units)
 * ID 6 reads 500 = 50.0 A (AC input current limit, /10)

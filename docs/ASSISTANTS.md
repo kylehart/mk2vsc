@@ -25,7 +25,7 @@ the section checksum. The area is one record and a tail:
     tail   := 0xff padding | ff | u16 free-space counter   (bare, container and stub blocks)
 
 The four bytes just before the length are settings 190 and 191, the grid-code / loss-of-mains words
-(`ff ff ff ff` when no grid code was ever applied, `f5 ff` + `01 00` or `01 01` with one; see
+(`ff ff ff ff` when no grid code was ever applied, `f5 ff` + a word with low byte 1 and high byte 0 to 3 with one; see
 docs/FIELDS.md). They are part of the settings array, not of the assistant record.
 
 | Block state | Area bytes (device form) | Meaning |
@@ -44,8 +44,9 @@ in the corpus. On ESS blocks the last three bytes read `ff 00 00` and the relati
 Every GUI-installed ESS system we hold carries exactly two records, one on each inverter: 704 bytes and
 1152 bytes. Which inverter gets which follows its role in the pair (the slot bytes at +0x35/+0x37 and
 the low nibble of the flag at +0x36). Settings 128 and 191 just before the record are grid-code words
-set per inverter; on every GUI-authored install they are equal on each inverter (1 or 0x0101), and the
-two inverters of a pair may carry different values (System C) or the same (Systems A and B).
+set per inverter; on every GUI-authored install they are equal on each inverter (low byte 1, high byte 0 to 3:
+0x0001, 0x0101, 0x0201, 0x0301), and the two inverters of a pair may carry different values (Systems C
+and D) or the same (Systems A and B).
 
 Aligned by role, the 1152-byte body is byte-identical across System C, System B and System A. The 704-byte body
 differs by one byte across systems (a primary/secondary flag near the record start). So the payload is a
@@ -62,10 +63,13 @@ inside it). It looks like an assembled program with its settings woven in. VE.Bu
 The GUI writes the assistant records compact (no 0xff padding runs, shorter block, a 16-byte export
 blob at +0x45). The device stores them padded and returns zeros at +0x45. A transform between the two
 forms exists and round-trips the installer's real export from the device's own download, byte-for-byte
-per block. The form decides what the device does with the file: a device-form upload is a settings write
-(no reset, the assistant area is not acted on); an upload-form upload runs the install procedure
-("Resetting VE.Bus products", inverters off for its duration). `mk2vsc assistant` builds upload-form
-files; the transform lives in `mk2vsc.upload_form`.
+per block. The form and the content together decide what the device does with the file. A device-form
+upload whose assistant area is unchanged is a settings write (no reset; every settings edit in our record).
+Device-form files with an altered assistant area produced outcomes B, C and D below (a stub, a half
+install, or stored-and-never-started), never a working change. Upload-form files of the system's own
+content produced outcomes E and F: the install procedure ran ("Resetting VE.Bus products", inverters off
+for its duration) and did what the file said. `mk2vsc assistant` builds upload-form files; the transform
+lives in `mk2vsc.upload_form`.
 
 ## 4. The outcomes we observed
 
@@ -75,14 +79,14 @@ files; the transform lives in `mk2vsc.upload_form`.
 | B. accept, then stub | began an install, discarded our records, wrote a 64-byte empty container on each inverter, flipped the flags to e4/e5 | yes, a stub; rollback by re-uploading a fresh bare file works | System B v4 (07-24), System A v3 (08-12) |
 | C. accept, half apply | "Resetting VE.Bus products", real install started, failed at the grid-code step with mk2vsc-36, VE.Bus error 10 for about 17 minutes | partially; GX reboots and a baseline re-upload recovered it | System C load-both v3 (07-20); System A v4 reached the same dialog and was rejected at commit with nothing written |
 | D. accept, store, never start | configuration stored byte-perfect and stable across cold boot, assistant advertised on both inverters, system stays Off in the connecting state with no error | yes; a fresh bare file restores operation | System A v7 and upload-form v2 (08-13), System D one-shot graft (08-13) |
-
 | E. accept, remove | "Resetting VE.Bus products"; assistant lists empty on both inverters afterwards; the re-download is the device's canonical bare block with every setting verbatim | yes, as intended | System D removal (09-04), an upload-form file with the assistant area emptied |
 | F. accept, reinstall | "Resetting VE.Bus products" for about five minutes; assistant lists populated on both, SOC limit enforced; the re-download equals the pre-removal download apart from bookkeeping | yes, as intended | System D reinstall (09-04), an upload-form file made from the system's own earlier ESS download |
 
-A device-form removal attempt on System C (07-20) was accepted as a settings write and left the *running*
-assistant corrupt (VE.Bus error 6) while the stored file still showed it present: device form cannot
-remove an assistant. Modes B, C and D were all device-form or transplanted files; the two upload-form
-files of the system's own content (E, F) both did what they said.
+A device-form removal attempt on System C (07-20) was accepted and left the *running*
+assistant corrupt (VE.Bus error 6) while the stored file still showed it present. Outcomes B, C and D came
+from device-form files with an altered assistant area or from transplanted records (one of them, System A
+upload-form v2, was an upload-form transplant); the two upload-form files of the system's own content
+(E, F) both did what they said.
 
 ## 5. Evidence table
 
@@ -108,7 +112,7 @@ the battery to support loads on grid unless a grid code is set. We do not have a
 gate, we did not look for one, and this toolkit will not include one. What we observed is narrower:
 
 - Setting 81 (`grid_code_active`) is 0 on every bare download and 1 on every GUI-authored ESS block.
-  Setting 128 (`lom_config_a`) moves from 0xffff to 1 or 0x0101. A few other settings change too
+  Setting 128 (`grid_settings_valid_checker_a`) moves from 0xffff to a value with low byte 1 (see docs/FIELDS.md). A few other settings change too
   (60, 67, 69, and the adaptive-charge bit in flags register 0). Those are ordinary settings the GUI
   writes; they are not a credential.
 - The password is not stored in the file. Two independent GUI exports from the same session carry
@@ -134,6 +138,12 @@ DVCC on or off, every restart lever.
 System A now runs ESS after the installer's GUI session on a repaired bus. That is consistent with the
 hypothesis and does not test it, because the file was GUI-authored. The clean test would be uploading a
 transformed file to a healthy-BMS system, and we have not done it.
+
+What the 2026-09-04 cycle adds: a transformed file (the system's own ESS download in upload form) started
+ESS on System D, whose CAN-bus BMS was connected and reporting by then. That is consistent with the
+hypothesis and does not isolate it: the same test on a system without a BMS has not been run. What the
+cycle does rule out is the alternative that our upload-form files were structurally unable to start an
+install; they were not.
 
 ## 8. Removing and reinstalling an assistant by file (`mk2vsc assistant`)
 

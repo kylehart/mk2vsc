@@ -4,8 +4,10 @@ Assistant operations by file: remove the assistant from a system, or reinstall i
 The device runs two different procedures depending on the container form of the uploaded file
 (docs/FORMAT.md section 4):
 
-* device form (what a download looks like): a settings write.  No VE.Bus reset; the assistant area is
-  not acted on.  This is what ``mk2vsc edit`` produces and the only form the writer accepts.
+* device form (what a download looks like) with an unchanged assistant area: a settings write, no VE.Bus
+  reset.  This is what ``mk2vsc edit`` produces and the only form the writer accepts.  Device-form files
+  with an altered assistant area have produced stubs, half installs and stored-but-never-started systems
+  (docs/ASSISTANTS.md section 4), never a working change.
 * upload form (what the VEConfigure GUI uploads): the install procedure.  "Resetting VE.Bus products",
   the inverters stop for its duration, and the device rebuilds its assistant state from the file.  On
   2026-09-04 a System D download turned into upload form with the assistant area emptied removed ESS
