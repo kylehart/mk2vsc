@@ -1,0 +1,20 @@
+title: mk2vsc
+description: "Victron VEConfigure .rvms and .rvsc configuration files without VEConfigure: format, checksum, settings table, editor."
+url: "https://kylehart.github.io"
+baseurl: "/mk2vsc"
+remote_theme: pages-themes/minimal@v0.2.0
+plugins:
+  - jekyll-remote-theme
+  - jekyll-relative-links
+  - jekyll-sitemap
+  - jekyll-seo-tag
+relative_links:
+  enabled: true
+  collections: false
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
+exclude:
+  - "*.py"

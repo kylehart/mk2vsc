@@ -1,3 +1,8 @@
+---
+title: "How mk2vsc came to be"
+description: "The story of the format work, in order, including what went wrong."
+---
+
 # How this came to be
 
 This toolkit exists because we operate four Victron MultiPlus systems (two inverters each, split

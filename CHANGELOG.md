@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.1 (2026-09-04)
+
+* Documentation site at https://kylehart.github.io/mk2vsc/ (GitHub Pages from `docs/`), CITATION.cff, NOTICE.md (interoperability and trademark notice, editing guards stated), PyPI project links, README opening rewritten around the terms people search for. No code changes.
+
 ## 0.5.0 (2026-09-04)
 
 * Every setting index 0 to 191 now carries VEConfigure's own identifier (`Field.eprom`, `EPROM_NAMES`), from the identifier table published by talas9/rvsc-tools (MIT). Settings above 65 renamed from those identifiers: `fs_ubat_start_V` .. `fs_ubat_stop_delay_s`, `vs_dont_ignore_soc_below_pct` (= vs2StartOnSOC), `inverter_current_limit_during_assist_A` (73 was mislabelled a voltage), `abs_to_float_soc_reset_pct`, `ubat_dont_charge_V`, `grid_settings_valid_checker_a`, reserved and grid-code slots.

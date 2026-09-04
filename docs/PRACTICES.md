@@ -1,3 +1,8 @@
+---
+title: "How the project is run"
+description: "Public record, evidence rules, safety rules, AI-assistance disclosure."
+---
+
 # How this project is run
 
 This page says how the repository is maintained, so you can judge whether to trust it and know how to

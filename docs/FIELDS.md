@@ -1,3 +1,8 @@
+---
+title: "VE.Bus settings table: every setting ID with name, identifier, scale, default and range"
+description: "All 192 VE.Bus settings as stored in VEConfigure .rvms files, with Victron names, VEConfigure identifiers, scales, defaults, ranges and confidence."
+---
+
 # The settings table
 
 Each `BareSettingData` block carries a flat array of 190 little-endian u16 values starting at block

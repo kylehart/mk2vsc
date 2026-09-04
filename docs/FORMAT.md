@@ -1,3 +1,8 @@
+---
+title: "The Victron VEConfigure .rvms file format"
+description: "Section grammar, per-section checksum, per-inverter block layout, device and upload forms, assistant area, and what remains unknown."
+---
+
 # The `.rvms` file format, as far as we understand it
 
 This is the specification a Victron Community thread asked Victron to publish and never received. It is

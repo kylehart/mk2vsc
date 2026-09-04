@@ -1,3 +1,8 @@
+---
+title: "The fixture corpus"
+description: "84 real .rvms files from four systems, what each is, and the negative controls."
+---
+
 # The fixture corpus
 
 `fixtures/` holds every distinct `.rvms` file we collected while operating four inverter systems
