@@ -28,7 +28,8 @@ def all_fixture_paths():
 
 
 def rel(p):
-    return os.path.relpath(p, FIXTURES)
+    """Fixture key with forward slashes on every OS (the Windows CI run used backslashes and missed KNOWN_BAD)."""
+    return os.path.relpath(p, FIXTURES).replace(os.sep, "/")
 
 
 @pytest.fixture(scope="session")
