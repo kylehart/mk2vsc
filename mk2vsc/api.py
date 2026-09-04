@@ -29,6 +29,9 @@ from .writer import set_settings, WriteRefused, Edit
 from .diff import diff_bytes, FileDiff, render as render_diff
 from .qualify import Intent, qualify_bytes
 from .assistants import parse_assistant_area
+from .schema import schema_of
+from .align import check as align_check
+from .limits import at_limits
 
 # Human grouping for `show`.  Field names are those in fields.py.
 GROUPS: List[Tuple[str, List[str]]] = [
@@ -219,10 +222,19 @@ def render_summary(cfg: Config, include_unknown: bool = False) -> str:
     lines = [f"{cfg.path or '<bytes>'}: {len(cfg.data)} bytes, {len(units)} inverter(s), form={cfg.form}, "
              f"checksums {'OK' if f.all_checksums_ok else 'INVALID'}"]
     serials = sorted(units)
+    try:
+        schema = schema_of(f)
+    except Exception:  # noqa: BLE001  (no usable BareSettingInfo: show values without the self-checks)
+        schema = None
+    notes: Dict[Tuple[str, int], str] = {}
     for s in serials:
         u = units[s]
         lines.append(f"  {s}: firmware {u.firmware_version}, saved {u.save_datetime.isoformat() if u.save_datetime else '?'}, "
                      f"assistant: {parse_assistant_area(u)['summary']}")
+        if schema is not None:
+            lines.append(f"    {align_check(u, schema).summary}")
+            for hit in at_limits(u, schema):
+                notes[(s, hit.field.id)] = hit.message
     conf_mark = {CONFIRMED: "", HIGH: "", MEDIUM: "  ?", "LOW": "  ??", "UNKNOWN": "  ???"}
     width = max(len(s) for s in serials)
     for title, names in GROUPS:
@@ -233,6 +245,9 @@ def render_summary(cfg: Config, include_unknown: bool = False) -> str:
                 continue
             vals = [_fmt(fld, units[s].setting(fld.id)) for s in serials]
             flag = "" if len(set(vals)) == 1 else "   <- inverters differ"
+            limit = [notes[(s, fld.id)] for s in serials if (s, fld.id) in notes]
+            if limit:
+                flag += "   <- " + limit[0]
             label = fld.label if fld.label and fld.label != fld.name else ""
             rows.append(f"    {fld.name:28s} {label:34s} " + "  ".join(f"{v:>{max(width, 14)}}" for v in vals)
                         + conf_mark.get(fld.confidence, "") + flag)
@@ -248,4 +263,8 @@ def render_summary(cfg: Config, include_unknown: bool = False) -> str:
                         + conf_mark.get(fld.confidence, ""))
     lines.append("  Legend: ? = MEDIUM confidence, ?? = LOW, ??? = UNKNOWN; no mark = CONFIRMED/HIGH. "
                  "Names are what `mk2vsc edit` takes; `--all` shows every setting.")
+    if schema is not None:
+        lines.append("  Self-checks: 'alignment' = do the values fall inside the ranges the file's own schema declares "
+                     "(if not, do not trust the numbers); 'at minimum/maximum of allowed range' = a physical setting "
+                     "typed as the extreme value VEConfigure accepts, which is not the default.")
     return "\n".join(lines)

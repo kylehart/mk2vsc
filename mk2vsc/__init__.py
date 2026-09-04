@@ -33,7 +33,7 @@ from .diff import diff_files, diff_bytes
 from .qualify import qualify_file, Intent
 from .api import load, loads, verify, Config, Unit
 
-__version__ = "0.6.0"
+__version__ = "0.7.0"
 __all__ = [
     "load", "loads", "verify", "Config", "Unit",
     "RvmsFile", "Section", "RvmsParseError", "sum32_le", "scan_unit_blocks",

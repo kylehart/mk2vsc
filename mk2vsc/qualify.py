@@ -27,6 +27,9 @@ from typing import Dict, List, Optional, Tuple
 from .sections import RvmsFile
 from .units import units_by_serial
 from .fields import lookup, FIELDS, CONFIRMED, HIGH
+from .schema import schema_of
+from .align import check as align_check
+from .limits import at_limits
 
 EPS = 0.005
 
@@ -69,7 +72,21 @@ def qualify_bytes(data: bytes, intent: Intent) -> Tuple[bool, List[Tuple[str, st
             results.append(("FAIL", f"serials {sorted(units)} != intended {sorted(want)} -- wrong system?"))
         else:
             results.append(("PASS", "serials match the intended system"))
+    try:
+        schema = schema_of(f)
+    except Exception as e:  # noqa: BLE001
+        schema = None
+        results.append(("WARN", f"device schema (BareSettingInfo) not parsed: {e}; alignment and range checks skipped"))
     for u in units.values():
+        if schema is not None:
+            al = align_check(u, schema)
+            if al.ok:
+                results.append(("PASS", f"{u.serial}: {al.summary}"))
+            else:
+                ok = False
+                results.append(("FAIL", f"{u.serial}: {al.summary} -- values decoded from this block cannot be trusted"))
+            for hit in at_limits(u, schema):
+                results.append(("WARN", f"{u.serial}: {hit.field.name} {hit.message}"))
         if u.is_upload_form:
             results.append(("WARN", f"{u.serial}: upload-form block (GUI export), not a device download"))
         if b"\x40\x00\xa7\xfe" in u.assistant_area:
