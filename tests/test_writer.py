@@ -160,3 +160,48 @@ def test_48v_file_still_refuses_a_24v_absorption(good_files):
     with pytest.raises(WriteRefused) as ei:
         set_settings(good_files[BARE], [(None, "absorption_V", 28.4)], allow_out_of_range=False)
     assert "48 V system" in str(ei.value) or "outside the device's own range" in str(ei.value)
+
+
+# ---------------------------------------------------------------- bit-level writes (decision 2: qualified bits only)
+def test_set_lithium_bit_changes_exactly_one_bit_on_the_target_block(good_files):
+    from mk2vsc.writer import set_bits
+    data = good_files[BARE]
+    units = units_by_serial(RvmsFile.parse(data))
+    off = [s for s, u in units.items() if not (u.setting(60) >> 4) & 1]
+    assert off == ["HQ0000A0002"], "the 2026-07-20 System A download has the lithium flag clear on unit 2 only"
+    out, edits = set_bits(data, [("HQ0000A0002", "flags2", 4, True)])
+    assert len(edits) == 1 and edits[0].bit == 4
+    assert edits[0].new_raw == edits[0].old_raw | 0x10
+    new_units = units_by_serial(RvmsFile.parse(out))
+    assert new_units["HQ0000A0002"].setting(60) == units["HQ0000A0002"].setting(60) | 0x10
+    assert new_units["HQ0000A0001"].setting(60) == units["HQ0000A0001"].setting(60)
+    d = diff_bytes(data, out)
+    for u in d.units:
+        assert {s["id"] for s in u.settings} <= {60}
+    # clearing it again reproduces the input byte for byte
+    back, _ = set_bits(out, [("HQ0000A0002", "flags2", 4, False)])
+    assert back == data
+
+
+def test_set_bits_on_every_inverter_is_a_no_op_where_already_set(good_files):
+    from mk2vsc.writer import set_bits
+    data = good_files[BARE]
+    out, edits = set_bits(data, [(None, "flags2", 4, True)])
+    assert len(edits) == 2
+    changed = [e for e in edits if e.old_raw != e.new_raw]
+    assert [e.serial for e in changed] == ["HQ0000A0002"]
+
+
+def test_set_bits_refuses_unqualified_bits_non_flag_fields_and_unsettable_bits(good_files):
+    from mk2vsc.writer import set_bits
+    data = good_files[BARE]
+    with pytest.raises(WriteRefused) as ei:
+        set_bits(data, [(None, "flags0", 11, False)])          # storage mode / adaptive: three published meanings
+    assert "qualif" in str(ei.value)
+    with pytest.raises(WriteRefused):
+        set_bits(data, [(None, "absorption_V", 0, True)])       # not a flag register
+    with pytest.raises(WriteRefused) as ei:
+        set_bits(data, [(None, "flags0", 15, False)], allow_unqualified=True)   # bit 15 is outside the 0x6ffc settable mask
+    assert "settable" in str(ei.value)
+    out, edits = set_bits(data, [(None, "flags0", 11, False)], allow_unqualified=True)
+    assert all(not (e.new_raw >> 11) & 1 for e in edits)

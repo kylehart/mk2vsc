@@ -29,7 +29,7 @@ from .sections import RvmsFile, Section, RvmsParseError, sum32_le, scan_unit_blo
 from .units import UnitBlock, unit_blocks, units_by_serial
 from .fields import FIELDS, BY_ID, BY_NAME, ALIASES, lookup, Field
 from .decode import decode_file, decode_bytes
-from .writer import set_settings, WriteRefused
+from .writer import set_settings, set_bits, WriteRefused
 from .diff import diff_files, diff_bytes
 from .qualify import qualify_file, Intent
 from .api import load, loads, verify, Config, Unit
@@ -40,6 +40,6 @@ __all__ = [
     "RvmsFile", "Section", "RvmsParseError", "sum32_le", "scan_unit_blocks",
     "UnitBlock", "unit_blocks", "units_by_serial",
     "FIELDS", "BY_ID", "BY_NAME", "ALIASES", "lookup", "Field",
-    "decode_file", "decode_bytes", "set_settings", "WriteRefused", "diff_files", "diff_bytes",
+    "decode_file", "decode_bytes", "set_settings", "set_bits", "WriteRefused", "diff_files", "diff_bytes",
     "qualify_file", "Intent",
 ]
