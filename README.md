@@ -216,7 +216,9 @@ in commits and in docs/PRACTICES.md.
 
 ## Acknowledgements
 
+* Victron's public document "Interfacing with VE.Bus products, MK2 Protocol 3.14" names settings 0 to 65,
+  every flag bit, and the setting-info record that turned out to be the `BareSettingInfo` section.
 * github.com/xcellsior/ve-bus-programming documented the VE.Bus setting IDs and scales over the MK2/MK3
-  protocol; that table is what let us name most of the settings array.
+  protocol before we found the Victron document; it is what led us to the setting-ID mapping.
 * The Victron Community threads on `.rvsc`/`.rvms` files, Remote VEConfigure and the "switch as group"
   error saved us time and confirmed the demand for this work.

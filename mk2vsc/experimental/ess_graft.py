@@ -17,7 +17,7 @@ What it does (the "v3 + v7" recipe, the last one we tried):
 4. Optionally apply the "install state": the set of ordinary settings that every GUI ESS install was
    observed to write.  In setting-ID terms (we did not know this when we found them by byte offset):
 
-       flags0 bit 11 cleared        (adaptive charge curve off; +0x5a 0x89 -> 0x81)
+       flags0 bit 11 cleared        (EnableReducedFloat off; +0x5a 0x89 -> 0x81)
        setting 7  = 2               (repeated absorption time)
        setting 8  = 4               (repeated absorption interval)
        setting 10 = 1               (charge characteristic: fixed)
@@ -49,15 +49,15 @@ ASSIST_ON = {0xF4: 0xE4, 0xF5: 0xE5}
 # The install-state writes, by setting ID (see module docstring).  Byte-level fields are expressed as
 # (id, mask, value) so a partial-word write stays explicit.
 INSTALL_STATE = [
-    ("flags0", 0x0800, 0x0000),            # clear bit 11 (adaptive charge curve)
-    ("repeated_absorption_time", None, 2),
-    ("repeated_absorption_interval", None, 4),
+    ("flags0", 0x0800, 0x0000),            # clear bit 11 (EnableReducedFloat)
+    ("repeated_absorption_time_min", None, 2),
+    ("repeated_absorption_interval_min", None, 4),
     ("charge_characteristic", None, 1),
-    ("unknown_toggle_15", None, 0),
-    ("solar_wind_priority_flags", None, 48),
+    ("vs_usage", None, 0),
+    ("flags2", None, 48),
     ("output_frequency_Hz", 0x00FF, 0x00C3),   # low byte of the period word: 41666 -> 41667
     ("battery_capacity_Ah", None, 300),
-    ("grid_code_active", None, 1),
+    ("grid_code", None, 1),
     ("lom_config_a", None, 1),
 ]
 

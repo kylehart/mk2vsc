@@ -55,7 +55,7 @@ def test_refusals_surface_through_the_facade():
     with pytest.raises(WriteRefused):
         cfg.set("absorption", 5.68)
     with pytest.raises(WriteRefused):
-        cfg.set("vs_load_above_for_s", 1)
+        cfg.set("param66_V", 1)
     with pytest.raises(KeyError):
         cfg.set("vs_soc_pct", 20)
     with pytest.raises(KeyError):
@@ -65,7 +65,7 @@ def test_refusals_surface_through_the_facade():
 
 def test_summary_text():
     s = mk2vsc.load(BARE).summary()
-    assert "Charger" in s and "Absorption voltage" in s and "inverters differ" in s and "Legend" in s
+    assert "Charger" in s and "UBatAbsorption" in s and "inverters differ" in s and "Legend" in s
     assert "param85" not in s and "param85" in mk2vsc.load(BARE).summary(include_unknown=True)
 
 

@@ -102,7 +102,7 @@ Every GUI-installed ESS block we hold has:
 
 | Setting | Value after install | Meaning | Note |
 |---|---|---|---|
-| 0 (flags0) bit 11 | cleared | adaptive (lead-acid) charge curve off | the "+0x5a 0x89 -> 0x81" byte we chased for a week |
+| 0 (flags0) bit 11 | cleared | EnableReducedFloat off (Victron's flag name) | the "+0x5a 0x89 -> 0x81" byte |
 | 7 | 2 | repeated absorption time | |
 | 8 | 4 | repeated absorption interval | |
 | 10 | 1 | charge characteristic: fixed | lithium |
