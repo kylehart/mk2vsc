@@ -26,7 +26,7 @@ Confidence vocabulary (be honest, and be specific):
 
 A CONFIRMED entry is safe to edit with the writer.  Everything else is safe to *read*; editing it means
 you are the first person to test that offset on hardware.  The writer refuses to touch anything below
-HIGH unless you pass ``--i-know-this-is-unverified``.
+HIGH unless you pass ``--allow-unverified``.
 """
 from __future__ import annotations
 
@@ -294,7 +294,9 @@ FIELDS: List[Field] = [
        "Grid-code word A. 0xffff on blocks that never had a grid code. On every GUI-authored ESS download it equals setting 191 on "
        "the same inverter: low byte 1, high byte 0 to 3 (0x0001, 0x0101, 0x0201, 0x0301); the two inverters of a pair may differ "
        "(System C: 1 and 0x0101; System D: 0x0201 and 0x0301) or match (System B: 1 and 1; System A: 0x0101 and 0x0101). On a single bench unit xcellsior reads 1 with LOM type B and 257 with no LOM detection. "
-       "0 or 0xffff on bare blocks after a grid code was removed. Byte-grafted files (never started) show 128 != 191.",
+       "0 or 0xffff on bare blocks after a grid code was removed. Byte-grafted files (never started) show 128 != 191. "
+       "Named GridSettingsValidCheckerA by VEConfigure (Inferred: the firmware's validity check on the grid-code block, with 191). "
+       "Refused by set_settings/set_bits with no override (GRID_CODE_LOCKED).",
        f"{RT}; xcellsior FINDINGS 7.4; corpus.", "65535, 1, 257, 65281, 0", "rtti + xcellsior + ours"),
     _f(190, "general_grid_settings_int", "GeneralGridSettingsInt", 1, "", MEDIUM,
        "Grid-code word B, firmware-managed (wire writes are silently dropped per xcellsior). 0xffff on blocks that never had a grid "
@@ -303,7 +305,10 @@ FIELDS: List[Field] = [
        f"{RT}; xcellsior FINDINGS 7.4/9 (0xfff5 / 0xfff6); corpus.", "65535, 65525", "rtti + xcellsior + ours"),
     _f(191, "grid_settings_valid_checker_b", "GridSettingsValidCheckerB", 1, "", MEDIUM,
        "Grid-code word C. 0xffff on blocks that never had a grid code; equals setting 128 on every GUI-authored ESS download (low byte 1, "
-       "high byte 0 to 3, per inverter; see 128); 0 or 0xff00 on bare blocks after a grid code was removed.",
+       "high byte 0 to 3, per inverter; see 128); 0 or 0xff00 on bare blocks after a grid code was removed. "
+       "Refused by set_settings/set_bits with no override (GRID_CODE_LOCKED): on 2026-09-04 a live System A accepted a "
+       "device-form file that changed only this word (0x0101 -> 0xff00, both inverters), reset the VE.Bus, and the GX "
+       "went offline within ten seconds (docs/HISTORY.md).",
        f"{RT}; xcellsior FINDINGS 7.4 (1 / 257 / residual 512); corpus.", "65535, 1, 257, 0, 65280", "rtti + xcellsior + ours"),
 ]
 FIELDS += [_f(n, f"not_defined_yet_{127 - n}", EPROM_NAMES[n], 1, "", UNKNOWN, "Reserved slot; 0 on every block.", RT, "0", "rtti") for n in range(90, 128)]
@@ -314,7 +319,16 @@ BY_ID: Dict[int, Field] = {f.id: f for f in FIELDS}
 BY_NAME: Dict[str, Field] = {f.name: f for f in FIELDS}
 
 # Fields the guarded writer will edit without an override.
-EDITABLE = {f.name for f in FIELDS if f.confidence in (CONFIRMED, HIGH) and f.bits is None}
+# The grid-code block and the words the firmware keeps with it.  ``set_settings`` and ``set_bits`` refuse
+# them with no override.  Observed (System A, 2026-09-04): a live ESS system accepted a device-form file
+# that changed only setting 191 (0x0101 -> 0xff00), ran "Resetting VE.Bus products", and the GX went
+# silent within ten seconds and stayed off VRM (docs/HISTORY.md).  Whether the word caused the outage is
+# Unknown until the re-download; the lock does not wait for that answer.  A grid code reaches a device
+# through VEConfigure, or by file only as a complete device-authored block (a fresh download, or
+# ``mk2vsc assistant remove/reinstall``, which write the four words as a set).
+GRID_CODE_LOCKED = frozenset({81, 128, 190, 191} | set(range(129, 190)))
+
+EDITABLE = {f.name for f in FIELDS if f.confidence in (CONFIRMED, HIGH) and f.bits is None and f.id not in GRID_CODE_LOCKED}
 
 # Short aliases accepted everywhere a field name is (CLI, API).  Full names remain valid.
 ALIASES = {
