@@ -160,14 +160,12 @@ FIELDS: List[Field] = [
     # Virtual Switch "Ignore AC input" tab.  Layout: SoC pair (50, 51), then four threshold/duration pairs
     # (52/53 load high, 54/55 Udc low, 56/57 load low, 58/59 Udc high).  Load thresholds are stored as
     # current in 0.01 A; the tab shows watts (W = A x inverter output voltage).
-    Field(50, "vs_ignore_soc_above_pct", "VS: ignore AC input when SoC higher than", 2, "%", LOW,
-          "Alternative battery condition for returning to battery (the drop-down next to 'Udc higher than').",
-          "Adjacent to the SoC-lower setting and identical (60 = 30 %) on every block; not seen on a screenshot.",
-          "60"),
-    Field(51, "vs_dont_ignore_soc_below_pct", "VS: do not ignore AC input when SoC lower than", 2, "%", MEDIUM,
-          "Battery condition for accepting the grid: SoC below this (x0.5 %, the scale setting 65 uses).",
-          "40 = 20.0 % on every block, matching the 20.0 % shown on the VEConfigure tab; a single value, so the "
-          "scale rests on one data point plus the setting-65 convention.", "40"),
+    Field(50, "vs_param50", "Virtual Switch parameter", 100, "", LOW,
+          "Device schema: scale -100, 0.21 to 2.55, default 0.60; reads 0.60 on every block. Not the SoC threshold.",
+          "Schema only.", "60", "schema"),
+    Field(51, "vs_param51", "Virtual Switch parameter", 100, "", LOW,
+          "Device schema: scale -100, 0.40 to 2.55, default 0.40; reads 0.40 on every block. Not the SoC threshold.",
+          "Schema only.", "40", "schema"),
     Field(52, "vs_dont_ignore_load_above_A", "VS: do not ignore AC input when load higher than", 100, "A", HIGH,
           "Load condition for accepting the grid: AC load above this current (VEConfigure shows watts; "
           "W = A x inverter output voltage, 120 V here).",
@@ -225,9 +223,12 @@ FIELDS: List[Field] = [
     Field(67, "param67", "", 1, "", LOW, "Changed 04 -> 02 by the GUI ESS install on one inverter.", "", "3, 2, 4"),
     Field(68, "param68_V", "", 100, "V?", LOW, "54.00 V -- voltage-like, pairs with 66.", "", "5400"),
     Field(69, "param69", "", 1, "", LOW, "Changed 1c -> 04 by the GUI ESS install on one inverter.", "", "3, 4, 28"),
-    Field(70, "soc_pct_70", "", 2, "%", LOW, "A state-of-charge value (device schema: scale -2, 0..100 %); "
-          "25 % on configured blocks, the value the installer set fleet-wide as the reserve.", "Schema scale; one value.",
-          "50, 0", "schema"),
+    Field(70, "vs_dont_ignore_soc_below_pct", "VS: do not ignore AC input when SoC lower than", 2, "%", MEDIUM,
+          "Virtual Switch battery condition for accepting the grid: state of charge below this.",
+          "Device schema: scale -2, 0 to 100 %. Reads 25 % on every configured block; the installer's note of the "
+          "same week says the SoC setpoint for going to grid was set to 25 % on all systems, and the tab captured "
+          "before that change showed 20.0 %. Zero on the one system that had not been configured.",
+          "50, 0", "schema + installer note", lo=0, hi=100),
     Field(71, "signed_offset_71", "", 1, "", LOW, "A signed value centred on 32768 (schema range -800..+800); 0 here.",
           "Schema only.", "32768", "schema", raw_offset=-32768),
     Field(72, "charge_efficiency", "Battery charge efficiency", 256, "", MEDIUM,

@@ -40,7 +40,7 @@ GROUPS: List[Tuple[str, List[str]]] = [
     ("Virtual Switch (ignore AC input)", ["vs_dont_ignore_load_above_A", "vs_load_above_for_s", "vs_ignore_load_below_A",
                                           "vs_load_below_for_min", "vs_ignore_ac_below_V", "vs_udc_below_for_s",
                                           "vs_dont_ignore_soc_below_pct", "vs_accept_battery_above_V", "vs_udc_above_for_min",
-                                          "vs_ignore_soc_above_pct"]),
+                                          "vs_param50", "vs_param51"]),
     ("Grid / ESS related", ["grid_code_active", "lom_config_a", "solar_wind_priority_flags", "solar_wind_priority_V",
                             "voltage_threshold_73_V"]),
     ("Flag registers", ["flags0", "flags1"]),

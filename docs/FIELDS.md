@@ -62,13 +62,13 @@ not name it.
 
 ## The Virtual Switch block (IDs 50 to 59)
 
-The "Virtual switch > Ignore AC input" tab in VEConfigure holds eight values and a drop-down. Settings 50
-to 59 hold them in this layout:
+The "Virtual switch > Ignore AC input" tab in VEConfigure holds eight values, a SoC threshold and a
+drop-down. Settings 52 to 59 and 70 hold them in this layout:
 
 | IDs | Tab field | Storage |
 |---|---|---|
-| 50 | ignore AC when SoC higher than (drop-down alternative) | x0.5 %, LOW: 60 = 30 % on every block, never seen on a screen |
-| 51 | do not ignore AC when SoC lower than | x0.5 %, MEDIUM: 40 = 20.0 %, the value on the tab |
+| 70 | do not ignore AC when SoC lower than | x0.5 %, MEDIUM: 25 % on every configured block, the value the installer set fleet-wide |
+| 50, 51 | (not the SoC threshold) | schema scale /100: 0.60 and 0.40 on every block; purpose unknown |
 | 52, 53 | do not ignore AC when load higher than ... W for ... s | current in 0.01 A (HIGH); seconds = raw - 1 (MEDIUM) |
 | 54, 55 | do not ignore AC when Udc lower than ... V for ... s | volts x100 (CONFIRMED); seconds = raw - 1 (MEDIUM) |
 | 56, 57 | ignore AC when load lower than ... W for ... min | current in 0.01 A (HIGH); minutes = raw - 1 (MEDIUM) |
@@ -138,8 +138,8 @@ systems we cannot say.
 | 47 | +0x0b7 | `param47` |  | u16 |  | UNKNOWN |  |  | 5 | default 5; 1 to 15 |
 | 48 | +0x0b9 | `param48` |  | u16 |  | UNKNOWN |  |  | 32 | default 32; 4 to 56 |
 | 49 | +0x0bb | `ac2_input_limit_A` | AC input 2 current limit | u16 / 10 | A | MEDIUM | Quattro only; 0 on MultiPlus. | Reference; 0 on all our MultiPlus blocks. | 0 | unused |
-| 50 | +0x0bd | `vs_ignore_soc_above_pct` | VS: ignore AC input when SoC higher than | u16 / 2 | % | LOW | Alternative battery condition for returning to battery (the drop-down next to 'Udc higher than'). | Adjacent to the SoC-lower setting and identical (60 = 30 %) on every block; not seen on a screenshot. | 60 | default 30; 10.5 to 127.5 |
-| 51 | +0x0bf | `vs_dont_ignore_soc_below_pct` | VS: do not ignore AC input when SoC lower than | u16 / 2 | % | MEDIUM | Battery condition for accepting the grid: SoC below this (x0.5 %, the scale setting 65 uses). | 40 = 20.0 % on every block, matching the 20.0 % shown on the VEConfigure tab; a single value, so the scale rests on one data point plus the setting-65 convention. | 40 | default 20; 20 to 127.5 |
+| 50 | +0x0bd | `vs_param50` | Virtual Switch parameter | u16 / 100 |  | LOW | Device schema: scale -100, 0.21 to 2.55, default 0.60; reads 0.60 on every block. Not the SoC threshold. | Schema only. | 60 | default 0.6; 0.21 to 2.55 |
+| 51 | +0x0bf | `vs_param51` | Virtual Switch parameter | u16 / 100 |  | LOW | Device schema: scale -100, 0.40 to 2.55, default 0.40; reads 0.40 on every block. Not the SoC threshold. | Schema only. | 40 | default 0.4; 0.4 to 2.55 |
 | 52 | +0x0c1 | `vs_dont_ignore_load_above_A` | VS: do not ignore AC input when load higher than | u16 / 100 | A | HIGH | Load condition for accepting the grid: AC load above this current (VEConfigure shows watts; W = A x inverter output voltage, 120 V here). | The tab showed 1000 W while the same-period download held 833 = 8.33 A = 1000 W / 120 V; the 750 W field matched setting 56 the same way. Current values 1750 = 17.5 A = 2100 W. | 833, 1750, 2125 | default 21.25; 0 to 91.66 |
 | 53 | +0x0c3 | `vs_load_above_for_s` | VS: ... for (seconds) | u16 | s | MEDIUM | Duration for the load-high condition, in seconds. | Device schema: offset -1, unit 1/60 minute; raw 4 = 3 s. Adjacent to setting 52. | 0, 4, 6 | default -1; -1 to 254 |
 | 54 | +0x0c5 | `vs_ignore_ac_below_V` | VS: do not ignore AC input when Udc lower than | u16 / 100 | V | CONFIRMED | Battery condition for accepting the grid: DC voltage below this for the configured time. | Matched to the VEConfigure tab (51.40 V) and to the installer's note of lowering it to 51.0 at all sites; later GUI changes landed here; written by us. | 5100 (current), 4700 (old) | default 47; 0 to 70 |
@@ -157,7 +157,7 @@ systems we cannot say.
 | 67 | +0x0df | `param67` |  | u16 |  | LOW | Changed 04 -> 02 by the GUI ESS install on one inverter. |  | 3, 2, 4 | default 3; 1 to 255 |
 | 68 | +0x0e1 | `param68_V` |  | u16 / 100 | V? | LOW | 54.00 V -- voltage-like, pairs with 66. |  | 5400 | default 54; 0 to 70 |
 | 69 | +0x0e3 | `param69` |  | u16 |  | LOW | Changed 1c -> 04 by the GUI ESS install on one inverter. |  | 3, 4, 28 | default 3; 1 to 255 |
-| 70 | +0x0e5 | `soc_pct_70` |  | u16 / 2 | % | LOW | A state-of-charge value (device schema: scale -2, 0..100 %); 25 % on configured blocks, the value the installer set fleet-wide as the reserve. | Schema scale; one value. | 50, 0 | default 0; 0 to 100 |
+| 70 | +0x0e5 | `vs_dont_ignore_soc_below_pct` | VS: do not ignore AC input when SoC lower than | u16 / 2 | % | MEDIUM | Virtual Switch battery condition for accepting the grid: state of charge below this. | Device schema: scale -2, 0 to 100 %. Reads 25 % on every configured block; the installer's note of the same week says the SoC setpoint for going to grid was set to 25 % on all systems, and the tab captured before that change showed 20.0 %. Zero on the one system that had not been configured. | 50, 0 | default 0; 0 to 100 |
 | 71 | +0x0e7 | `signed_offset_71` |  | u16 |  | LOW | A signed value centred on 32768 (schema range -800..+800); 0 here. | Schema only. | 32768 | default 0; -800 to 800 |
 | 72 | +0x0e9 | `charge_efficiency` | Battery charge efficiency | u16 / 256 |  | MEDIUM | Fraction: (raw + 1) / 256. 255 = 1.000, 242 = 0.949 (the reference's 'about 95 % for LiFePO4'). | Device schema: scale -256, offset +1. | 250, 242, 255 | default 1; 0.00390625 to 1 |
 | 73 | +0x0eb | `voltage_threshold_73_V` | Voltage threshold | u16 / 100 | V | MEDIUM | Reference calls it a voltage threshold that 'varies significantly'. Ours reads 63.00 V everywhere, the same value as the DC over-voltage protection trip we found in the alarm history. | Value coincidence with a known protection level; not toggled. | 6300 | default 63; 8.03 to 106 |

@@ -139,4 +139,5 @@ def test_virtual_switch_load_thresholds_are_current_in_centiamps(good_files):
             continue
         assert 3 <= u.setting(52) / 100 <= 30, (name, u.setting(52))
         assert 3 <= u.setting(56) / 100 <= 30, (name, u.setting(56))
-        assert u.setting(51) == 40 and u.setting(50) == 60, name       # 20.0 % and 30.0 % at the x0.5 scale
+        assert u.setting(51) == 40 and u.setting(50) == 60, name       # 0.40 and 0.60 at the schema's /100 scale
+        assert u.setting(70) in (0, 50), name                            # VS SoC threshold: 25 % (0 on an unconfigured system)
