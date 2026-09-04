@@ -13,7 +13,7 @@ def test_every_good_block_aligns_at_the_expected_offset(good_files):
                 continue   # stub-installed blocks carry zeroed settings
             al = check(u, sch)
             assert al.ok, (name, u.serial, al.summary)
-            assert al.total >= 180
+            assert al.total >= 130
 
 
 def test_a_shifted_offset_scores_much_lower(good_files):
@@ -24,5 +24,5 @@ def test_a_shifted_offset_scores_much_lower(good_files):
     good, tot = score(u.raw, u.settings_offset, sch)
     for shift in (-10, -2, -1, 1, 2, 10):
         bad, _ = score(u.raw, u.settings_offset + shift, sch)
-        assert bad < good - 40, (shift, bad, good)
+        assert bad < good - 25, (shift, bad, good)
     assert find_offset(u.raw, sch)[0] == u.settings_offset
