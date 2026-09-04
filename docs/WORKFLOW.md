@@ -1,6 +1,6 @@
 ---
 title: "Editing Victron inverter settings without VEConfigure: the VRM Remote VEConfigure workflow"
-description: "Download, edit, upload, verify; what still needs Windows and VEConfigure."
+description: "Download, edit, upload, verify; assistant removal and reinstall; what still needs Windows and VEConfigure."
 ---
 
 # Operational workflow with Victron's tools
@@ -56,8 +56,11 @@ wrong.
    - "Success. The system has been configured." The device accepted the bytes. It is not proof the
      settings are what you intended; re-download and check (Rule 4 in docs/CHANGE_CONTROL.md).
    - "Resetting VE.Bus products" with a long progress bar. A real assistant install or removal is
-     happening on the device. Settings-only uploads do not show this. If you see it after uploading
-     a settings-only edit, stop and investigate before doing anything else.
+     happening on the device; it takes one to five minutes, the inverters are off for the reset, and
+     the dialog often ends in "Error 1303" although the device completed. This is the device's normal
+     behaviour for an assistant change from any source, VEConfigure's GUI included. Settings-only
+     uploads do not show this. If you see it after uploading a settings-only edit, stop and investigate
+     before doing anything else.
    - "Error 1303, VRM connection stopped responding." The tunnel between the portal and the GX
      timed out. The device may still be working. Wait, watch the VRM device page, then re-download.
    - "Error 1391, installation already executing another request." A write is still in progress on
@@ -74,8 +77,9 @@ wrong.
 
 Be clear about this before choosing the toolkit for a job:
 
-- Installing, removing or reconfiguring an assistant (ESS, generator start/stop, and so on). By-file
-  attempts have never produced a running assistant for us; see docs/ASSISTANTS.md.
+- Installing an assistant on a system that never had one, or reconfiguring an assistant's own settings.
+  Removing an assistant and reinstalling it from an earlier download of the same system work by file
+  (`mk2vsc assistant`, docs/ASSISTANTS.md section 8); both reset the VE.Bus.
 - Setting or changing the grid code. This requires the dealer password, entered in VEConfigure. The
   toolkit reads the grid-code flag (setting 81) and does not write it.
 - Anything that is not one of the 192 u16 values in the settings array, or is in the array but is

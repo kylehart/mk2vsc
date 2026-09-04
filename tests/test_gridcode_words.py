@@ -20,7 +20,7 @@ def test_grid_code_words_take_only_the_observed_values(good_files):
         for u in unit_blocks(RvmsFile.parse(data)):
             w = grid_code_words(u)
             assert w["w190"] in (0xFFFF, 0xFFF5), (name, u.serial, w)
-            assert w["w191"] in (0xFFFF, 0x0000, 0xFF00, 0x0001, 0x0101), (name, u.serial, w)
+            assert w["w191"] in (0xFFFF, 0x0000, 0xFF00, 0x0001, 0x0101, 0x0201, 0x0301), (name, u.serial, w)
             seen[w["state"]] += 1
     assert seen["never"] and seen["set"] and seen["residual"], seen
 

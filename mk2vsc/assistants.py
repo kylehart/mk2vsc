@@ -20,7 +20,7 @@ The four bytes before the length (``ff ff ff ff`` bare, ``f5 ff 01 01`` on ESS b
 
 We do NOT understand the record body.  It looks like a compiled program (entropy ~6.2 bits/byte,
 recurring 2-3 byte opcodes, embedded parameter values such as 48.00 V and 10 %).  This module reports
-structure; it does not author it.
+structure; it does not author it (`mk2vsc.assistant` removes records and reinstalls a system's own earlier ones).
 """
 from __future__ import annotations
 

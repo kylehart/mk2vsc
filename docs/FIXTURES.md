@@ -1,12 +1,12 @@
 ---
 title: "The fixture corpus"
-description: "84 real .rvms files from four systems, what each is, and the negative controls."
+description: "88 real .rvms files from four systems, what each is, and the negative controls."
 ---
 
 # The fixture corpus
 
 `fixtures/` holds every distinct `.rvms` file we collected while operating four inverter systems
-between June and September 2026: 84 unique files (duplicates by SHA-256 were dropped). Every test in
+between June and September 2026: 88 unique files (duplicates by SHA-256 were dropped). Every test in
 `tests/` runs against these files, and `fixtures/manifest.json` records what each one is.
 
 ## Where the files come from

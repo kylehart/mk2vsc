@@ -31,20 +31,23 @@ What we have done repeatedly on live systems without incident:
 
 Settings-only uploads did not reset the VE.Bus or interrupt loads on any of our uploads.
 
-## What is unproven and what has broken live systems
+## Assistant changes: what works, what is unproven, what has broken live systems
 
-Assistant changes by file. Adding, removing, or transplanting an assistant record has produced four
-outcomes for us, none of them a working install:
+Removing an assistant, and reinstalling one from an earlier download of the same system, work by file
+(`mk2vsc assistant`). Both produce upload-form files, and uploading one resets the VE.Bus: the inverters
+stop for the duration, the tunnel is unresponsive for about five minutes afterwards, GX-based monitoring
+shows the site disconnected and stale inverter states, and the dialog can end in an error although the
+device completed. None of that is specific to this toolkit: an assistant change saved from VEConfigure's
+GUI and uploaded through VRM behaves the same way. Do it only with someone able to power-cycle the
+inverters, the battery well charged and the reinstall file ready before the removal.
 
-1. Clean rejection before write (mk2vsc-47, mk2vsc-49). Harmless.
-2. Accepted, then the device wrote a 64-byte empty stub and discarded our payload.
-3. Accepted, began installing, failed at the grid-code step; the VE.Bus was left half-configured
-   (VE.Bus error 10) for about 17 minutes, and a removal attempt left a corrupt assistant
-   program (VE.Bus error 6). Both were recovered by re-uploading the baseline and rebooting the GX.
-4. Accepted and stored byte-perfectly, and the inverters never started.
-
-docs/ASSISTANTS.md has the evidence table. The writer refuses to change block length, and the
-qualifier fails any file that carries the stub. Do not work around either on a system that matters.
+Installing an assistant on a system that never had one (a graft of another system's records) is
+unproven, and the attempts produced: clean rejection before write (harmless); accepted then a 64-byte
+stub written and the payload discarded; accepted, install started, failed at the grid-code step with
+VE.Bus error 10 for about 17 minutes; accepted and stored byte-perfectly with the inverters never
+starting. A device-form removal attempt left a corrupt assistant program (VE.Bus error 6): device form
+is a settings write and cannot remove an assistant. docs/ASSISTANTS.md has the evidence table. The
+settings writer refuses to change block length, and the qualifier fails any file that carries the stub.
 
 Fields below HIGH confidence. `mk2vsc edit` refuses them unless you pass
 `--i-know-this-is-unverified`. If you do, you are the first person to test that offset on hardware:

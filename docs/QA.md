@@ -37,7 +37,7 @@ python -m venv .venv
 
 ## The corpus and its limits
 
-84 unique files (81 well-formed, 162 inverter blocks, plus 3 negative controls), 8 inverters in 4 two-inverter split-phase systems, one
+88 unique files (85 well-formed, 170 inverter blocks, plus 3 negative controls), 8 inverters in 4 two-inverter split-phase systems, one
 firmware version (2729560), one format version (1.33), downloads spanning June to September 2026.
 Three files are deliberately broken and listed in `tests/conftest.py` `KNOWN_BAD` with the reason:
 a file with deliberately stale checksums (a negative control for the validator).
@@ -114,7 +114,7 @@ matching GUI screenshot.
 
 | area | status | evidence |
 |---|---|---|
-| Section grammar and checksum | proven | every section of all 84 unique files (107 counting archive duplicates); four live uploads accepted; byte-exact round trip on every fixture |
+| Section grammar and checksum | proven | every section of all 88 unique files (111 counting archive duplicates); four live uploads accepted; byte-exact round trip on every fixture |
 | Settings array as VE.Bus setting IDs 0 to 191 | strong | absorption/float anchor IDs 2/3; IDs 5, 6, 65, 73, 81, 88 corroborate on every block; one firmware only |
 | Individual fields | mixed | all 192 IDs carry VEConfigure's identifier; decode confidence 4 CONFIRMED (written and read back live), 68 HIGH, 9 MEDIUM, 12 LOW, 99 UNKNOWN (reserved and grid-code slots, mostly 0 or 0xffff); docs/FIELDS.md lists each with its evidence |
 | Guarded writer | proven for its surface | edit-and-revert byte identity on every fixture; reproduces the archived prepared files; 4 live uploads |

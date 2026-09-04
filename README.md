@@ -33,16 +33,16 @@ built to do that, together with everything we learned about the file along the w
   * edits settings in place, self-verifies that nothing else changed, and never changes file length,
   * qualifies a file against the values you intended before you upload and after you re-download,
   * mines a library of archived downloads into a dated, per-inverter change log (`mk2vsc history`).
-* A corpus of 84 real device files with a manifest, and a test suite that checks every documented
+* A corpus of 88 real device files with a manifest, and a test suite that checks every documented
   claim against that corpus (475 tests).
 * A written account of the format as we understand it, and of what we do not understand.
 
 ## What this is not
 
 * It does not upload anything. You upload through VRM, exactly as before.
-* It does not install assistants (ESS and others) as a supported operation. The experimental graft and
-  upload-form transform are included under `mk2vsc.experimental`, gated, and have never produced a running
-  system; docs/ESS_INJECTION.md is the complete record for anyone who wants to pick that up.
+* It does not install an assistant on a system that never had one. It can remove an assistant and
+  reinstall one from an earlier download of the same system (`mk2vsc assistant`, docs/ASSISTANTS.md);
+  the graft for a first-time install stays under `mk2vsc.experimental`, gated and unproven.
 * It does not touch grid codes or the dealer password that protects them.
 * It is not affiliated with or endorsed by Victron Energy.
 
@@ -50,15 +50,15 @@ built to do that, together with everything we learned about the file along the w
 
 | Capability | Status | Evidence |
 |---|---|---|
-| Section grammar and integrity checksum | Proven | Validates on every section of all 84 fixture files (107 counting archive duplicates); edited files accepted by the device on 4 systems |
+| Section grammar and integrity checksum | Proven | Validates on every section of all 88 fixture files (111 counting archive duplicates); edited files accepted by the device on 4 systems |
 | Settings array = VE.Bus setting IDs at +0x59 + 2n | High | Reference IDs reproduce 120 V output, 50.0 A limit, 95 %/98 % SoC, grid-code flag on all 162 blocks of the 81 well-formed fixtures |
 | Field table (192 entries) | Partial | every ID carries VEConfigure's identifier; 94 settings and bits placed on VEConfigure's tabs (`mk2vsc fields --by-tab`); decode confidence 4 CONFIRMED, 68 HIGH, 9 MEDIUM, 12 LOW, 99 UNKNOWN (reserved and grid-code slots) |
 | Guarded writer (`mk2vsc edit`) | Proven live | Absorption, float and Virtual Switch thresholds written and read back on 4 systems, July to August 2026 |
 | By-serial diff (`mk2vsc diff`) | Proven | Consecutive downloads, including a pair whose blocks swapped position, classify as bookkeeping only |
 | Checker (`mk2vsc check`) | Proven | Reproduces the incident that motivated it (a rollback that reverted a charge-voltage fix) |
-| Assistant area | Read only | Record structure and stub signature recognised; record bodies not understood |
+| Assistant area | Read; remove and reinstall | Record structure and stub signature recognised; record bodies not understood. `mk2vsc assistant remove` and `reinstall` removed and re-installed ESS on one live system (2026-09-04), re-downloads matching byte for byte apart from bookkeeping |
 | Upload-form (GUI export) files | Read only | Detected and decoded; the writer refuses them |
-| ESS injection (`mk2vsc experimental`) | Experimental, never ran | Graft and device-to-upload-form transform reproduce the August 2026 files byte-for-byte; the device stored them, the system never started |
+| First-time ESS install (`mk2vsc experimental graft`) | Experimental, never ran | Grafts of another system's records stored but never started; the upload-form transform they rely on is now proven by `mk2vsc assistant` |
 
 The confidence vocabulary (CONFIRMED, HIGH, MEDIUM, LOW, UNKNOWN) is defined in `mk2vsc/fields.py` and
 docs/FIELDS.md. The writer edits CONFIRMED and HIGH fields; anything lower needs an explicit override.
@@ -160,7 +160,7 @@ are how we make that safe; docs/CHANGE_CONTROL.md explains each one and the inci
 
 ## Corpus and tests
 
-The `fixtures/` directory holds 84 unique files from 4 split-phase MultiPlus systems (8 inverters,
+The `fixtures/` directory holds 88 unique files from 4 split-phase MultiPlus systems (8 inverters,
 firmware 2729560, format version 1.33) collected between June and September 2026, including device
 downloads, GUI exports, files our tools produced, and three deliberately broken files kept as negative
 controls. `fixtures/manifest.json` records each file's hash, origin, state and inverters. The tests in
@@ -194,8 +194,8 @@ things on your own system before trusting the tool with it.
   lists what each value looks like even where we cannot say what it does.
 * The assistant record bodies, the 4001-byte BareSettingInfo section and parts of the block header
   are not understood. docs/FORMAT.md keeps an explicit Observed / Inferred / Unknown list.
-* Installing an assistant by file has never produced a running system for us. docs/ASSISTANTS.md
-  records each attempt and its outcome so nobody has to repeat them on live hardware.
+* Installing an assistant on a system that never had one has not been done by file. Removal and
+  reinstall from the system's own earlier download have (docs/ASSISTANTS.md section 8).
 
 ## How to help
 
@@ -224,6 +224,8 @@ format claim is tied to a test on real files. The project is developed with AI a
 in commits and in docs/PRACTICES.md.
 
 ## Related projects
+
+What this project took from each of them, and where it landed, is in [ACKNOWLEDGEMENTS.md](ACKNOWLEDGEMENTS.md).
 
 * [talas9/rvsc-tools](https://github.com/talas9/rvsc-tools) (July 2026): a read-only viewer and format
   specification for single-unit `.rvsc` files, with VEConfigure's internal setting identifiers extracted

@@ -237,7 +237,7 @@ systems in at most one byte (a primary/secondary flag). **Inferred.** The assist
 program template chosen by VEConfigure for the installation type, not something compiled per unit.
 **Unknown.** The body's encoding. It has the statistics of code (entropy about 6.2 bits/byte, recurring
 2-3 byte patterns) and contains recognisable parameter values (48.00 V, 10 %). `mk2vsc` reports the records;
-it does not author them, and `docs/ASSISTANTS.md` explains why we stopped trying.
+it does not author record bodies; it removes records and reinstalls the system's own earlier ones (`docs/ASSISTANTS.md` section 8).
 
 ## 6. Observed / Inferred / Unknown, collected
 

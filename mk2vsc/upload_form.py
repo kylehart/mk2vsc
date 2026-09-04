@@ -3,7 +3,7 @@ EXPERIMENTAL: convert a device-form download into the GUI's *upload form*, the b
 VE.Bus System Configurator writes when it exports a file for Remote VEConfigure upload.
 
 Why anyone would want this: GUI-authored upload-form files install assistants that RUN; our device-form
-grafts install assistants that store and never start.  One hypothesis (docs/ESS_INJECTION.md, H2) was
+the transform is proven: `mk2vsc.assistant` uses it to remove and reinstall assistants (2026-09-04, System D).  One hypothesis (docs/ESS_INJECTION.md, H2) was
 that the upload form itself is what triggers the device-side install procedure.  This transform was
 built to test that.  Result on 2026-08-13: the device ACCEPTED a transformed file (after two fixes that
 this module now contains), stored the configuration, and the system still did not start.  The
@@ -39,8 +39,8 @@ import struct
 import time
 from typing import Dict, List, Optional, Tuple
 
-from ..sections import RvmsFile, SECTION_DATA
-from ..units import unit_blocks, UnitBlock, OFF_BLOB, OFF_SAVE_TS_DEVICE, ASSISTANT_FLAGS
+from .sections import RvmsFile, SECTION_DATA
+from .units import unit_blocks, UnitBlock, OFF_BLOB, OFF_SAVE_TS_DEVICE, ASSISTANT_FLAGS
 
 BLOB12 = bytes.fromhex("010008004a3981804e93d70c")
 HDR = len(SECTION_DATA) + 4          # name + next-pointer: bytes of a block that are not payload
