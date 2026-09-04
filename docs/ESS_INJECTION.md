@@ -149,8 +149,8 @@ All dates 2026. "Written" says what the device held afterwards, proven by a fres
 | 07-24 | System B | v3: slot-matched tail from System C's device download | 7049 B, 14 self-checks | mk2vsc-47 again | nothing | GX reboot | the GX showed one serial as "Unknown"; mk2vsc-47 was enumeration, not the file |
 | 07-24 | System B | v4: same, rebuilt on the post-reboot download | 7049 B | accepted | a 64-byte empty stub on each inverter, flags e4/e5, records gone | baseline re-upload; blocks swapped order in the re-download | accept-then-stub; compare by serial |
 | 08-12 | System A | v3: same recipe, template = System C device download | 7049 B, records byte-identical to template | accepted; Error 1303 mid-write | stub on both inverters, VE.Bus reset (battery full) | baseline re-upload, verified bare | third independent stub |
-| 08-12 | System A | v4: v3 + seven "grid-code fingerprint" bytes | fingerprint from a cross-unit diff | "Resetting VE.Bus products", then mk2vsc-36 at commit | nothing (fresh download byte-identical to baseline) | see next row | the fingerprint was wrong in 4 of 7 bytes: it included two capacity bytes (setting 64) and missed setting 10 and the flags0 bit |
-| 08-12 | System A | re-upload of the archived bare baseline, after two clean GX reboots | archived file | mk2vsc-36 | nothing | upload the fresh download instead: accepted first try | mk2vsc-36 "old configuration file" is literal: stale save timestamp |
+| 08-12 | System A | v4: v3 + seven "grid-code fingerprint" bytes | fingerprint from a cross-unit diff | "Resetting VE.Bus products", then mk2vsc-36 at commit | grid-code words 190/191 (0xffff -> 0xfff5/0xff00 in the next download; corrected 2026-09-04, the row first said "nothing") | see next row | the fingerprint was wrong in 4 of 7 bytes: it included two capacity bytes (setting 64) and missed setting 10 and the flags0 bit |
+| 08-12 | System A | re-upload of the archived bare baseline, after two clean GX reboots | archived file | mk2vsc-36 | nothing | upload the fresh download instead: accepted first try | read at the time as a stale save timestamp; corrected 2026-09-04 (docs/ERRORS.md): the stamp is not a gate, the cause is unknown |
 | 08-13 | System A | v5: v3 + corrected six-byte grid-code set (10, 15, 60, 62, 81, 128), on a fresh baseline | 7049 B | accepted | stored byte-perfect, records present, no stub | | first by-file ESS that the device kept |
 | 08-13 | System A | (observation) | | inverter cycles Off -> Fault every ~15 s | | | config internally inconsistent |
 | 08-13 | System A | v6: v5 + flags0 bit 11 cleared on one block | two bytes changed | superseded before upload | | | |
@@ -161,6 +161,7 @@ All dates 2026. "Written" says what the device held afterwards, proven by a fres
 | 08-13 | System A | upload-form v2: e4 first, fresh unix timestamps | reproduces the installer's export format | accepted | stored; still Off | | timestamps are unix time; the upload form is not by itself the trigger |
 | 08-13 | System D | one-shot: v3 + full install state from a clean bare download | 7049 B | accepted; Error 1303 at the end | stored; Off; telemetry dark 6 h; building found without power, put on bypass | GUI session by the installer later | same outcome on a second system with all "good" bytes |
 | 08-13 | both | GX ESS setting RunWithoutGridMeter 0 -> 1 (both non-starters read "external meter required"; runners read "inverter/charger") | | still Off after a fresh re-upload | | | a real commissioning defect, not the blocker |
+| 08-14 | System A | rollback to a bare device-form file built from the 08-12 baseline (`prepared_bare_deviceform_1` or `_2`; words 0xffff or 1, 191 = 0xff00) while the device held ESS words 128 = 1, 191 = 1/257 | 5055 B | accepted (operator's incident notes; not verifiable from the corpus: the 08-19 download matches neither file, its charge profile is the pre-07-20 one) | the system did not run; recovered on site | | a device-form file with differing grid-code words was accepted that day: counts against the words-mismatch reading of mk2vsc-36 |
 | 08-14 | System A | CAN bus diagnosis: 0 RX packets, transmitter error-passive | | | | | the BMS bus had been physically dead since 07-20 |
 | 09-02 | System A | the installer's GUI session, after the CAN bus was repaired and a third battery module installed | GUI export | accepted | ESS running on both inverters, charge profile corrected in the same session | | consistent with H3 below; does not test it |
 
@@ -286,7 +287,7 @@ list the ESS assistant on both; `SwitchoverInfo/Connecting`, `VebusMainState`; `
 | Stable Off, Connecting = 1, no error, assistants listed | H3 falsified; the blocker is in the file or the transport; try the upload-form variant next, then H1 |
 | Off/Fault cycling every ~15 s | the install state is incomplete for this firmware or battery; diff your file against a GUI install of the same model |
 | Stub in the re-download | the device discarded the records; report the file, this is outcome B on a configuration we have not seen |
-| mk2vsc-36 without the "Resetting" dialog | stale timestamp; download fresh and rebuild |
+| mk2vsc-36 without the "Resetting" dialog | archived file; download fresh and rebuild (docs/ERRORS.md) |
 
 Whatever happens, upload the fresh bare download back afterwards and confirm with `mk2vsc diff` that the
 system is byte-for-byte its pre-experiment self except bookkeeping.
@@ -317,7 +318,7 @@ Do not:
 
 - upload any file from `mk2vsc experimental` to a system that people depend on, or without someone at
   the switches;
-- upload an archived file; the device rejects stale timestamps and old files carry old settings;
+- upload an archived file; archived files have been refused with mk2vsc-36 and old files carry old settings;
 - treat "Success" or "Resetting VE.Bus products" as a good sign: outcomes B, C and D all began that way;
 - try to remove an assistant by truncating the block (outcome E);
 - stamp `INSTALL_STATE` without `--capacity-ah`; it writes the template system's battery capacity;

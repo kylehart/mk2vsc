@@ -1,6 +1,6 @@
 {
  "generated": "2026-09-04",
- "count": 88,
+ "count": 92,
  "entries": [
   {
    "file": "system_a/system_a_2026-06-18_experiment_bare_deviceform_1.rvms",
@@ -2025,6 +2025,98 @@
     }
    ],
    "notes": "re-download after the by-file reinstall"
+  },
+  {
+   "file": "system_b/system_b_2026-09-04_download_ess_deviceform_1.rvms",
+   "sha256": "2f45e9f4e3fdf8cebcdf2f7701fa2341a20b455858567913a24573aedd39cf4f",
+   "size": 7049,
+   "system": "B",
+   "date": "2026-09-04",
+   "origin": "download",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ0000B0002",
+     "length": 1705,
+     "flag": "e4"
+    },
+    {
+     "serial": "HQ0000B0001",
+     "length": 1255,
+     "flag": "e5"
+    }
+   ],
+   "notes": "17:21 UTC download; uploaded unmodified at 20:04 after a newer download and accepted (R6)"
+  },
+  {
+   "file": "system_b/system_b_2026-09-04_download_ess_deviceform_2.rvms",
+   "sha256": "9c445caaedd5c54a5dbeb4faab22cb23e831081d32ef65b497c77056e8800c78",
+   "size": 7049,
+   "system": "B",
+   "date": "2026-09-04",
+   "origin": "download",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ0000B0002",
+     "length": 1705,
+     "flag": "e4"
+    },
+    {
+     "serial": "HQ0000B0001",
+     "length": 1255,
+     "flag": "e5"
+    }
+   ],
+   "notes": "20:03 UTC download of unchanged content"
+  },
+  {
+   "file": "system_b/system_b_2026-09-04_download_ess_deviceform_3.rvms",
+   "sha256": "664d71e337e823f9abe4f1bdf832cea5e0d97d3fd88b6a449805493538030d7e",
+   "size": 7049,
+   "system": "B",
+   "date": "2026-09-04",
+   "origin": "download",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ0000B0001",
+     "length": 1257,
+     "flag": "e5"
+    },
+    {
+     "serial": "HQ0000B0002",
+     "length": 1703,
+     "flag": "e4"
+    }
+   ],
+   "notes": "20:06 UTC download after the older file was accepted"
+  },
+  {
+   "file": "system_b/system_b_2026-09-04_prepared_ess_deviceform_1.rvms",
+   "sha256": "721288d429ff035b77b045e63b7b82beeb0d3cdb2da6d1f356c251752bdaea0b",
+   "size": 7049,
+   "system": "B",
+   "date": "2026-09-04",
+   "origin": "prepared",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ0000B0002",
+     "length": 1705,
+     "flag": "e4"
+    },
+    {
+     "serial": "HQ0000B0001",
+     "length": 1255,
+     "flag": "e5"
+    }
+   ],
+   "notes": "_2 content with +0x4f set to 16:00 UTC; accepted 20:13 (R6b): the stamp is not an acceptance gate"
   }
  ],
  "serials_note": "Inverter serials are pseudonyms of the same shape as real ones (HQ0000<system><unit>); every other byte is as downloaded."

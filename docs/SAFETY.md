@@ -116,7 +116,9 @@ In the order we have found to work:
   checksummed is necessary and not sufficient. A file the device accepts is a higher-risk event
   than one it rejects.
 - We read mk2vsc-36 as "the device now demands a grid-code password" and spent hours on it. It was
-  a stale save timestamp. Download fresh first, theorize second.
+  an archived file; a fresh download was accepted at once. Download fresh first, theorize second.
+- We then explained that rejection as a save-timestamp check. Tested on 2026-09-04, it is not: older
+  stamps with current content are accepted. Test the mechanism before writing it into a rule.
 - We built a rollback from a month-old baseline and reverted a correction without noticing. Keep
   intended values outside the file and check every upload against them.
 - We compared downloads by file position and saw dozens of spurious differences. Block order is not

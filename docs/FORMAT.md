@@ -13,7 +13,7 @@ one of three labels:
 * **Inferred**: the narrowest reading of the observations that we have not verified independently.
 * **Unknown**: bytes we can locate but cannot explain.
 
-The corpus behind every claim: 88 unique files (`fixtures/`, see `docs/FIXTURES.md`), 8 inverters
+The corpus behind every claim: 92 unique files (`fixtures/`, see `docs/FIXTURES.md`), 8 inverters
 (MultiPlus-II class, 48 V battery, 120 V output) in 4 two-inverter split-phase systems, a single firmware
 version (2729560, shown as "v560" in VRM), a single format version ("1.33"). We have no `.rvsc`
 (single-unit) file, no three-phase or 3+ unit file, and no file from any other firmware or tool version.
@@ -69,7 +69,7 @@ The section table of that file as our parser reports it:
 
 **Observed.** The last four bytes of every section are the 32-bit little-endian word sum of the section
 from its length prefix up to those four bytes, modulo 2**32, with a trailing partial word zero-padded on
-the high side. This validates on all 111 files we have held (88 unique) and every section in them, with
+the high side. This validates on all 115 files we have held (92 unique) and every section in them, with
 the three deliberately broken files in `fixtures/` as negative controls. `mk2vsc.sections.sum32_le` is the
 whole implementation.
 
@@ -141,7 +141,7 @@ The same System A file, first unit block:
 | +0x37 | u8 | slot byte B: `00` or `01` | Observed |
 | +0x3a | 11 + pad | ASCII inverter serial `HQ...`, zero padded | Observed |
 | +0x45 | 10 | zeros (device form); see §4 for the upload form | Observed |
-| +0x4f | u32 | Unix timestamp of the last save; rewritten on every save. This is the "nonce" that makes an archived file "old" to the device | Observed |
+| +0x4f | u32 | Unix timestamp stamped when the file was generated (each download of unchanged content carries a new value; the GUI stamps its export). Not an acceptance gate: the device accepted older-stamped files with current content | Observed |
 | +0x53 | u32 | zero | Observed |
 | +0x57 | u16 | `0x0180` in every block | Observed; Unknown |
 | +0x59 | u16[192] | the settings array; entry *n* is VE.Bus setting ID *n* (see `docs/FIELDS.md`). Entries 190 and 191 are the grid-code / loss-of-mains words (`ff ff ff ff` with no grid code, `f5 ff 01 00` or `f5 ff 01 01` with one) | Observed |
@@ -162,11 +162,14 @@ shows dozens of differences; compared by serial there are exactly six bookkeepin
 
 **Observed.** The u32 at +0x4f decodes to a plausible UTC time on every device-form block (2026-06 to
 2026-09 in our corpus) and the two blocks of one download differ by a few seconds. Two same-hour re-saves
-of an unchanged system differ only here (and in the checksum). **Inferred.** The device compares this
-against its own record and rejects an upload whose stamp is older than its current state with
-`mk2vsc-36` ("Incorrect grid code password or old configuration file"). Uploading a freshly downloaded
-file back unchanged is always accepted; uploading a weeks-old archived file of the same system is
-rejected. Build every edit on a fresh download.
+of an unchanged system differ only here (and in the checksum), and three downloads of unchanged content
+minutes apart carry three increasing values (`system_b_2026-09-04_download_ess_deviceform_1/2/3`,
+tests/test_timestamp_not_a_gate.py): the stamp is the time the file was generated. **Observed.** The
+device does not use it as an acceptance gate: on 2026-09-04 System B accepted the three-hour-old `_1`
+after `_2` had been taken, and then `system_b_2026-09-04_prepared_ess_deviceform_1` (the `_2` content
+stamped 16:00, before a file it had just accepted).
+The `mk2vsc-36` rejections of archived files have another cause (docs/ERRORS.md). Build every edit on a
+fresh download anyway: it carries the device's current settings and grid-code words.
 
 ## 4. Device form and upload form
 
@@ -256,7 +259,7 @@ it does not author record bodies; it removes records and reinstalls the system's
 **Inferred**
 
 * +0x17 word encodes hardware revision / batch (tracks the serial date code; firmware is elsewhere)
-* the timestamp is the freshness token behind `mk2vsc-36`
+* the +0x4f stamp is the file-generation time and not an acceptance gate (tests/test_timestamp_not_a_gate.py)
 * the trailer u16 is a free-space counter over 2816 bytes
 * the assistant body is a fixed template per installation type
 

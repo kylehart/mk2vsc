@@ -11,8 +11,8 @@ download. "Documented" means the meaning comes from Victron documentation or com
 have not seen it ourselves.
 
 The single most useful rule in this file: **if an upload is rejected and you are not sure why, download
-a fresh copy from the device, then upload that (edited or not).** Most rejections we hit were the device
-refusing a file whose save timestamp was older than the one it already had.
+a fresh copy from the device, then upload that (edited or not).** Most rejections we hit were mk2vsc-36 on
+archived files; a fresh download of the same system was accepted every time (see mk2vsc-36).
 
 ## Remote VEConfigure upload errors (from the device's VE.Bus layer)
 
@@ -21,27 +21,48 @@ inverter side, not from the VEConfigure program. They are verdicts on the bytes.
 
 ### mk2vsc-36  "Incorrect grid code password or old configuration file"
 
-Two meanings, and the text does not tell you which.
+On a settings-only upload the file is refused and the settings are not applied. What the device objects to
+is not fully established; the record below is what we hold.
 
-**Meaning 1 (common): the file is stale.** The device compares the save timestamp at block offset +0x4f
-(or +0x59 in upload form) with what it holds and rejects anything older. Any archived file, including
-a known-good baseline that loaded fine last week, triggers this after the device has been saved since.
-*Observed* on System A 2026-08-12: the archived bare baseline was rejected repeatedly across two GX reboots;
-a fresh download compared byte-for-byte to that baseline showed the device had written nothing and
-was not corrupt; uploading the fresh download unmodified was accepted immediately.
+**Observed rejections of archived files.** System A 2026-08-12: right after a hand-built file carrying
+assistant records and grid-code words had been accepted into the install dialog and refused at commit, the
+archived bare baseline (`system_a_2026-08-12_download_bare_deviceform_1`, settings 190/191 = 0xffff) was
+refused repeatedly across two GX reboots; the fresh downloads taken then (`..._2`, `..._3`) carry settings
+190/191 = 0xfff5/0xff00 on both inverters, so the device had written its grid-code words during the
+attempt, and uploading that fresh download unmodified was accepted at once. System C 2026-07-20: after the
+half-applied install (VE.Bus error 10), every pre-incident file was refused; the post-incident download
+(`system_c_2026-07-20_download_half-ess_deviceform_5`) carries 190/191 = 0xfff5/0x0000 where the refused
+files carry 0xffff/0xffff.
 
-**Meaning 2 (rare): the grid-code step of a real assistant install failed.** *Observed* on System C
-2026-07-20 and System A 2026-08-12, both times after the "Resetting VE.Bus products" dialog, both times
-with a file we had built by hand that carried assistant records. On System C the VE.Bus was left
-half-configured (error 10); on System A the fresh download proved nothing had been written.
+**Observed rejections at the grid-code step.** System C 2026-07-20 and System A 2026-08-12, after the
+"Resetting VE.Bus products" dialog of a hand-built assistant install (System A v4 carried grid-code words
+that differed from the device's and was refused at commit, not up front).
 
-How to tell them apart: if you never saw "Resetting VE.Bus products" and the file was not freshly
-downloaded, it is meaning 1. If you are uploading a hand-built file with an assistant, assume meaning 2
-and stop.
+**What it is not.** It is not a timestamp check. The u32 at block offset +0x4f (+0x59 in upload form) is
+stamped when the file is generated (`system_b_2026-09-04_download_ess_deviceform_1/2/3`: unchanged content,
+three increasing stamps), and on 2026-09-04 System B accepted the three-hour-old `_1` after `_2` had been
+taken, and then `system_b_2026-09-04_prepared_ess_deviceform_1` (the `_2` content stamped 16:00, before a
+file it had just accepted). Neither was refused.
 
-Device state: nothing written (meaning 1, and meaning 2 on System A); possibly half-applied (meaning 2 on
-System C). What to do: download fresh, rebuild your edit on that file, upload. If the system is in error
-10, see below.
+**Cause: Unknown.** Two readings fit part of the record and neither fits all of it. (a) The first half of
+the message is literal and a device-form file whose grid-code words (81, 128, 190, 191) disagree with the
+device's is refused: every refused archived file above carried words that differed from the device's. But
+on 2026-08-14 System A accepted a device-form bare rollback while it held an ESS install
+(`system_a_2026-08-14_download_ess_deviceform_1`: 128 = 1 on both inverters, 191 = 1 and 257). The two
+candidate rollback files are in the corpus (`system_a_2026-08-14_prepared_bare_deviceform_1`, words
+0xffff/0xff00, and `_2`, words 1/0xff00); which one was uploaded, and that it was accepted, come from the
+operator's incident notes rather than from a re-download in the corpus (the next download, 08-19, matches
+neither file: its charge profile is the pre-07-20 one, docs/HISTORY.md 2026-08-19, so the file that landed is
+not in the corpus). **Inferred**, then: a device-form file with differing words
+was not refused that day. (b) A transient state of the device in the minutes after an
+interrupted install: both refusals of archived files happened within the same session as an install
+attempt that ended at commit or in error 10, and the 08-14 acceptance came a day later. Neither reading
+has been tested as a controlled experiment (a current file with only those words changed; an archived file
+uploaded long after any install attempt).
+
+What to do: download fresh, rebuild your edit on that file, upload; a fresh download carries the device's
+current grid-code words. Do not edit settings 81, 128, 190 or 191 in a device-form file. If the system is
+in error 10, see below.
 
 ### mk2vsc-47  "More than one unknown unit detected"
 

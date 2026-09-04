@@ -33,7 +33,7 @@ built to do that, together with everything we learned about the file along the w
   * edits settings in place, self-verifies that nothing else changed, and never changes file length,
   * qualifies a file against the values you intended before you upload and after you re-download,
   * mines a library of archived downloads into a dated, per-inverter change log (`mk2vsc history`).
-* A corpus of 88 real device files with a manifest, and a test suite that checks every documented
+* A corpus of 92 real device files with a manifest, and a test suite that checks every documented
   claim against that corpus (528 tests).
 * A written account of the format as we understand it, and of what we do not understand.
 
@@ -50,8 +50,8 @@ built to do that, together with everything we learned about the file along the w
 
 | Capability | Status | Evidence |
 |---|---|---|
-| Section grammar and integrity checksum | Proven | Validates on every section of all 88 fixture files (111 counting archive duplicates); edited files accepted by the device on 4 systems |
-| Settings array = VE.Bus setting IDs at +0x59 + 2n | High | Reference IDs reproduce 120 V output, 50.0 A limit, 95 %/98 % SoC, grid-code flag on all 170 blocks of the 85 well-formed fixtures |
+| Section grammar and integrity checksum | Proven | Validates on every section of all 92 fixture files (115 counting archive duplicates); edited files accepted by the device on 4 systems |
+| Settings array = VE.Bus setting IDs at +0x59 + 2n | High | Reference IDs reproduce 120 V output, 50.0 A limit, 95 %/98 % SoC, grid-code flag on all 178 blocks of the 89 well-formed fixtures |
 | Field table (192 entries) | Partial | every ID carries VEConfigure's identifier; 94 settings and bits placed on VEConfigure's tabs (`mk2vsc fields --by-tab`); decode confidence 4 CONFIRMED, 68 HIGH, 9 MEDIUM, 12 LOW, 99 UNKNOWN (reserved and grid-code slots) |
 | Guarded writer (`mk2vsc edit`) | Proven live | Absorption, float and Virtual Switch thresholds written and read back on 4 systems, July to August 2026 |
 | By-serial diff (`mk2vsc diff`) | Proven | Consecutive downloads, including a pair whose blocks swapped position, classify as bookkeeping only |
@@ -151,7 +151,7 @@ Uploading a file replaces the whole configuration of every inverter in the syste
 are how we make that safe; docs/CHANGE_CONTROL.md explains each one and the incident behind it.
 
 1. Download a fresh file from VRM (Remote VEConfigure) into `00_baseline/`. Never start from an
-   archived copy: the device rejects stale save timestamps, and old files carry old values.
+   archived copy: old files carry old values, and archived files have been refused with mk2vsc-36 (docs/ERRORS.md).
 2. `mk2vsc edit` the baseline into `01_prepared/`, then `mk2vsc check` it against the values you intend
    (on the command line, or an intent file that lives outside the file under test).
 3. Upload `01_prepared/` through VRM.
@@ -160,7 +160,7 @@ are how we make that safe; docs/CHANGE_CONTROL.md explains each one and the inci
 
 ## Corpus and tests
 
-The `fixtures/` directory holds 88 unique files from 4 split-phase MultiPlus systems (8 inverters,
+The `fixtures/` directory holds 92 unique files from 4 split-phase MultiPlus systems (8 inverters,
 firmware 2729560, format version 1.33) collected between June and September 2026, including device
 downloads, GUI exports, files our tools produced, and three deliberately broken files kept as negative
 controls. `fixtures/manifest.json` records each file's hash, origin, state and inverters. The tests in

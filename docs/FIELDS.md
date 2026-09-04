@@ -46,7 +46,7 @@ Two values were pinned early, independently of any reference: absorption voltage
 voltage at +0x5f, confirmed by editing them, uploading through VRM, and reading them back on live
 systems. When we later compared the array against the reference's setting IDs, those two sit exactly
 where IDs 2 and 3 would if ID 0 started at +0x59. Reading the rest of the array under that assumption
-across all 170 blocks of the well-formed corpus gave values that only make sense if the mapping is right:
+across all 178 blocks of the well-formed corpus gave values that only make sense if the mapping is right:
 
 | ID | reads | meaning under the reference | why that is convincing |
 |---:|---|---|---|

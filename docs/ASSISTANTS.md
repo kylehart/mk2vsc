@@ -98,7 +98,7 @@ upload-form v2, was an upload-form transplant); the two upload-form files of the
 | 2026-07-24 | System B | both blocks with transplanted records, v2/v3 | mk2vsc-47 | GX showed a serial as Unknown; GX reboot fixed it |
 | 2026-07-24 | System B | same, v4, after reboot | accepted | 64-byte stubs on both inverters; rolled back |
 | 2026-08-12 | System A | records byte-identical to System C's, v3 | accepted, Error 1303 mid-write | stubs on both inverters, VE.Bus reset; rolled back |
-| 2026-08-12 | System A | v4 with seven "grid code" header bytes stamped | "Resetting VE.Bus products", mk2vsc-36 at commit | nothing written; archived baseline also rejected until a fresh download was uploaded |
+| 2026-08-12 | System A | v4 with seven "grid code" header bytes stamped | "Resetting VE.Bus products", mk2vsc-36 at commit | grid-code words 190/191 written (0xfff5/0xff00 in the next download), no assistant stored; the archived baseline was then refused until a fresh download was uploaded |
 | 2026-08-13 | System A | v5/v6/v7 header normalisation | accepted | v7 stopped a 15 s off/fault cycle; system stable Off, connecting, no error; survived cold boot |
 | 2026-08-13 | System A | device form converted to upload form, v1 | mk2vsc-49 | block order and framing; fixed |
 | 2026-08-13 | System A | upload form v2, fresh timestamps | accepted | stored; did not start |
@@ -119,8 +119,8 @@ gate, we did not look for one, and this toolkit will not include one. What we ob
   identical bytes apart from timestamps.
 - mk2vsc-36 reads "Incorrect grid code password or old configuration file". We hit it in two situations:
   once when a real install reached the grid-code step (mode C), and repeatedly when uploading archived
-  files whose save timestamp was older than the device's. The second is the common case and the fix is
-  a fresh download. See docs/ERRORS.md.
+  files; a fresh download of the same system was accepted each time. The second is the common case and
+  the fix is a fresh download. See docs/ERRORS.md.
 
 If you need a grid code set, that is a job for whoever holds the password, in VEConfigure. Everything
 else in the file, including every charge and Virtual Switch setting, can be edited without it.

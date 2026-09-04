@@ -19,7 +19,7 @@ Layout of a device-form block (what VRM's Remote VEConfigure *download* produces
     +0x37  u8   slot byte B      (00 / 01)
     +0x3a  ASCII serial number  "HQ..."            11 characters, zero padded
     +0x45  10 zero bytes                            (upload form: a 16-byte blob + 4 zeros instead; +10 shift)
-    +0x4f  u32 unix timestamp of last save          rewritten on every save -> the "nonce"/freshness token
+    +0x4f  u32 unix timestamp of file generation    new on every download; NOT an acceptance gate (docs/FORMAT.md 3.2)
     +0x53  u32 = 0
     +0x57  u16 = 0x0180                             unknown, constant
     +0x59  u16[192] VE.Bus settings array           setting ID n at +0x59 + 2n   (see fields.py);

@@ -1,12 +1,12 @@
 ---
 title: "The fixture corpus"
-description: "88 real .rvms files from four systems, what each is, and the negative controls."
+description: "92 real .rvms files from four systems, what each is, and the negative controls."
 ---
 
 # The fixture corpus
 
 `fixtures/` holds every distinct `.rvms` file we collected while operating four inverter systems
-between June and September 2026: 88 unique files (duplicates by SHA-256 were dropped). Every test in
+between June and September 2026: 92 unique files (duplicates by SHA-256 were dropped). Every test in
 `tests/` runs against these files, and `fixtures/manifest.json` records what each one is.
 
 ## Where the files come from
@@ -202,3 +202,11 @@ fixture and paste the output here.
 | system_d/system_d_2026-08-14_download_ess_deviceform_1.rvms | 7049 | ess | deviceform | download | HQ0000D0001 (1257, e5), HQ0000D0002 (1703, e4) |
 | system_d/system_d_2026-08-14_prepared_bare_deviceform_1.rvms | 5055 | bare | deviceform | prepared | HQ0000D0002 (484, f4), HQ0000D0001 (482, f5) |
 | system_d/system_d_2026-08-14_prepared_bare_deviceform_2.rvms | 5055 | bare | deviceform | prepared | HQ0000D0001 (484, f5), HQ0000D0002 (482, f4) |
+| system_d/system_d_2026-09-04_download_ess_deviceform_1.rvms | 7049 | ess | deviceform | download | HQ0000D0002 (1705, e4), HQ0000D0001 (1255, e5) |
+| system_d/system_d_2026-09-04_prepared_bare_uploadform_1.rvms | 5079 | bare | uploadform | prepared | HQ0000D0002 (496, f4), HQ0000D0001 (494, f5) |
+| system_d/system_d_2026-09-04_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ0000D0001 (484, f5), HQ0000D0002 (482, f4) |
+| system_d/system_d_2026-09-04_download_ess_deviceform_2.rvms | 7049 | ess | deviceform | download | HQ0000D0001 (1257, e5), HQ0000D0002 (1703, e4) |
+| system_b/system_b_2026-09-04_download_ess_deviceform_1.rvms | 7049 | ess | deviceform | download | HQ0000B0002 (1705, e4), HQ0000B0001 (1255, e5) |
+| system_b/system_b_2026-09-04_download_ess_deviceform_2.rvms | 7049 | ess | deviceform | download | HQ0000B0002 (1705, e4), HQ0000B0001 (1255, e5) |
+| system_b/system_b_2026-09-04_download_ess_deviceform_3.rvms | 7049 | ess | deviceform | download | HQ0000B0001 (1257, e5), HQ0000B0002 (1703, e4) |
+| system_b/system_b_2026-09-04_prepared_ess_deviceform_1.rvms | 7049 | ess | deviceform | prepared | HQ0000B0002 (1705, e4), HQ0000B0001 (1255, e5) |

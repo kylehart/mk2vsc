@@ -97,12 +97,13 @@ outside the file, and fails any file whose two inverters disagree on a confirmed
 
 ### Rule 2: build only on a fresh download
 
-The device rejects a file whose save timestamp is older than the one it holds. The error is
-`mk2vsc-36 "Incorrect grid code password or old configuration file"`, and the second half of that
-message is the common meaning: an archived known-good file is refused, and the same configuration
-freshly downloaded and uploaded unmodified is accepted (docs/ERRORS.md). Download, edit
-that file, upload that file. If any new download happens after you prepared a file, prepare it
-again from the newest download.
+An archived file carries the settings and grid-code words the device had when it was downloaded, not
+the ones it has now: uploading it re-applies every value it holds (Rule 1), and every `mk2vsc-36` refusal
+of a settings-only upload in our record was an archived file, while a fresh download of the same system
+was accepted every time (docs/ERRORS.md; the mechanism is not established). A fresh download has neither
+problem. Download, edit that file, upload that file. The save timestamp at +0x4f is not what the device
+checks (an older-stamped file with current content is accepted), so a fresh download is about currency of
+content, not of clock.
 
 ### Rule 3: never leave prepared files loose
 

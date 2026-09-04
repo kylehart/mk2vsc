@@ -65,9 +65,9 @@ wrong.
      timed out. The device may still be working. Wait, watch the VRM device page, then re-download.
    - "Error 1391, installation already executing another request." A write is still in progress on
      the device. Wait.
-   - `mk2vsc-36`, `mk2vsc-47`, `mk2vsc-49`: the device rejected the file before writing anything.
-     See docs/ERRORS.md. The most common one, mk2vsc-36, almost always means your file is older than
-     the one on the device: download fresh and rebuild.
+   - `mk2vsc-36`, `mk2vsc-47`, `mk2vsc-49`: the device refused the file and applied none of its settings.
+     See docs/ERRORS.md. Every mk2vsc-36 on a settings-only upload in our record was an archived file,
+     and a fresh download was accepted each time; download fresh and rebuild.
 3. A settings-only upload (what `mk2vsc edit` produces) does not reset the VE.Bus and does not
    interrupt the inverters. We have applied such uploads to occupied buildings without any
    observable effect on loads. Assistant changes do reset the VE.Bus, and the inverters go off for
