@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.0 (2026-09-04)
+
+* VEConfigure placement for every setting and flag bit the GUI shows (`mk2vsc/ui.py`): tab, group and field label, from the layout talas9/rvsc-tools observed on VEConfigure 1.33 (MIT, credited), keyed by identifier. `Field.ui`, `mk2vsc fields --by-tab`, and an "In VEConfigure" column in docs/FIELDS.md. 62 settings and 32 bits placed; 7 GUI fields are computed by the GUI from other settings; 6 have no known setting. The Ignore AC input tab (settings 52 to 59, 70) is placed from our own screenshot; UPS function (setting 0 bit 3, inverted) and Dynamic current limiter (setting 1 bit 12) from Victron's MK2 document and xcellsior's toggle-and-diff. NOTICE.md gains a third-party section with the MIT notice.
+* Flag bits 3 to 9 of setting 60 named from VEConfigure's identifiers; VEConfigure option text for the grid-code list (0 to 22) recorded in `mk2vsc.ui.ENUMS`.
+
 ## 0.8.0 (2026-09-04)
 
 * The settings array is 192 entries. Settings 190 and 191 are grid-code words (0xffff until a grid code is set; then 190 = 0xfff5 and 128 = 191 = 1 or 0x0101, set per inverter; partly retained after a grid code is removed). They were previously read as the assistant record's "marker" and "subtype"; the assistant area now starts at +0x1d9 as `u16 length | body | tail`. `grid_code_words()` reports never / set / residual; `census` prints it; `show` lists 190/191. Settings 128/190/191 descriptions updated. Issue #24 re-stated: the differing word is setting 191, set per inverter by the grid-code step; System C's two inverters carry different values.
