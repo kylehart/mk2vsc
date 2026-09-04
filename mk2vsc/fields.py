@@ -246,7 +246,7 @@ FIELDS: List[Field] = [
     _f(59, "vs_udc_above_for_min", "vs2offUBatHigh (time)", 1, "min", HIGH, "Duration for the Udc-high condition, minutes (raw - 1).",
        f"{MK2}; schema offset -1; raw 2 = 1 min.", "0, 2", "mk2", lo=0, hi=254, raw_offset=-1),
     _f(60, "flags2", "Flags2", 1, "bitmask", HIGH, "Bit register; bits 0 to 2 named by Victron (MK2 flags 32 to 34), bits 3 to 9 by VEConfigure identifiers (talas9/rvsc-tools); see the bit table. Schema max 1022.",
-       f"{MK2} flags 32-34.", "0, 16, 48", "mk2", bits=FLAGS2_BITS),
+       f"{MK2} flags 32-34 (bits 0 to 2); {RT} (bits 3 to 9).", "0, 16, 48", "mk2 + rtti", bits=FLAGS2_BITS),
     _f(61, "flags3", "Flags3", 1, "bitmask", HIGH, "Bit register; no documented bits.", f"{MK2}: Flags3.", "0", "mk2", bits={}),
     _f(62, "output_frequency_Hz", "vsInverterPeriodTime", 2_500_000, "Hz", HIGH,
        "Inverter output frequency, stored as the period in 1/2500 ms: 41667 = 16.667 ms = 60 Hz (Hz = 2500000 / raw). Applied when Flags2 bit 2 (vsSetInverterPeriodTime) is set.",

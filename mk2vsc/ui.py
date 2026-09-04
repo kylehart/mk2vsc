@@ -27,8 +27,11 @@ Victron's MK2 document and this project's field names count from 1 (``IMainsLimi
 Two sources besides talas9's table: ``source="mk2"`` for the two boxes placed from Victron's MK2 document
 plus xcellsior's toggle-and-diff (the tab and group still come from talas9's layout); ``source="ours"`` for
 the ignore-AC tab, matched to a VEConfigure screenshot of one of our systems (docs/FIELDS.md, the vs2
-section).  talas9's unit was not in ignore-AC mode, so their table places settings 54/55/58/59 under
-"VS options"; ours is the layout that tab shows when the mode is selected.
+section, which abbreviates the same labels).  The labels here are transcribed from that screenshot; the
+screenshot itself is not in the repository.  Settings 53 and 70 are placed by position and name (their
+values were not read off the tab), so they are "probable".  talas9's unit was not in ignore-AC mode, so
+their table places settings 54/55/58/59 under "VS options"; ours is the layout that tab shows when the
+mode is selected.
 """
 from __future__ import annotations
 
@@ -125,11 +128,11 @@ UI_BY_EPROM: Dict[str, UI] = {
     "EPROM_vsInverterPeriodTime": _n("virtual_switch", "VS options", "Make period time", "ms"),
     # Ignore AC input tab (vs2 settings), matched to a VEConfigure screenshot of one of our systems in that mode.
     "EPROM_vs2onILoadHigh": _n("virtual_switch", "Ignore AC input", "Do not ignore AC input when load higher than", "W", source="ours"),
-    "EPROM_vs2tonILoadHigh": _n("virtual_switch", "Ignore AC input", "Do not ignore AC input when load higher than - for", "s", source="ours"),
+    "EPROM_vs2tonILoadHigh": _n("virtual_switch", "Ignore AC input", "Do not ignore AC input when load higher than - for", "s", "probable", source="ours"),
     "EPROM_vs2onUBatLow": _n("virtual_switch", "Ignore AC input", "Do not ignore AC input when Udc lower than", "V", source="ours",
                              note="talas9's table (unit not in ignore-AC mode) shows this under VS options"),
     "EPROM_vs2tonUBatLow": _n("virtual_switch", "Ignore AC input", "Do not ignore AC input when Udc lower than - for", "s", source="ours"),
-    "EPROM_vs2StartOnSOC": _n("virtual_switch", "Ignore AC input", "Do not ignore AC input when state of charge lower than", "%", source="ours"),
+    "EPROM_vs2StartOnSOC": _n("virtual_switch", "Ignore AC input", "Do not ignore AC input when state of charge lower than", "%", "probable", source="ours"),
     "EPROM_vs2offILoadLow": _n("virtual_switch", "Ignore AC input", "When accepting AC due to load, ignore AC when load lower than", "W", source="ours"),
     "EPROM_vs2toffILoadLow": _n("virtual_switch", "Ignore AC input", "When accepting AC due to load, ignore AC when load lower than - for", "min", source="ours"),
     "EPROM_vs2offUBat": _n("virtual_switch", "Ignore AC input", "When accepting AC due to a battery condition, ignore AC when Udc higher than", "V", source="ours",
