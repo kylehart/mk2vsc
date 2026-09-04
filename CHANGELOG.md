@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+* `mk2vsc diagnose`: configuration problems read from the settings themselves, with evidence, a fix to take or leave, a corrected file through the writer's guards (`--fix --accept ID`, `--set FIELD=VALUE`, `--copy-from SERIAL`) and a manual change sheet (`--sheet`); `--json` is the `report_version` 1 contract. Eight rules: D1 lead-acid profile on a lithium bank, D2 pair disagreement, C1 range edge (over `limits`), V1 low-voltage shutdown at the lead-acid default, V2 unreachable Virtual Switch return, E1 stub, E2 half-loaded assistant, P3 upload form. Every finding carries decode confidence and an evidence class (device-confirmed / vendor-documented / inferred). Corpus hit counts are asserted by the tests (82 device-form files, 164 blocks). docs/DIAGNOSE.md.
+* `mk2vsc.schema.nominal_voltage()`: 12, 24 or 48 V from the absorption record's minimum; the writer's voltage plausibility bounds scale with it instead of assuming a 48 V system (a synthetic 24 V twin accepts absorption 28.4 V).
+* `set_bits`: set or clear one bit of a flag register, target bit checked against the schema's settable mask; only qualified bits without an override (today the LithiumBattery bit, setting 60 bit 4).
 * The +0x4f timestamp is a file-generation stamp, not an acceptance gate: four System B fixtures from 2026-09-04 (three downloads of unchanged content with increasing stamps, and a back-stamped file the device accepted) and a test. mk2vsc-36 rewritten around the observed rejections; the fixtures show the device had written its grid-code words (190/191) during the August attempts and the archived files it refused carried the earlier words, but a device-form file with differing words was accepted on 2026-08-14, so the cause is recorded as unknown with both readings. Rule 2 kept as practice. 92 fixtures.
 
 ## 0.10.0 (2026-09-04)

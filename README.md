@@ -74,7 +74,7 @@ Or from source, with the fixture corpus and tests:
 ```
 git clone https://github.com/kylehart/mk2vsc.git && cd mk2vsc
 python3 -m venv .venv && .venv/bin/pip install -e ".[test]"
-.venv/bin/pytest          # 528 tests against the fixture corpus
+.venv/bin/pytest          # 582 tests against the fixture corpus
 ```
 
 ## Quickstart: one download, one change
@@ -125,10 +125,36 @@ mk2vsc verify download.edited.rvms redownload.rvms
 mk2vsc check  redownload.rvms --expect absorption=56.8 float=54.0
 ```
 
-That is the whole loop. `show`, `edit`, `verify`, `check`; plus `diff` for any two files, `history` for
-a folder of old downloads, `validate`, `fields`, and `experimental` (read docs/ESS_INJECTION.md first).
+That is the whole loop. `show`, `edit`, `verify`, `check`; plus `diagnose` (below), `diff` for any two files,
+`history` for a folder of old downloads, `validate`, `fields`, and `experimental` (read docs/ESS_INJECTION.md first).
 Field names take aliases (`absorption`, `float`, `charge_current`, `ac_limit`, `low_shutdown`,
 `vs_entry`, `vs_return`, `capacity`), full names from `mk2vsc fields`, or VE.Bus setting IDs.
+
+## Diagnose: what is wrong, with the evidence
+
+```
+mk2vsc diagnose download.rvms
+```
+```
+download.rvms: status ok; 2 inverter(s) HQ0000A0001, HQ0000A0002; 48 V system; chemistry lithium (flag:HQ0000A0001)
+  [DEGRADES] D1 Lead-acid factory profile on a lithium bank  (HQ0000A0002; decode HIGH, evidence device-confirmed)
+      HQ0000A0002: flags2 = 0x0000 bitmask: LithiumBattery flag clear
+      HQ0000A0002: absorption_V = 57.6 V (schema 48 to 64, default 57.6): at the lead-acid schema default
+      HQ0000A0002: charge_characteristic = 3 enum (schema 1 to 3, default 3): curve 3 = adaptive + BatterySafe
+      ...
+      fix: copy absorption_V, float_V, charge_characteristic from HQ0000A0001 to HQ0000A0002; set the LithiumBattery flag
+```
+
+Nothing is applied silently. Name the findings to take, and the corrected file is built through the same
+guards as `edit`, next to the input, with a manual change sheet for typing the same change into VEConfigure:
+
+```
+mk2vsc diagnose download.rvms --fix --accept D1:HQ0000A0002
+```
+
+A fix that needs a value the file cannot supply asks for it (`--set absorption=56.8 float=54.0 ...`); no
+generic chemistry template is offered. `--json` is the `report_version` 1 contract. The rules, their evidence
+and their corpus hit counts are in docs/DIAGNOSE.md.
 
 From Python, the same loop:
 
@@ -175,6 +201,7 @@ things on your own system before trusting the tool with it.
 | docs/FORMAT.md | The file format as we understand it: sections, checksum, unit block layout, device vs upload form, assistant area |
 | docs/FIELDS.md | The settings table: every field's offset, label, scale, confidence, presumed purpose and evidence |
 | docs/CHANGE_CONTROL.md | The baseline / prepared / downloaded pattern, the rules, and the incidents that produced them |
+| docs/DIAGNOSE.md | The diagnose rules, their evidence class and corpus hits, the report_version 1 contract, fixes and the change sheet |
 | docs/WORKFLOW.md | Working with VRM Remote VEConfigure, and what still needs the Windows GUI |
 | docs/SAFETY.md | Responsible use, the proven-safe surface, recovery, first-use protocol |
 | docs/QA.md | How to decide whether to trust this: the test suite, the corpus, and a verify-it-yourself recipe |
