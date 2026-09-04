@@ -1,3 +1,8 @@
+---
+title: "Safety and responsible use"
+description: "What is proven, what is not, the guards in the writer, and how to recover."
+---
+
 # Safety and responsible use
 
 ## Who this is for

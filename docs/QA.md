@@ -1,3 +1,8 @@
+---
+title: "How to decide whether to trust mk2vsc"
+description: "The test suite, the fixture corpus, and how to verify the claims on your own system."
+---
+
 # QA: how to decide whether to trust this
 
 Trust in a tool that writes configuration to a battery inverter has to be earned by evidence you

@@ -1,3 +1,8 @@
+---
+title: "Installing the ESS assistant by file: the experiment in full"
+description: "Every attempt, outcome, hypothesis and the next experiment, for anyone who wants to pick it up."
+---
+
 # ESS injection by file: the experiment, in full
 
 **Goal.** Install the ESS assistant on both inverters of a bare two-inverter system by editing the

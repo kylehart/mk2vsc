@@ -1,3 +1,8 @@
+---
+title: "Assistants (ESS) in VEConfigure .rvms files"
+description: "What the assistant records look like, what a GUI install writes, and what this tool will not do."
+---
+
 # Assistants (ESS) in the file: what we know, what we do not, what we will not do
 
 An "assistant" is a small program VEConfigure loads into a MultiPlus or Quattro. ESS is the one most

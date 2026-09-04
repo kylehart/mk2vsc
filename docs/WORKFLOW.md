@@ -1,3 +1,8 @@
+---
+title: "Editing Victron inverter settings without VEConfigure: the VRM Remote VEConfigure workflow"
+description: "Download, edit, upload, verify; what still needs Windows and VEConfigure."
+---
+
 # Operational workflow with Victron's tools
 
 This toolkit reads and writes files. Getting a file off a system and back onto it is done with

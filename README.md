@@ -2,8 +2,11 @@
 
 [![tests](https://github.com/kylehart/mk2vsc/actions/workflows/test.yml/badge.svg)](https://github.com/kylehart/mk2vsc/actions/workflows/test.yml) [![PyPI](https://img.shields.io/pypi/v/mk2vsc.svg)](https://pypi.org/project/mk2vsc/) [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Read, validate, decode, diff, edit and qualify Victron VEConfigure `.rvms` configuration files
-without VEConfigure, on any operating system, from Python or the command line.
+Read, validate, decode, diff, edit and verify Victron VEConfigure `.rvms` configuration files (the
+files VRM Remote VEConfigure downloads and uploads for MultiPlus and Quattro systems) on macOS, Linux
+or Windows, without VEConfigure. Zero dependencies, Python 3.9+. Includes the file format as we
+understand it, the per-section checksum, the settings table with Victron's names, and what the
+`mk2vsc-36`, `mk2vsc-47` and `mk2vsc-49` upload errors mean. Documentation: https://kylehart.github.io/mk2vsc/
 
 ## The problem
 

@@ -1,3 +1,8 @@
+---
+title: "What mk2vsc-36, mk2vsc-47, mk2vsc-49, Error 1303 and VE.Bus errors 6 and 10 mean"
+description: "Decoder for the messages Remote VEConfigure and the device show, what was written, and what to do."
+---
+
 # Error and message decoder
 
 What the messages mean, whether anything was written to the inverters, what to do, and how sure we are.

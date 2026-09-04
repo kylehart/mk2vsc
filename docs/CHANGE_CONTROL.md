@@ -1,3 +1,8 @@
+---
+title: "Change control for Victron .rvms configuration files"
+description: "The simple loop and the fleet discipline: fresh downloads, prepared files, verification, intent files."
+---
+
 # Change control for `.rvms` configuration changes
 
 This is the part of the toolkit that a GUI cannot give you. VEConfigure lets you edit a file and

@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use mk2vsc or the file-format documentation in it, please cite it as below."
+title: "mk2vsc: Victron VEConfigure .rvms/.rvsc configuration files without VEConfigure"
+type: software
+authors:
+  - family-names: Hart
+    given-names: Kyle
+version: 0.5.1
+date-released: 2026-09-04
+license: MIT
+repository-code: "https://github.com/kylehart/mk2vsc"
+url: "https://kylehart.github.io/mk2vsc/"
+keywords:
+  - Victron
+  - VEConfigure
+  - VE.Bus
+  - MultiPlus
+  - rvms
+  - rvsc
+  - file format
+abstract: >-
+  A zero-dependency Python library and command-line tool that reads, validates, decodes, diffs,
+  edits and qualifies the .rvms configuration files produced by Victron VRM Remote VEConfigure,
+  together with a written description of the file format: section grammar, per-section integrity
+  checksum, the per-setting schema (scale, offset, default, min, max), the settings table with
+  Victron's own names and identifiers, and the assistant area.
