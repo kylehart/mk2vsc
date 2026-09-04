@@ -17,31 +17,34 @@ System D; inverters by serial.
 
 ## 1. Where the assistant lives (CONFIRMED)
 
-Each inverter's block holds a 190-entry u16 settings array followed by an *assistant area* that runs to
-the section checksum. The area is a sequence of records:
+Each inverter's block holds a 192-entry u16 settings array followed by an *assistant area* that runs to
+the section checksum. The area is one record and a tail:
 
-    record := marker(2) subtype(2) length(2) body[length]
-    marker  ff ff   empty slot or container
-            f5 ff   assistant record
+    area   := length(2) body[length] tail
     tail   := 0xff padding | ff | u16 free-space counter   (bare, container and stub blocks)
+
+The four bytes just before the length are settings 190 and 191, the grid-code / loss-of-mains words
+(`ff ff ff ff` when no grid code was ever applied, `f5 ff` + `01 00` or `01 01` with one; see
+docs/FIELDS.md). They are part of the settings array, not of the assistant record.
 
 | Block state | Area bytes (device form) | Meaning |
 |---|---|---|
-| bare | `ff ff ff ff 00 00 ff 00 0b` (9 bytes) | empty slot, length 0; free = 2816, and free + used = 2822 |
-| bare, older tool build | `ff ff ff ff 06 00 a7 fe 00 00 57 01 ff fa 0a` | a 6-byte empty container carrying the signature `a7 fe 00 00 57 01`; free = 2810 |
-| stub | `ff ff ff ff 40 00 a7 fe 00 00 57 01` + 0xff filler + `ff c0 0a` | the 64-byte empty container VEConfigure writes when it discards a transplanted assistant; free = 2752 |
-| residue | `f5 ff 00 ff 00 00 ff 00 0b` or `f5 ff 00 00 00 00 ff 00 0b` | an assistant-record header with length 0 where `ff ff` is expected; seen on downloads after a rejected or rolled-back assistant upload. Functionally bare. |
-| ESS (GUI installed) | `f5 ff 01 01 c0 02` + 704 bytes, or `f5 ff 01 00 80 04` + 1152 bytes, then 72 bytes | one record per inverter of the pair; see below |
+| bare | `00 00 ff 00 0b` (5 bytes) | length 0; free = 2816 |
+| bare, older tool build | `06 00 a7 fe 00 00 57 01 ff fa 0a` | a 6-byte empty container carrying the signature `a7 fe 00 00 57 01`; free = 2810 |
+| stub | `40 00 a7 fe 00 00 57 01` + 0xff filler + `ff c0 0a` | the 64-byte empty container VEConfigure writes when it discards a transplanted assistant; free = 2752 |
+| ESS (GUI installed) | `c0 02` + 704 bytes, or `80 04` + 1152 bytes, then 72 bytes | one record per inverter of the pair; see below |
 
-The free-space counter is 2816 (0x0b00) minus the container length on every bare, container and stub block
+The free-space counter is 2816 (0x0b00) minus the body length on every bare, container and stub block
 in the corpus. On ESS blocks the last three bytes read `ff 00 00` and the relation does not hold; the
 72-byte ESS tail (mostly 0xff, then `0e 00 8e 01 15 00 76 c4 e8 db ff 00 00`) is **not understood**.
 
 ## 2. The ESS records (CONFIRMED)
 
-Every GUI-installed ESS system we hold carries exactly two records, one on each inverter: 704 bytes with
-subtype 0x0101 and 1152 bytes with subtype 0x0001. Which inverter gets which follows its role in the
-pair (the slot bytes at +0x35/+0x37 and the low nibble of the flag at +0x36).
+Every GUI-installed ESS system we hold carries exactly two records, one on each inverter: 704 bytes and
+1152 bytes. Which inverter gets which follows its role in the pair (the slot bytes at +0x35/+0x37 and
+the low nibble of the flag at +0x36). Settings 128 and 191 just before the record are grid-code words
+set per inverter; on every GUI-authored install they are equal on each inverter (1 or 0x0101), and the
+two inverters of a pair may carry different values (System C) or the same (Systems A and B).
 
 Aligned by role, the 1152-byte body is byte-identical across System C, System B and System A. The 704-byte body
 differs by one byte across systems (a primary/secondary flag near the record start). So the payload is a
@@ -146,7 +149,7 @@ someone at the switches, with the battery full, with a fresh bare download ready
 - The 72-byte ESS tail and the `0e 00 8e 01 15 00 76 c4 e8 db` sequence.
 - Files from single-unit systems (`.rvsc`) and three-phase systems. We hold none; the section grammar
   and checksum probably carry over, the block layout may not.
-- Files with other assistants (AC PV, generator start/stop, relay assistants) to see whether the
-  record subtypes identify the assistant.
+- Files with other assistants (AC PV, generator start/stop, relay assistants) to see how the record
+  length and body identify the assistant.
 - A GUI export and its post-upload device download, from a session where exactly one thing was changed.
   Pairs like that are what moved this project forward; see docs/QA.md on contributing fixtures.

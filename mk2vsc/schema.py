@@ -18,7 +18,7 @@ and 55.20), charge current (0 to 35 A on this model), output voltage (95 to 128 
 (scale -10, 1.0 to 100.0 A), charge efficiency (scale -256, offset +1: 255 -> 1.000), SoC fields
 (scale -2), the Virtual Switch durations (offset -1, seconds or minutes), output frequency as a period
 (setting 62: 41667/2500 ms = 16.667 ms = 60 Hz, range 45 to 65 Hz), and the flags register whose "max"
-is the mask of settable bits.  189 of 190 settings in the corpus fall inside their own [min, max]; the
+is the mask of settable bits.  189 of the 190 bounded settings (0 to 189) in the corpus fall inside their own [min, max]; the
 exception is that flags mask.
 
 The 2070 bytes after the records (a per-setting attribute byte table and an offset-indexed set of

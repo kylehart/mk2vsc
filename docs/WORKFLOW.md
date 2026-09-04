@@ -63,7 +63,7 @@ Be clear about this before choosing the toolkit for a job:
   attempts have never produced a running assistant for us; see docs/ASSISTANTS.md.
 - Setting or changing the grid code. This requires the dealer password, entered in VEConfigure. The
   toolkit reads the grid-code flag (setting 81) and does not write it.
-- Anything that is not one of the 190 u16 values in the settings array, or is in the array but is
+- Anything that is not one of the 192 u16 values in the settings array, or is in the array but is
   not yet identified (docs/FIELDS.md). You can edit an unidentified value with an explicit override,
   but you are then the first person to try that offset on hardware.
 

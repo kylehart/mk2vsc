@@ -16,7 +16,7 @@ System C's own device download taken after that upload succeeded (device form). 
     BLOB12 + u32 export_timestamp         16 bytes; BLOB12 is identical in every GUI export we hold
     4 zero bytes
     u32 save_timestamp                    a few seconds before the export timestamp in the real export
-    raw[0x53:assistant_area]              4 zeros, 0x0180, the 190 settings (unchanged, now at +0x63)
+    raw[0x53:assistant_area]              4 zeros, 0x0180, the 192 settings (unchanged, now at +0x63)
     compact assistant area                the device pads records with 0xff runs; the GUI does not
 
 and blocks are emitted with the e4-slot block first, because the file's unit walk depends on order
@@ -131,17 +131,17 @@ def to_upload_form(device: bytes, reference: Optional[bytes] = None, timestamp: 
 def _compact_no_reference(area: bytes) -> bytes:
     """Strip padding from each record body and rewrite its length; strip padding from the tail.
 
-    Records: ``f5 ff <subtype> <len> <body>``.  The device pads bodies with 0xff runs; the GUI stores the
-    body compact and a correspondingly smaller length.  We only hold two records to check this against
-    (1152 -> 1102, 704 -> 670); both reproduce.
+    Record: ``u16 len | body`` (settings 190/191 precede it and are copied with the settings).  The device
+    pads the body with 0xff runs; the GUI stores it compact with a correspondingly smaller length.  We only
+    hold two records to check this against (1152 -> 1102, 704 -> 670); both reproduce.
     """
     out = bytearray()
     pos = 0
-    while pos + 6 <= len(area) and area[pos: pos + 2] == b"\xf5\xff":
-        subtype, length = struct.unpack_from("<HH", area, pos + 2)
-        body = _strip_ff_runs(area[pos + 6: pos + 6 + length])
-        out += b"\xf5\xff" + struct.pack("<HH", subtype, len(body)) + body
-        pos += 6 + length
+    if len(area) >= 2:
+        length = struct.unpack_from("<H", area, 0)[0]
+        body = _strip_ff_runs(area[2: 2 + length])
+        out += struct.pack("<H", len(body)) + body
+        pos = 2 + length
     # tail: device form is 0xff padding + `0e 00 8e 01 15 00 <4 slot bytes> ff 00 00`; the GUI writes
     # `ff <u16 free> 0a 00` + the same 10 trailer bytes + `00 00 00`, where free = 2812 - bytes used by the
     # compact records (observed on the installer's export and on the one transformed file the device accepted).
@@ -150,7 +150,7 @@ def _compact_no_reference(area: bytes) -> bytes:
     if k < 0 or len(tail) < k + 13:
         raise TransformRefused("device tail does not carry the expected 0e 00 8e 01 15 00 trailer")
     trailer10 = tail[k: k + 10]
-    out += b"\xff" + struct.pack("<H", 2812 - len(out)) + b"\x0a\x00" + trailer10 + b"\x00\x00\x00"
+    out += b"\xff" + struct.pack("<H", 2812 - 4 - len(out)) + b"\x0a\x00" + trailer10 + b"\x00\x00\x00"   # 2812 counted the 4 grid-code bytes
     return bytes(out)
 
 

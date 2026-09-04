@@ -12,9 +12,8 @@ def test_bare_blocks_have_the_empty_header(good_files, manifest):
             a = parse_assistant_area(u)
             if not u.has_assistant_flag:
                 assert a["kind"] in ("none", "container"), (name, u.serial, a)
-                assert not any(r["length"] for r in a["records"] if r["marker"] == "f5ff")
                 if "free" in a:
-                    assert a["free_plus_used"] == 2816 + 6, (name, a)   # 6 = the empty header itself
+                    assert a["free_plus_used"] == 2816, (name, a)
 
 
 def test_free_space_counter_on_stub_blocks(good_files, manifest):
@@ -24,7 +23,7 @@ def test_free_space_counter_on_stub_blocks(good_files, manifest):
             continue
         for u in unit_blocks(RvmsFile.parse(data)):
             a = parse_assistant_area(u)
-            assert a["records"][0]["length"] == 64 and a["free_plus_used"] == 2816 + 6, (name, a)
+            assert a["records"][0]["length"] == 64 and a["free_plus_used"] == 2816, (name, a)
 
 
 def test_gui_installed_ess_has_704_and_1152_byte_records(good_files, manifest):
@@ -75,7 +74,7 @@ def test_stub_signature_detected(good_files, manifest):
 
 
 def test_record_length_beyond_area_is_reported_as_malformed(good_files):
-    """A hand-built 2026-07-20 file carries an f5ff header whose length exceeds the area."""
+    """A hand-built 2026-07-20 file carries a record length that exceeds the area."""
     name = "system_c/system_c_2026-07-20_prepared_half-ess_deviceform_4.rvms"
     kinds = [parse_assistant_area(u)["kind"] for u in unit_blocks(RvmsFile.parse(good_files[name]))]
     assert "malformed" in kinds, kinds

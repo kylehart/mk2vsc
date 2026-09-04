@@ -106,7 +106,7 @@ def test_retracted_vs_soc_field_is_the_high_byte_of_setting_88(good_files):
 def test_settings_region_129_to_189_is_unprogrammed_on_bare_blocks(good_files):
     for name, u in _units(good_files):
         if not u.has_assistant_flag:
-            assert all(v == 0xFFFF for v in u.settings()[129:N_SETTINGS]), name
+            assert all(v == 0xFFFF for v in u.settings()[129:190]), name   # 190/191 may hold grid-code residuals
 
 
 def test_field_table_is_consistent():

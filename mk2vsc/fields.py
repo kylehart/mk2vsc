@@ -1,7 +1,7 @@
 """
 The settings table: what each u16 in the per-inverter settings array means, and how sure we are.
 
-Every ``BareSettingData`` block carries a flat array of 190 little-endian u16 values starting at
+Every ``BareSettingData`` block carries a flat array of 192 little-endian u16 values starting at
 block offset +0x59 (device form).  Entry *n* of that array is VE.Bus **setting ID n** as documented by
 the community MK2/MK3 protocol work (github.com/xcellsior/ve-bus-programming, "Persistent Settings
 IDs 0-255").  We established the mapping by noticing that the two fields we had confirmed
@@ -97,7 +97,7 @@ SCH = "device schema (BareSettingInfo = CommandGetSettingInfo records)"
 FLAGS0_BITS = {0: "MultiPhaseSystem", 1: "MultiPhaseLeader", 2: "60 Hz", 3: "Disable wave check (UPS function off)",
                4: "DoNotStopAfter10HrBulk", 5: "AssistEnabled (PowerAssist)", 6: "DisableCharge",
                7: "inverse of bit 3", 8: "DisableAES", 9: "not promoted", 10: "not promoted",
-               11: "EnableReducedFloat", 12: "not promoted", 13: "Disable ground relay", 14: "Weak AC input",
+               11: "EnableReducedFloat (storage mode, per the Victron doc; xcellsior reads the bit as adaptive charge. On every GUI- or device-authored block here bit 11 is set exactly when charge_characteristic = 3, so the corpus cannot separate the two readings)", 12: "not promoted", 13: "Disable ground relay", 14: "Weak AC input",
                15: "Remote overrules AC2"}
 FLAGS1_BITS = {0: "vsonBulkProtection", 1: "vsonTemperaturePreAlarm", 2: "vsonLowBatteryPreAlarm",
                3: "vsonOverloadPreAlarm", 4: "vsonUBatRipplePreAlarm", 5: "vsoffTemperaturePreAlarm",
@@ -170,7 +170,7 @@ FIELDS: List[Field] = [
        f"{MK2} (0 to 2); options 3 to 6 from VEConfigure's UI via {RT}.", "0, 1, 3", "mk2 + rtti"),
     # Virtual Switch, relay mode (15 to 43): documented names; values on our systems are defaults.
     _vs_level(16, "vs_on_inverter_current_high_A", "vsonIInvHigh", "on when inverter current higher than (0.01 A)", "2125", scale=100, unit="A"),
-    _vs_level(17, "vs_on_ubat_high_V", "vsonUBatHigh", "on when battery voltage higher than", "6400"),
+    _vs_level(17, "vs_on_ubat_high_V", "vsonUBatHigh", "on when battery voltage higher than (relay mode; 6400 is the schema default and is unchanged on every block, as is 4700 for 18; xcellsior reads 17 as a 64 V over-voltage threshold)", "6400"),
     _vs_level(18, "vs_on_ubat_low_V", "vsonUBatLow", "on when battery voltage lower than", "4700"),
     _vs_time(19, "vs_ton_inverter_current_high", "vstonIInvHigh", "time for vsonIInvHigh", "0"),
     _vs_time(20, "vs_ton_ubat_high", "vstonUBatHigh", "time for vsonUBatHigh", "0"),
@@ -283,10 +283,20 @@ FIELDS: List[Field] = [
     _f(88, "ubat_dont_charge_V", "UBatDontCharge", 100, "V", HIGH, "Battery voltage below which the charger does not charge (52.00 V here; VEConfigure shows it as the sustain voltage).", f"{RT}; {SCH}: 48.00 to 64.00 V; {XC} calls it the solar & wind priority voltage.", "5200", "rtti + schema"),
     _f(89, "current_sensor_factor", "CurrentSensorFactor", 1, "", LOW, "", f"{RT}; schema unused here.", "0", "rtti"),
     _f(128, "grid_settings_valid_checker_a", "GridSettingsValidCheckerA", 1, "", MEDIUM,
-       "Validity marker for the grid-settings block (129 to 189). 0xffff on bare blocks; the GUI ESS install writes 1 or 0x0101.",
-       f"{RT}; observed transition.", "65535, 1, 257, 65281, 0", "rtti + ours"),
-    _f(190, "general_grid_settings_int", "GeneralGridSettingsInt", 1, "", LOW, "Beyond the 190-entry array the unit blocks carry; present in the schema only.", f"{RT}.", "", "rtti"),
-    _f(191, "grid_settings_valid_checker_b", "GridSettingsValidCheckerB", 1, "", LOW, "Present in the schema only.", f"{RT}.", "", "rtti"),
+       "Grid-code word A. 0xffff on blocks that never had a grid code. On every GUI-authored ESS download it equals setting 191 on "
+       "the same inverter: 1 or 0x0101, and the two inverters of a pair may differ (System C: 1 and 0x0101) or match (System B: 1 and 1; "
+       "System A: 0x0101 and 0x0101). On a single bench unit xcellsior reads 1 with LOM type B and 257 with no LOM detection. "
+       "0 or 0xffff on bare blocks after a grid code was removed. Byte-grafted files (never started) show 128 != 191.",
+       f"{RT}; xcellsior FINDINGS 7.4; corpus.", "65535, 1, 257, 65281, 0", "rtti + xcellsior + ours"),
+    _f(190, "general_grid_settings_int", "GeneralGridSettingsInt", 1, "", MEDIUM,
+       "Grid-code word B, firmware-managed (wire writes are silently dropped per xcellsior). 0xffff on blocks that never had a grid "
+       "code; 0xfff5 on every grid-coded block here, including the 0x0101 ones (the bench reads 0xfff6 for those); 0xfff5 or 0xffff "
+       "on bare blocks after a grid code was removed.",
+       f"{RT}; xcellsior FINDINGS 7.4/9 (0xfff5 / 0xfff6); corpus.", "65535, 65525", "rtti + xcellsior + ours"),
+    _f(191, "grid_settings_valid_checker_b", "GridSettingsValidCheckerB", 1, "", MEDIUM,
+       "Grid-code word C. 0xffff on blocks that never had a grid code; equals setting 128 on every GUI-authored ESS download (1 or "
+       "0x0101, per inverter; see 128); 0 or 0xff00 on bare blocks after a grid code was removed.",
+       f"{RT}; xcellsior FINDINGS 7.4 (1 / 257 / residual 512); corpus.", "65535, 1, 257, 0, 65280", "rtti + xcellsior + ours"),
 ]
 FIELDS += [_f(n, f"not_defined_yet_{127 - n}", EPROM_NAMES[n], 1, "", UNKNOWN, "Reserved slot; 0 on every block.", RT, "0", "rtti") for n in range(90, 128)]
 FIELDS += [_f(n, f"grid_settings_int{n - 129}", EPROM_NAMES[n], 1, "", UNKNOWN, "Grid-code settings block, written by the grid-code step in VEConfigure; 0xffff on bare blocks.", RT, "65535", "rtti") for n in range(129, 190)]

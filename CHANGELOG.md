@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.8.0 (2026-09-04)
+
+* The settings array is 192 entries. Settings 190 and 191 are grid-code words (0xffff until a grid code is set; then 190 = 0xfff5 and 128 = 191 = 1 or 0x0101, set per inverter; partly retained after a grid code is removed). They were previously read as the assistant record's "marker" and "subtype"; the assistant area now starts at +0x1d9 as `u16 length | body | tail`. `grid_code_words()` reports never / set / residual; `census` prints it; `show` lists 190/191. Settings 128/190/191 descriptions updated. Issue #24 re-stated: the differing word is setting 191, set per inverter by the grid-code step; System C's two inverters carry different values.
+
 ## 0.7.0 (2026-09-04)
 
 * `show` prints the alignment self-check under each inverter and marks any physical setting sitting at the minimum or maximum of its own schema range when that limit is not the default (`mk2vsc.limits`). On the fixture corpus this marks exactly the blocks commissioned with absorption = float = 48.00 V.

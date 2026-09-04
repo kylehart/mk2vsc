@@ -102,7 +102,7 @@ value   = (raw + offset) / |scale|   when scale < 0      (divisor: -100 for cent
 value   = (raw + offset) * scale     when scale > 0      (unit: 15-minute, 60-minute, 360-minute steps)
 ```
 
-Setting 2 (absorption) reads scale -100, default 5760, min 4800, max 6400. 189 of 190 settings in the
+Setting 2 (absorption) reads scale -100, default 5760, min 4800, max 6400. 189 of the 190 bounded settings (0 to 189) in the
 corpus lie inside their own range; the flags register's "max" is a settable-bits mask. `mk2vsc.schema`
 parses it; docs/FIELDS.md shows each setting's default and range.
 
@@ -144,8 +144,8 @@ The same System A file, first unit block:
 | +0x4f | u32 | Unix timestamp of the last save; rewritten on every save. This is the "nonce" that makes an archived file "old" to the device | Observed |
 | +0x53 | u32 | zero | Observed |
 | +0x57 | u16 | `0x0180` in every block | Observed; Unknown |
-| +0x59 | u16[190] | the settings array; entry *n* is VE.Bus setting ID *n* (see `docs/FIELDS.md`) | Observed |
-| +0x1d5 | var | assistant area (§5) | Observed |
+| +0x59 | u16[192] | the settings array; entry *n* is VE.Bus setting ID *n* (see `docs/FIELDS.md`). Entries 190 and 191 are the grid-code / loss-of-mains words (`ff ff ff ff` with no grid code, `f5 ff 01 00` or `f5 ff 01 01` with one) | Observed |
+| +0x1d9 | var | assistant area (§5) | Observed |
 | last 4 | u32 | section checksum (§1.1) | Observed |
 
 **Observed.** Slot bytes: in every file the two blocks differ, one being (`00`,`00`) and the other
@@ -203,28 +203,28 @@ assistant *install* procedure (see `docs/ASSISTANTS.md`).
 
 ## 5. The assistant area
 
-**Observed.** After the 190 settings the block continues with a sequence of records and a tail:
+**Observed.** After the 192 settings the block continues with one record and a tail:
 
 ```
-area   := record* tail
-record := marker(2) | subtype(2) | len(2) | body[len]
-marker := ff ff   empty slot / container
-        | f5 ff   assistant record
+area   := len(2) | body[len] | tail
 ```
 
-Every block in the corpus fits one of these shapes:
+The four bytes before `len` are settings 190 and 191, the grid-code / loss-of-mains words (0xffff = not
+applicable; 0xfff5 and 0x0001 / 0x0101 once a grid code has been applied; see docs/FIELDS.md). They are
+settings, not part of the record.
+
+Every block in the corpus fits one of these shapes (settings 190/191 shown first for orientation):
 
 | Shape | Bytes | Where seen |
 |---|---|---|
-| bare | `ff ff ff ff 00 00` + `ff 00 0b` | every well-formed block without an assistant (89 blocks; a few show the residue or container shapes below) |
-| residue | `f5 ff 00 ff 00 00` + `ff 00 0b` (also `ff ff 00 00 00 00`, `f5 ff 00 00 00 00`) | downloads taken after a rejected or rolled-back assistant upload; functionally bare |
-| 6-byte container | `ff ff ff ff 06 00` + `a7 fe 00 00 57 01` + `ff fa 0a` | two files written by an older tool build (see docs/FIXTURES.md) |
-| stub | `ff ff ff ff 40 00` + `a7 fe 00 00 57 01` + 56 × `ff` + `c0 0a`, then `ff 40 0a` | what VEConfigure wrote on both inverters after accepting a transplanted assistant and discarding it |
-| GUI-installed ESS | `f5 ff 01 01 c0 02` + 704-byte body, or `f5 ff 01 00 80 04` + 1152-byte body, then a 72-byte tail | every working ESS install (one record per inverter; the pair holds one of each) |
+| bare | `ff ff ff ff` \| `00 00` + `ff 00 0b` | every well-formed block without an assistant and without a grid code |
+| bare, grid code removed | `f5 ff 00 00`, `f5 ff 00 ff` or `ff ff 00 00` \| `00 00` + `ff 00 0b` | bare blocks on which a grid code was once applied: some words stay (residual) |
+| 6-byte container | `ff ff ff ff` \| `06 00` + `a7 fe 00 00 57 01` + `ff fa 0a` | two files written by an older tool build (see docs/FIXTURES.md) |
+| stub | `ff ff ff ff` \| `40 00` + `a7 fe 00 00 57 01` + 56 × `ff` + `c0 0a`, then `ff 40 0a` | what VEConfigure wrote on both inverters after accepting a transplanted assistant and discarding it |
+| GUI-installed ESS | `f5 ff 01 01` or `f5 ff 01 00` \| `c0 02` + 704-byte body, or `80 04` + 1152-byte body, then a 72-byte tail | every working ESS install (one record per inverter; the pair holds one of each). Settings 128 and 191 read 1 or 0x0101, equal to each other on every GUI-authored block, set per inverter |
 
-**Observed.** On bare, residue, container and stub blocks the tail is `ff` + u16, and that u16 plus the bytes
-used by the records is always 2822 (= 2816 + the 6-byte empty header). **Inferred.** The u16 is a
-remaining-space counter over a 2816-byte assistant budget.
+**Observed.** On bare, container and stub blocks the tail is `ff` + u16, and that u16 plus the body length
+is always 2816. **Inferred.** The u16 is a remaining-space counter over a 2816-byte assistant budget.
 
 **Observed.** On device-form ESS blocks the 72-byte tail is `ff` padding followed by
 `0e 00 8e 01 15 00 <4 bytes> ff 00 00`, where the 4 bytes follow the record slot, not the inverter or the
@@ -250,7 +250,7 @@ it does not author them, and `docs/ASSISTANTS.md` explains why we stopped trying
 * upload-form shift of exactly 10 bytes; setting 5 reads 120 (V) on every block under the shifted or
   unshifted offset, which is how the shift was pinned
 * save timestamp plausible on every device-form block
-* assistant area shapes as tabulated; free + used = 2822 on non-ESS blocks; ESS records 704/1152 only
+* assistant area shapes as tabulated; free + body = 2816 on non-ESS blocks; ESS records 704/1152 only
 * block order not stable; content identical by serial
 
 **Inferred**
