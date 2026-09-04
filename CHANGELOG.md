@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.1 (2026-09-04)
+
+* `mk2vsc census` is now the self-check report contributors are asked for: structure, checksum status, schema parse, settings-in-range count, key values per inverter, and the reporting hint. Contribution docs and issue forms lead with it; the fixture form is replaced by a census-report form.
+* Frequency decode fixed (Hz = 2500000 / raw).
+
 ## 0.4.0 (2026-09-04)
 
 * Settings 0 to 65 and all flag bits now carry Victron's own names from the public MK2 Protocol 3.14 document; 63 of 80 named fields are HIGH confidence. New: Virtual Switch relay-mode settings 15 to 43, mains voltage window 44 to 47, assist boost factor 48, AES current limit 50/51, low-battery pre-alarm offset 63, three-phase mode 14, slave count 13.

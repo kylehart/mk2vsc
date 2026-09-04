@@ -18,6 +18,7 @@ def test_load_read_aliases_and_ids():
     u = cfg["HQ2414U6FVN"]
     assert u["absorption"] == u["absorption_V"] == u[2] == u["2"] == 56.0
     assert u["ac_limit"] == 50.0 and u.raw("ac_limit") == 500
+    assert round(u["frequency"], 2) == 60.0
     assert u.get("nonsense") is None
     assert cfg.value("absorption") == {"HQ2414AXENJ": 57.6, "HQ2414U6FVN": 56.0}
     assert not cfg.agree("absorption") and cfg.agree("inverter_output_V")

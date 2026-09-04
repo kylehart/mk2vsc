@@ -28,7 +28,7 @@ def test_known_scales_agree_with_the_schema(good_files):
         if r.unused:
             continue   # e.g. setting 49 (AC input 2) has no schema entry on a MultiPlus
         if fld.period:
-            assert r.scale == -fld.scale, fld.name
+            assert r.scale == -fld.scale // 1000, fld.name   # period in 1/2500 ms; Hz = 2500000 / raw
         elif fld.scale != 1.0:
             assert r.scale == -fld.scale, (fld.name, r.scale, fld.scale)
         assert r.offset == fld.raw_offset, (fld.name, r.offset, fld.raw_offset)

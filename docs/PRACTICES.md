@@ -60,5 +60,6 @@ publish through the release workflow.
 
 ## How to take part
 
-See CONTRIBUTING.md. The most valuable contributions are files and controlled pairs from systems we do
-not have, and independent verification of our claims on your own hardware.
+Run `mk2vsc census` on your own downloads and open a "Census report" issue with the output and what
+the values should be. That report is the unit of contribution; files and screenshots follow only when a
+report shows something worth chasing. See CONTRIBUTING.md.

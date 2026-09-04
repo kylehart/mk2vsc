@@ -193,14 +193,17 @@ things on your own system before trusting the tool with it.
 
 ## How to help
 
-The most useful contributions are files and controlled pairs, not code:
+Run it on your own system and report what it says:
 
-* A download, one setting changed in VEConfigure, and a second download, plus a screenshot of the
-  VEConfigure tab showing the value. One such pair names a field for everyone.
-* Files from other hardware: Quattro, other firmware, three-phase, single-unit `.rvsc`.
-* Running the verify-it-yourself recipe in docs/QA.md on your system and reporting what happened.
+```
+pip install mk2vsc
+mk2vsc census <your download>.rvms
+```
 
-See CONTRIBUTING.md for how to add a fixture and what the privacy expectations are.
+Open a "Census report" issue with the output and what the values should be according to VEConfigure or
+VRM. That is the contribution: it tests every claim here on hardware we do not have, and a disagreement
+is a finding. A pair of downloads with one setting changed between them (and which) names a field. See
+CONTRIBUTING.md.
 
 ## License and responsible use
 

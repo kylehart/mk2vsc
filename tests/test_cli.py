@@ -100,5 +100,8 @@ def test_diff_validate_fields_census_history(capsys):
     assert "absorption" in out and "param85" not in out
     assert main(["fields", "--all"]) == 0
     assert "param85" in capsys.readouterr().out
-    assert main(["census", BARE, BAD]) == 0
+    assert main(["census", BARE]) == 0
+    out = capsys.readouterr().out
+    assert "schema parsed" in out and "settings in schema range 190/190" in out and "absorption_V=" in out and "To report" in out
+    assert main(["census", BAD]) == 1
     assert main(["history", A, B]) == 0

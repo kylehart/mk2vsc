@@ -7,6 +7,10 @@ body:
     attributes: {label: Setting ID and current name, placeholder: "e.g. 52 (vs_param52)"}
     validations: {required: true}
   - type: textarea
+    id: census
+    attributes: {label: Output of `mk2vsc census` on the file you are reading, render: text}
+    validations: {required: true}
+  - type: textarea
     id: evidence
     attributes:
       label: Evidence

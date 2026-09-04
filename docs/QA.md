@@ -50,6 +50,11 @@ A claim test failing on a file from outside this envelope is the expected way to
 
 ## Verify it yourself before writing anything
 
+The short form is one command: `mk2vsc census <download>` prints structure, checksum status, whether the
+device schema parsed, whether every setting lies inside the schema's range, and the key values per
+inverter. Compare the key values with VEConfigure or VRM. If everything agrees, the model holds on your
+hardware; if not, you have a finding worth an issue. The longer form:
+
 1. Download your system's file twice, a minute apart. `mk2vsc diff a.rvms b.rvms` should say
    ONLY BOOKKEEPING and exit 0. This checks that the parser, the by-serial comparison, and the
    bookkeeping model (pointer, save timestamp, checksum) hold on your firmware.
