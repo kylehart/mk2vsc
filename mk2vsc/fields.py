@@ -6,7 +6,7 @@ block offset +0x59 (device form).  Entry *n* of that array is VE.Bus **setting I
 the community MK2/MK3 protocol work (github.com/xcellsior/ve-bus-programming, "Persistent Settings
 IDs 0-255").  We established the mapping by noticing that the two fields we had confirmed
 independently (absorption at +0x5d, float at +0x5f) sit exactly where setting IDs 2 and 3 land,
-then checking the rest of the array against that reference across the whole corpus (162 blocks in 81 well-formed files):
+then checking the rest of the array against that reference across the whole corpus (170 blocks in 85 well-formed files):
 
 * ID 5 reads 120 in every device-form block (our inverters are 120 V units)
 * ID 6 reads 500 = 50.0 A (AC input current limit, /10)
@@ -292,8 +292,8 @@ FIELDS: List[Field] = [
     _f(89, "current_sensor_factor", "CurrentSensorFactor", 1, "", LOW, "", f"{RT}; schema unused here.", "0", "rtti"),
     _f(128, "grid_settings_valid_checker_a", "GridSettingsValidCheckerA", 1, "", MEDIUM,
        "Grid-code word A. 0xffff on blocks that never had a grid code. On every GUI-authored ESS download it equals setting 191 on "
-       "the same inverter: 1 or 0x0101, and the two inverters of a pair may differ (System C: 1 and 0x0101) or match (System B: 1 and 1; "
-       "System A: 0x0101 and 0x0101). On a single bench unit xcellsior reads 1 with LOM type B and 257 with no LOM detection. "
+       "the same inverter: low byte 1, high byte 0 to 3 (0x0001, 0x0101, 0x0201, 0x0301); the two inverters of a pair may differ "
+       "(System C: 1 and 0x0101; System D: 0x0201 and 0x0301) or match (System B: 1 and 1; System A: 0x0101 and 0x0101). On a single bench unit xcellsior reads 1 with LOM type B and 257 with no LOM detection. "
        "0 or 0xffff on bare blocks after a grid code was removed. Byte-grafted files (never started) show 128 != 191.",
        f"{RT}; xcellsior FINDINGS 7.4; corpus.", "65535, 1, 257, 65281, 0", "rtti + xcellsior + ours"),
     _f(190, "general_grid_settings_int", "GeneralGridSettingsInt", 1, "", MEDIUM,
@@ -302,8 +302,8 @@ FIELDS: List[Field] = [
        "on bare blocks after a grid code was removed.",
        f"{RT}; xcellsior FINDINGS 7.4/9 (0xfff5 / 0xfff6); corpus.", "65535, 65525", "rtti + xcellsior + ours"),
     _f(191, "grid_settings_valid_checker_b", "GridSettingsValidCheckerB", 1, "", MEDIUM,
-       "Grid-code word C. 0xffff on blocks that never had a grid code; equals setting 128 on every GUI-authored ESS download (1 or "
-       "0x0101, per inverter; see 128); 0 or 0xff00 on bare blocks after a grid code was removed.",
+       "Grid-code word C. 0xffff on blocks that never had a grid code; equals setting 128 on every GUI-authored ESS download (low byte 1, "
+       "high byte 0 to 3, per inverter; see 128); 0 or 0xff00 on bare blocks after a grid code was removed.",
        f"{RT}; xcellsior FINDINGS 7.4 (1 / 257 / residual 512); corpus.", "65535, 1, 257, 0, 65280", "rtti + xcellsior + ours"),
 ]
 FIELDS += [_f(n, f"not_defined_yet_{127 - n}", EPROM_NAMES[n], 1, "", UNKNOWN, "Reserved slot; 0 on every block.", RT, "0", "rtti") for n in range(90, 128)]

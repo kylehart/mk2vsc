@@ -36,8 +36,10 @@ Everything that matters is on GitHub, in the open:
 - The library produces files. It never uploads. The decision to upload, and its consequences on a live
   battery system, are the operator's.
 - The guarded writer only makes length-preserving changes to settings with CONFIRMED or HIGH confidence
-  on device-form downloads, and proves that nothing else in the file moved. Everything beyond that is in
-  `mk2vsc/experimental/`, behind an explicit flag, with its full history in docs/ESS_INJECTION.md.
+  on device-form downloads, and proves that nothing else in the file moved. Assistant removal and
+  reinstall (`mk2vsc assistant`) produce upload-form files that reset the VE.Bus and are gated behind
+  `--resets-the-vebus`. Installing an assistant on a system that never had one is in
+  `mk2vsc/experimental/`, behind `--i-accept-the-risk`, with its full history in docs/ESS_INJECTION.md.
 - Incidents caused by this tooling on our own systems are written up with what went wrong, what it
   cost, and what changed as a result (docs/HISTORY.md). Corrections are stated as corrections.
 

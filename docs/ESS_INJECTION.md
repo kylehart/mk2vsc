@@ -234,7 +234,7 @@ discriminator standing, untested. Test: section 5.
 with the 704 record) on every system including the GUI export, so they are not per-inverter identity.
 What remains unexplained is the u16 immediately after the record (`40 00` device, `0a 00` GUI export)
 and the final byte (`ff` device, `00` GUI export), which our upload-form v2 carried in the GUI form and
-our device-form grafts carried in the device form. Neither started. (`mk2vsc experimental to-upload-form`
+our device-form grafts carried in the device form. Neither started. (`mk2vsc assistant` and `mk2vsc.upload_form`
 writes the GUI form.) Status: open, low prior. Test: a
 second GUI export from a different system to see whether `0a 00` is constant.
 
@@ -336,3 +336,21 @@ Recovery, in order:
    lever. Confirm from the GX that the VE.Bus service actually went silent; LEDs off is not proof.
 5. If the system has a bypass switch, put the loads on it for the whole window and take them off only
    when the inverter is inverting with AC In 1 active.
+
+## 8. 2026-09-04: the cycle closed
+
+The experiment in section 5 was run, on System D, with the toolkit's own upload-form transform and no GUI.
+A device download with ESS on both inverters, turned into upload form with no setting changed, was
+accepted; the immediate download failed with "Cannot find VE.Bus system" (the bus was re-enumerating), and
+ESS came back running. That separated the two device paths: device form is a settings write, upload form
+is the install procedure. The same download turned into upload form with the assistant flag cleared, the
+grid code and its words cleared and the assistant area emptied removed ESS from both inverters ("Resetting
+VE.Bus products"; assistant lists empty; the re-download was the device's canonical bare block with every
+setting verbatim). The earlier ESS download turned into upload form put it back: assistant lists
+populated, SOC limit enforced, re-download equal to the pre-removal download apart from bookkeeping. Every
+earlier failure in this document used device-form or transplanted files; hypothesis H2 (the upload-form
+path triggers the install routine) is the one that held. What remains open is the first-time install of an
+assistant on a system that never had one, which needs the settings a GUI install normalises as well as the
+records; the graft stays experimental for that case. The supported operations are in `mk2vsc assistant`
+and docs/ASSISTANTS.md section 8.
+

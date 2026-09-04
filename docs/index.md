@@ -29,7 +29,7 @@ Source and issues: [github.com/kylehart/mk2vsc](https://github.com/kylehart/mk2v
 ## Working with the device
 
 - [Error codes: mk2vsc-36, mk2vsc-47, mk2vsc-49, Error 1303, VE.Bus errors](ERRORS.md).
-- [Workflow with VRM Remote VEConfigure](WORKFLOW.md), including what still needs Windows.
+- [Workflow with VRM Remote VEConfigure](WORKFLOW.md), including assistant removal and reinstall and what still needs Windows.
 - [Change control](CHANGE_CONTROL.md): the loop that keeps a fleet's configuration auditable.
 - [Safety](SAFETY.md) and [how to decide whether to trust this](QA.md).
 

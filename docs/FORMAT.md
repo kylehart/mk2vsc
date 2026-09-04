@@ -13,7 +13,7 @@ one of three labels:
 * **Inferred**: the narrowest reading of the observations that we have not verified independently.
 * **Unknown**: bytes we can locate but cannot explain.
 
-The corpus behind every claim: 84 unique files (`fixtures/`, see `docs/FIXTURES.md`), 8 inverters
+The corpus behind every claim: 88 unique files (`fixtures/`, see `docs/FIXTURES.md`), 8 inverters
 (MultiPlus-II class, 48 V battery, 120 V output) in 4 two-inverter split-phase systems, a single firmware
 version (2729560, shown as "v560" in VRM), a single format version ("1.33"). We have no `.rvsc`
 (single-unit) file, no three-phase or 3+ unit file, and no file from any other firmware or tool version.
@@ -37,7 +37,7 @@ The sections always appear in this order:
 | Section | Payload | Count |
 |---|---|---|
 | `Mk2vscInfo` | 10 bytes: `u32 1`, `u16 4`, `"1.33"` | 1 |
-| `BareSettingInfo` | 4001 bytes, byte-identical across all 84 files: the settings schema (scale, offset, default, min, max per setting) | 1 |
+| `BareSettingInfo` | 4001 bytes, byte-identical across all 88 files: the settings schema (scale, offset, default, min, max per setting) | 1 |
 | `BareSettingData` | one inverter's configuration | one per inverter (2 in every corpus file) |
 
 A real header, from `fixtures/system_a/system_a_2026-07-20_download_bare_deviceform_1.rvms`:
@@ -69,7 +69,7 @@ The section table of that file as our parser reports it:
 
 **Observed.** The last four bytes of every section are the 32-bit little-endian word sum of the section
 from its length prefix up to those four bytes, modulo 2**32, with a trailing partial word zero-padded on
-the high side. This validates on all 107 files we have held (84 unique) and every section in them, with
+the high side. This validates on all 111 files we have held (88 unique) and every section in them, with
 the three deliberately broken files in `fixtures/` as negative controls. `mk2vsc.sections.sum32_le` is the
 whole implementation.
 
@@ -221,7 +221,7 @@ Every block in the corpus fits one of these shapes (settings 190/191 shown first
 | bare, grid code removed | `f5 ff 00 00`, `f5 ff 00 ff` or `ff ff 00 00` \| `00 00` + `ff 00 0b` | bare blocks on which a grid code was once applied: some words stay (residual) |
 | 6-byte container | `ff ff ff ff` \| `06 00` + `a7 fe 00 00 57 01` + `ff fa 0a` | two files written by an older tool build (see docs/FIXTURES.md) |
 | stub | `ff ff ff ff` \| `40 00` + `a7 fe 00 00 57 01` + 56 × `ff` + `c0 0a`, then `ff 40 0a` | what VEConfigure wrote on both inverters after accepting a transplanted assistant and discarding it |
-| GUI-installed ESS | `f5 ff 01 01` or `f5 ff 01 00` \| `c0 02` + 704-byte body, or `80 04` + 1152-byte body, then a 72-byte tail | every working ESS install (one record per inverter; the pair holds one of each). Settings 128 and 191 read 1 or 0x0101, equal to each other on every GUI-authored block, set per inverter |
+| GUI-installed ESS | `f5 ff` + a word with low byte 1 and high byte 0 to 3 (settings 190/191) \| `c0 02` + 704-byte body, or `80 04` + 1152-byte body, then a 72-byte tail | every working ESS install (one record per inverter; the pair holds one of each). Settings 128 and 191 read 1 or 0x0101, equal to each other on every GUI-authored block, set per inverter |
 
 **Observed.** On bare, container and stub blocks the tail is `ff` + u16, and that u16 plus the body length
 is always 2816. **Inferred.** The u16 is a remaining-space counter over a 2816-byte assistant budget.
@@ -237,7 +237,7 @@ systems in at most one byte (a primary/secondary flag). **Inferred.** The assist
 program template chosen by VEConfigure for the installation type, not something compiled per unit.
 **Unknown.** The body's encoding. It has the statistics of code (entropy about 6.2 bits/byte, recurring
 2-3 byte patterns) and contains recognisable parameter values (48.00 V, 10 %). `mk2vsc` reports the records;
-it does not author them, and `docs/ASSISTANTS.md` explains why we stopped trying.
+it does not author record bodies; it removes records and reinstalls the system's own earlier ones (`docs/ASSISTANTS.md` section 8).
 
 ## 6. Observed / Inferred / Unknown, collected
 
@@ -266,7 +266,7 @@ it does not author them, and `docs/ASSISTANTS.md` explains why we stopped trying
 * header bytes +0x1f..+0x34 and the `0x0180` word at +0x57
 * the 12 constant blob bytes of the upload form and whether they gate an install
 * the ESS record body encoding and the 13-byte ESS trailer
-* settings 128..189 (0xffff on bare blocks; the GUI ESS install writes 1 or 0x0101 into 128 and 129)
+* settings 128..189 (0xffff on bare blocks; the GUI ESS install writes a value with low byte 1 and high byte 0 to 3 into 128, equal to 191; 129 to 189 stay 0xffff on every block we hold)
 * whether `.rvsc` single-unit files share this layout: we have none
 * three-phase or 3+ unit files: we have none
 * any other firmware version or format version: we have none

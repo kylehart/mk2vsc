@@ -1,6 +1,6 @@
 {
- "generated": "2026-09-03",
- "count": 84,
+ "generated": "2026-09-04",
+ "count": 88,
  "entries": [
   {
    "file": "system_a/system_a_2026-06-18_experiment_bare_deviceform_1.rvms",
@@ -1933,6 +1933,98 @@
     }
    ],
    "notes": ""
+  },
+  {
+   "file": "system_d/system_d_2026-09-04_download_ess_deviceform_1.rvms",
+   "sha256": "d6392ff4e288b197c963cf78616669093385da8d03a53020576f378cfc4c4067",
+   "size": 7049,
+   "system": "D",
+   "date": "2026-09-04",
+   "origin": "download",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ0000D0002",
+     "length": 1705,
+     "flag": "e4"
+    },
+    {
+     "serial": "HQ0000D0001",
+     "length": 1255,
+     "flag": "e5"
+    }
+   ],
+   "notes": "post-T5 download: the source of the reinstall file"
+  },
+  {
+   "file": "system_d/system_d_2026-09-04_prepared_bare_uploadform_1.rvms",
+   "sha256": "1885e0868ba5ac8ad474d318d74f1fd3f5cc1d4303bd8bc9009217835c60c446",
+   "size": 5079,
+   "system": "D",
+   "date": "2026-09-04",
+   "origin": "prepared",
+   "state": "bare",
+   "form": "uploadform",
+   "blocks": [
+    {
+     "serial": "HQ0000D0002",
+     "length": 496,
+     "flag": "f4"
+    },
+    {
+     "serial": "HQ0000D0001",
+     "length": 494,
+     "flag": "f5"
+    }
+   ],
+   "notes": "remove_assistant output; accepted 2026-09-04, removed ESS from both inverters"
+  },
+  {
+   "file": "system_d/system_d_2026-09-04_download_bare_deviceform_1.rvms",
+   "sha256": "a09787f7be615d797717f9980a08725330c2c87f00ef315020709f025f736a3c",
+   "size": 5055,
+   "system": "D",
+   "date": "2026-09-04",
+   "origin": "download",
+   "state": "bare",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ0000D0001",
+     "length": 484,
+     "flag": "f5"
+    },
+    {
+     "serial": "HQ0000D0002",
+     "length": 482,
+     "flag": "f4"
+    }
+   ],
+   "notes": "re-download after the by-file removal"
+  },
+  {
+   "file": "system_d/system_d_2026-09-04_download_ess_deviceform_2.rvms",
+   "sha256": "96bcd51993d2866b114c653ad097c4b77330c415b1801291eec438f428c95139",
+   "size": 7049,
+   "system": "D",
+   "date": "2026-09-04",
+   "origin": "download",
+   "state": "ess",
+   "form": "deviceform",
+   "blocks": [
+    {
+     "serial": "HQ0000D0001",
+     "length": 1257,
+     "flag": "e5"
+    },
+    {
+     "serial": "HQ0000D0002",
+     "length": 1703,
+     "flag": "e4"
+    }
+   ],
+   "notes": "re-download after the by-file reinstall"
   }
  ],
  "serials_note": "Inverter serials are pseudonyms of the same shape as real ones (HQ0000<system><unit>); every other byte is as downloaded."

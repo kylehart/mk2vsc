@@ -1,15 +1,16 @@
 ---
 title: "Assistants (ESS) in VEConfigure .rvms files"
-description: "What the assistant records look like, what a GUI install writes, and what this tool will not do."
+description: "What the assistant records look like, what a GUI install writes, how to remove and reinstall an assistant by file, and what remains unproven."
 ---
 
-# Assistants (ESS) in the file: what we know, what we do not, what we will not do
+# Assistants (ESS) in the file: what we know, what works, what remains unproven
 
 An "assistant" is a small program VEConfigure loads into a MultiPlus or Quattro. ESS is the one most
 people want. Assistants cannot be installed with VictronConnect, so they are the main reason people
-still need a Windows machine. This document records everything we learned about how assistants appear
-in `.rvms` files, and the clear limit: **this toolkit reads assistant areas; it does not author,
-transplant or remove them.** We tried, on live systems, and it did not work. Details below.
+still need a Windows machine. This document records how assistants appear in `.rvms` files and what
+this toolkit can do about them: **remove an assistant, and reinstall one from an earlier download of the
+same system** (`mk2vsc assistant`, section 8). Installing an assistant on a system that never had one is
+not proven and stays under `mk2vsc.experimental`.
 
 Vocabulary: CONFIRMED means observed on our systems and reproducible from the fixtures. HYPOTHESIS means
 one explanation consistent with the evidence that we could not falsify. Systems are System A, System B, System C,
@@ -24,7 +25,7 @@ the section checksum. The area is one record and a tail:
     tail   := 0xff padding | ff | u16 free-space counter   (bare, container and stub blocks)
 
 The four bytes just before the length are settings 190 and 191, the grid-code / loss-of-mains words
-(`ff ff ff ff` when no grid code was ever applied, `f5 ff` + `01 00` or `01 01` with one; see
+(`ff ff ff ff` when no grid code was ever applied, `f5 ff` + a word with low byte 1 and high byte 0 to 3 with one; see
 docs/FIELDS.md). They are part of the settings array, not of the assistant record.
 
 | Block state | Area bytes (device form) | Meaning |
@@ -43,8 +44,9 @@ in the corpus. On ESS blocks the last three bytes read `ff 00 00` and the relati
 Every GUI-installed ESS system we hold carries exactly two records, one on each inverter: 704 bytes and
 1152 bytes. Which inverter gets which follows its role in the pair (the slot bytes at +0x35/+0x37 and
 the low nibble of the flag at +0x36). Settings 128 and 191 just before the record are grid-code words
-set per inverter; on every GUI-authored install they are equal on each inverter (1 or 0x0101), and the
-two inverters of a pair may carry different values (System C) or the same (Systems A and B).
+set per inverter; on every GUI-authored install they are equal on each inverter (low byte 1, high byte 0 to 3:
+0x0001, 0x0101, 0x0201, 0x0301), and the two inverters of a pair may carry different values (Systems C
+and D) or the same (Systems A and B).
 
 Aligned by role, the 1152-byte body is byte-identical across System C, System B and System A. The 704-byte body
 differs by one byte across systems (a primary/secondary flag near the record start). So the payload is a
@@ -61,11 +63,15 @@ inside it). It looks like an assembled program with its settings woven in. VE.Bu
 The GUI writes the assistant records compact (no 0xff padding runs, shorter block, a 16-byte export
 blob at +0x45). The device stores them padded and returns zeros at +0x45. A transform between the two
 forms exists and round-trips the installer's real export from the device's own download, byte-for-byte
-per block. The device accepted such a file on System A on 2026-08-13. The system stored the configuration
-and did not start (section 4, mode D). The transform ships as `mk2vsc.experimental.upload_form`, gated behind
-`--i-accept-the-risk`; docs/ESS_INJECTION.md records every attempt made with it.
+per block. The form and the content together decide what the device does with the file. A device-form
+upload whose assistant area is unchanged is a settings write (no reset; every settings edit in our record).
+Device-form files with an altered assistant area produced outcomes B, C and D below (a stub, a half
+install, or stored-and-never-started), never a working change. Upload-form files of the system's own
+content produced outcomes E and F: the install procedure ran ("Resetting VE.Bus products", inverters off
+for its duration) and did what the file said. `mk2vsc assistant` builds upload-form files; the transform
+lives in `mk2vsc.upload_form`.
 
-## 4. The four failure modes we observed
+## 4. The outcomes we observed
 
 | Mode | What the device did | Written to device? | Examples |
 |---|---|---|---|
@@ -73,9 +79,14 @@ and did not start (section 4, mode D). The transform ships as `mk2vsc.experiment
 | B. accept, then stub | began an install, discarded our records, wrote a 64-byte empty container on each inverter, flipped the flags to e4/e5 | yes, a stub; rollback by re-uploading a fresh bare file works | System B v4 (07-24), System A v3 (08-12) |
 | C. accept, half apply | "Resetting VE.Bus products", real install started, failed at the grid-code step with mk2vsc-36, VE.Bus error 10 for about 17 minutes | partially; GX reboots and a baseline re-upload recovered it | System C load-both v3 (07-20); System A v4 reached the same dialog and was rejected at commit with nothing written |
 | D. accept, store, never start | configuration stored byte-perfect and stable across cold boot, assistant advertised on both inverters, system stays Off in the connecting state with no error | yes; a fresh bare file restores operation | System A v7 and upload-form v2 (08-13), System D one-shot graft (08-13) |
+| E. accept, remove | "Resetting VE.Bus products"; assistant lists empty on both inverters afterwards; the re-download is the device's canonical bare block with every setting verbatim | yes, as intended | System D removal (09-04), an upload-form file with the assistant area emptied |
+| F. accept, reinstall | "Resetting VE.Bus products" for about five minutes; assistant lists populated on both, SOC limit enforced; the re-download equals the pre-removal download apart from bookkeeping | yes, as intended | System D reinstall (09-04), an upload-form file made from the system's own earlier ESS download |
 
-A fifth outcome belongs here for completeness: the removal attempt on System C (07-20) was accepted and
-left the *running* assistant corrupt (VE.Bus error 6) while the stored file still showed it present.
+A device-form removal attempt on System C (07-20) was accepted and left the *running*
+assistant corrupt (VE.Bus error 6) while the stored file still showed it present. Outcomes B, C and D came
+from device-form files with an altered assistant area or from transplanted records (one of them, System A
+upload-form v2, was an upload-form transplant); the two upload-form files of the system's own content
+(E, F) both did what they said.
 
 ## 5. Evidence table
 
@@ -101,7 +112,7 @@ the battery to support loads on grid unless a grid code is set. We do not have a
 gate, we did not look for one, and this toolkit will not include one. What we observed is narrower:
 
 - Setting 81 (`grid_code_active`) is 0 on every bare download and 1 on every GUI-authored ESS block.
-  Setting 128 (`lom_config_a`) moves from 0xffff to 1 or 0x0101. A few other settings change too
+  Setting 128 (`grid_settings_valid_checker_a`) moves from 0xffff to a value with low byte 1 (see docs/FIELDS.md). A few other settings change too
   (60, 67, 69, and the adaptive-charge bit in flags register 0). Those are ordinary settings the GUI
   writes; they are not a credential.
 - The password is not stored in the file. Two independent GUI exports from the same session carry
@@ -128,18 +139,48 @@ System A now runs ESS after the installer's GUI session on a repaired bus. That 
 hypothesis and does not test it, because the file was GUI-authored. The clean test would be uploading a
 transformed file to a healthy-BMS system, and we have not done it.
 
-## 8. What this toolkit will not do
+What the 2026-09-04 cycle adds: a transformed file (the system's own ESS download in upload form) started
+ESS on System D, whose CAN-bus BMS was connected and reporting by then. That is consistent with the
+hypothesis and does not isolate it: the same test on a system without a BMS has not been run. What the
+cycle does rule out is the alternative that our upload-form files were structurally unable to start an
+install; they were not.
 
-- Author, remove or transplant an assistant as a supported operation. `set_settings` refuses any edit that
-  changes block length. The graft and the upload-form transform exist only under `mk2vsc.experimental`,
-  gated behind `--i-accept-the-risk`, because no file they produced has ever run; docs/ESS_INJECTION.md
-  is the full record and the hand-off to whoever tries next.
-- Treat upload-form files as an input for settings edits. The writer refuses them.
-- Anything involving the grid-code password.
+## 8. Removing and reinstalling an assistant by file (`mk2vsc assistant`)
 
-If you are tempted anyway: a file the device *accepts* is a higher-risk event than one it rejects. Modes
-B, C and D above all started with "Success" or a progress bar. Do it on a system nobody depends on, with
-someone at the switches, with the battery full, with a fresh bare download ready to upload.
+```
+mk2vsc assistant remove    <fresh download>.rvms -o remove.rvms    --resets-the-vebus
+mk2vsc assistant reinstall <earlier download with the assistant>.rvms -o reinstall.rvms --resets-the-vebus
+```
+
+`remove` takes a fresh device download whose inverters carry an assistant and writes an upload-form file
+with the assistant flag cleared, the grid code and its words (81, 128, 190, 191) cleared, and an empty
+assistant area. `reinstall` takes an earlier download of the same system that had the assistant and writes
+it in upload form; settings, grid code and records travel with it. Both, uploaded, reset the VE.Bus.
+
+What happens on upload, as observed on System D on 2026-09-04, is the device's normal behaviour for any
+assistant change and is not specific to files from this toolkit: a file saved from VEConfigure's GUI goes
+through the same reset and the same delays. The dialog shows "Configuring, Status: Resetting VE.Bus
+products" for one to five minutes and then usually ends in "Error 1303, VRM connection stopped
+responding", although the device has completed; downloads fail for about five minutes ("Cannot
+find VE.Bus system", Error 745); GX-based monitoring shows the site disconnected and stale inverter
+states in that window. Judge the result by a fresh download (`mk2vsc verify` against the file you
+uploaded) and by the GX's assistant list per device (VRM diagnostics "Device N assistant list": empty
+after a removal, populated after a reinstall). Build the file minutes before uploading: any download
+taken after it was built makes the device reject it as old (mk2vsc-36).
+
+Preconditions: a system nobody depends on for the duration, someone able to power-cycle the inverters if
+the bus does not come back, battery well charged, grid present, and the reinstall file ready before the
+removal. Recovery order if a step goes wrong: upload the reinstall file; GX reboot; physical power cycle
+(confirm the VE.Bus service went silent); reinstall again.
+
+What this toolkit still does not do:
+
+- Install an assistant on a system that never had one. The records are a fixed template (section 2), but a
+  GUI install also normalises a set of settings and writes the grid code; no by-file install of that kind
+  has run. The graft stays under `mk2vsc.experimental`, gated, with docs/ESS_INJECTION.md as the record.
+- Treat upload-form files as an input for settings edits. The writer refuses them; edit the device-form
+  download and let `mk2vsc assistant` build the upload form.
+- Anything involving the grid-code password. `reinstall` carries the grid code the system already had.
 
 ## 9. What a contributor could safely investigate offline
 

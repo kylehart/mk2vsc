@@ -33,7 +33,8 @@ of these rules is docs/PRACTICES.md; this file is the operational checklist.
 ## 3. Safety of readers comes before completeness
 
 - The writer edits only length-preserving settings on device-form downloads and self-verifies the
-  diff. Anything else is experimental, gated behind an explicit flag, and documented as such.
+  diff; assistant removal and reinstall as upload-form files behind `--resets-the-vebus`. First-time
+  assistant installs are experimental, gated behind `--i-accept-the-risk`, and documented as such.
 - Never publish a command that uploads to a device. Uploads are a human action through VRM.
 - Every incident on our own systems caused by this tooling is written up (docs/HISTORY.md,
   docs/ESS_INJECTION.md) with what was wrong, what it cost, and what changed as a result.

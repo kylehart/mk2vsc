@@ -228,6 +228,17 @@ issue #24 was mis-stated rather than answered. The lesson repeats the one from t
 itself: name a byte by its VE.Bus setting ID before giving it a meaning, and a value that fits two
 stories fits neither until a second observation separates them.
 
+## 2026-09-04: assistants by file
+
+Six uploads on System D, each on a fresh download and each verified by re-download, took the toolkit from
+"settings only" to removing and reinstalling the ESS assistant by file. The decisive step was uploading the
+system's own download rewritten in the GUI's upload form with nothing changed: the device reset the VE.Bus,
+which no settings-only upload had ever caused, and ESS came back. Every earlier attempt had either the
+wrong form for its content or the wrong content for the system. A removal file and a reinstall file built the same way then did
+exactly what they said, and the dialog's closing "Error 1303" turned out to mean only that the tunnel had
+timed out while the device finished. The lesson for the record: when the device stores your bytes and does
+nothing with them, ask which procedure it ran, not which bytes it disliked.
+
 ## What remains open
 
 The open questions are tracked as GitHub issues, in priority order, at

@@ -1,7 +1,11 @@
 # Changelog
 
-## Unreleased
+## 0.10.0 (2026-09-04)
 
+* `mk2vsc assistant remove` and `mk2vsc assistant reinstall`: remove an assistant from a system, or reinstall the one an earlier download of the same system carried, as upload-form files. Proven on one live system on 2026-09-04 (ESS removed and put back; re-downloads verified). Uploading them resets the VE.Bus, as any assistant change does, GUI included; `--resets-the-vebus` acknowledges that.
+* The upload-form transform moved from `mk2vsc.experimental` to `mk2vsc.upload_form`; `experimental to-upload-form` is gone, `experimental graft` (first-time install from another system's records) stays gated and unproven.
+* Four System D fixtures from the cycle (post-T5 ESS download, the accepted removal file, the bare re-download, the ESS re-download); 88 files.
+* Settings 128/191 also take 0x0201 and 0x0301 (System D); descriptions updated.
 * docs: during a Remote VEConfigure operation, GX-based monitoring can report the site disconnected for under a minute and carry a stale inverter state while the MK2 tunnel holds the VE.Bus port (observed on two systems; inverter behaviour not measured independently); not a file fault; health checks must allow for the window (WORKFLOW "Monitoring during a remote operation", CHANGE_CONTROL Rule 4).
 
 ## 0.9.0 (2026-09-04)

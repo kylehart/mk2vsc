@@ -16,13 +16,14 @@ Quick tour::
 
 The facade (``mk2vsc.api``) is a thin layer over the same modules the CLI uses: ``sections`` (file
 grammar and checksums), ``units`` (per-inverter block), ``fields`` (the settings table with confidence
-levels), ``writer`` (guarded edits), ``diff``, ``qualify``, ``assistants`` (read-only), ``history``.
+levels), ``writer`` (guarded edits), ``diff``, ``qualify``, ``assistants`` (read-only parsing), ``assistant`` (remove / reinstall), ``history``.
 
 Safety model in one paragraph: this library produces *files*.  It never talks to an inverter.  A valid
 file is necessary, not sufficient: editing the right offset is on you (see ``fields.py`` confidence
 levels), and the only proven-safe edits are length-preserving value changes to the settings array.
-Adding, removing or transplanting an assistant (ESS etc.) by file has never produced a running system for
-us and has disrupted live systems.  Read docs/SAFETY.md before uploading anything.
+Removing an assistant, or reinstalling one from an earlier download of the same system, works through
+``mk2vsc.assistant`` (upload-form files; uploading them resets the VE.Bus).  Installing an assistant on a
+system that never had one is unproven (``mk2vsc.experimental``).  Read docs/SAFETY.md before uploading anything.
 """
 from .sections import RvmsFile, Section, RvmsParseError, sum32_le, scan_unit_blocks
 from .units import UnitBlock, unit_blocks, units_by_serial
@@ -33,7 +34,7 @@ from .diff import diff_files, diff_bytes
 from .qualify import qualify_file, Intent
 from .api import load, loads, verify, Config, Unit
 
-__version__ = "0.9.0"
+__version__ = "0.10.0"
 __all__ = [
     "load", "loads", "verify", "Config", "Unit",
     "RvmsFile", "Section", "RvmsParseError", "sum32_le", "scan_unit_blocks",

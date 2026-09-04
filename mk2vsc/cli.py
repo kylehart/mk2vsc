@@ -306,25 +306,42 @@ def cmd_census(a):
     return rc
 
 
+def cmd_assistant(a):
+    from .assistant import remove_assistant, reinstall_assistant, AssistantRefused
+    if not a.resets_the_vebus:
+        return _fail("this file, uploaded, resets the VE.Bus: the inverters stop for the duration and the VRM tunnel is "
+                     "unresponsive for about five minutes. Have someone at the switches, then pass --resets-the-vebus.", 2)
+    try:
+        data = open(a.file, "rb").read()
+        out = remove_assistant(data) if a.what == "remove" else reinstall_assistant(data)
+        if os.path.exists(a.out) and not a.overwrite:
+            return _fail(f"{a.out} exists; pass --overwrite or choose another name")
+        with open(a.out, "wb") as fh:
+            fh.write(out)
+    except (AssistantRefused, RvmsParseError, OSError) as e:
+        return _fail(f"REFUSED: {e}")
+    print(f"wrote {a.out} ({len(out)} bytes, upload form). Upload it through VRM within minutes: any download taken after")
+    print("this file was built makes the device treat it as old (mk2vsc-36). Expect 'Resetting VE.Bus products' and, after a")
+    print("few minutes, a fresh download that shows the intended assistant state on every inverter.")
+    return 0
+
+
 def cmd_experimental(a):
     if not a.i_accept_the_risk:
-        return _fail("experimental commands have never produced a running ESS system and have disrupted live systems; "
-                     "read docs/ESS_INJECTION.md, then pass --i-accept-the-risk", 2)
-    from .experimental import graft, to_upload_form, GraftRefused, TransformRefused
+        return _fail("experimental: the graft (installing an assistant on a system that never had one) has never produced a "
+                     "running system and has disrupted live systems; for removing or reinstalling an assistant use "
+                     "`mk2vsc assistant`. Read docs/ESS_INJECTION.md, then pass --i-accept-the-risk", 2)
+    from .experimental import graft, GraftRefused
     try:
-        if a.what == "graft":
-            out, checks = graft(open(a.baseline, "rb").read(), open(a.template, "rb").read(),
-                                install_state=a.install_state, capacity_ah=a.capacity_ah)
-            for k, v in checks.items():
-                print(f"  {k}: {v}")
-        else:
-            ref = open(a.reference, "rb").read() if a.reference else None
-            out = to_upload_form(open(a.device, "rb").read(), reference=ref)
+        out, checks = graft(open(a.baseline, "rb").read(), open(a.template, "rb").read(),
+                            install_state=a.install_state, capacity_ah=a.capacity_ah)
+        for k, v in checks.items():
+            print(f"  {k}: {v}")
         with open(a.out, "wb") as fh:
             fh.write(out)
         print(f"wrote {a.out} ({len(out)} bytes). EXPERIMENTAL: see docs/ESS_INJECTION.md before uploading.")
         return 0
-    except (GraftRefused, TransformRefused, RvmsParseError, OSError) as e:
+    except (GraftRefused, RvmsParseError, OSError) as e:
         return _fail(f"REFUSED: {e}")
 
 
@@ -383,13 +400,21 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("files", nargs="+", metavar="FILE"); s.add_argument("-q", "--quiet", action="store_true", help="omit the reporting hint")
     s.set_defaults(fn=cmd_census)
 
+    s = sub.add_parser("assistant", help="remove the assistant, or reinstall it from an earlier download (docs/ASSISTANTS.md)")
+    ss = s.add_subparsers(dest="what", required=True)
+    for what, hlp in (("remove", "upload-form file that removes the assistant from every inverter"),
+                      ("reinstall", "upload-form file that reinstalls the assistant carried by an earlier download of the same system")):
+        p = ss.add_parser(what, help=hlp)
+        p.add_argument("file", help="remove: a fresh device download; reinstall: the earlier device download of the same system that carries the assistant")
+        p.add_argument("-o", "--out", required=True)
+        p.add_argument("--overwrite", action="store_true")
+        p.add_argument("--resets-the-vebus", action="store_true", help="acknowledge that uploading the result resets the VE.Bus")
+        p.set_defaults(fn=cmd_assistant)
     x = sub.add_parser("experimental", help="assistant-injection experiments (docs/ESS_INJECTION.md)")
     xs = x.add_subparsers(dest="what", required=True)
     g = xs.add_parser("graft"); g.add_argument("baseline"); g.add_argument("template"); g.add_argument("out")
     g.add_argument("--install-state", action="store_true"); g.add_argument("--capacity-ah", type=int, default=None)
     g.add_argument("--i-accept-the-risk", action="store_true"); g.set_defaults(fn=cmd_experimental)
-    t = xs.add_parser("to-upload-form"); t.add_argument("device"); t.add_argument("out"); t.add_argument("--reference")
-    t.add_argument("--i-accept-the-risk", action="store_true"); t.set_defaults(fn=cmd_experimental)
     return ap
 
 

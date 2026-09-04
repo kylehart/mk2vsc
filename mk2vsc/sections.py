@@ -1,7 +1,7 @@
 """
 Section-level parser and serializer for Victron VEConfigure ``.rvms`` files.
 
-Observed file grammar (every file in the 84-file corpus, no exceptions)::
+Observed file grammar (every file in the 88-file corpus, no exceptions)::
 
     file     := magic section*
     magic    := u16 name_len | "VEConfig setting section file"          (29 bytes, no pointer, no checksum)
@@ -42,7 +42,7 @@ def sum32_le(data: bytes, start: int = 0, end: Optional[int] = None) -> int:
     """Sum ``data[start:end]`` as 32-bit little-endian words modulo 2**32.
 
     A trailing partial word is zero-padded on the high side.  This is the integrity function
-    VEConfigure uses for every section trailer (validated on all 107 corpus files).
+    VEConfigure uses for every section trailer (validated on all 111 corpus files).
     """
     if end is None:
         end = len(data)
