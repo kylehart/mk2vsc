@@ -184,13 +184,48 @@ def cmd_validate(a):
 
 def cmd_fields(a):
     alias_of = {v: k for k, v in ALIASES.items()}
-    print(f"{'id':>3} {'offset':>7} {'name':28s} {'alias':16s} {'unit':6s} {'conf':9s} label")
+    if a.by_tab:
+        return _fields_by_tab(alias_of)
+    print(f"{'id':>3} {'offset':>7} {'name':28s} {'alias':16s} {'unit':6s} {'conf':9s} {'label':34s} in VEConfigure")
     for f in FIELDS:
         if f.confidence not in (CONFIRMED, HIGH) and not a.all:
             continue
-        print(f"{f.id:3d} +0x{f.offset:03x} {f.name:28s} {alias_of.get(f.name, ''):16s} {f.unit:6s} {f.confidence:9s} {f.label}")
+        where = f.ui.path if f.ui else ""
+        print(f"{f.id:3d} +0x{f.offset:03x} {f.name:28s} {alias_of.get(f.name, ''):16s} {f.unit:6s} {f.confidence:9s} {f.label:34s} {where}")
     if not a.all:
-        print("(CONFIRMED and HIGH fields only; --all lists every named setting)")
+        print("(CONFIRMED and HIGH fields only; --all lists every named setting; --by-tab lays them out as VEConfigure does)")
+    return 0
+
+
+def _fields_by_tab(alias_of):
+    """The settings laid out as VEConfigure's tabs and groups, with the mk2vsc name to edit each one."""
+    from .fields import BY_ID
+    from .ui import by_tab, TAB_LABEL, DERIVED, UNPLACED
+    by_eprom = {f.eprom: f for f in FIELDS}
+    for tab, groups in by_tab().items():
+        if not groups:
+            continue
+        print(f"{TAB_LABEL[tab]}")
+        for group, items in groups.items():
+            print(f"  {group}")
+            for key, ui in items:
+                if key.startswith("setting "):
+                    sid, bit = int(key.split()[1]), int(key.split()[3])
+                    how = f"{BY_ID[sid].name} bit {bit}" + (" (ticked = bit clear)" if ui.inverted else "")
+                    conf = BY_ID[sid].confidence
+                else:
+                    f = by_eprom[key]
+                    how = f.name + (f"  alias {alias_of[f.name]}" if f.name in alias_of else "")
+                    conf = f.confidence
+                cert = "" if ui.certainty == "confirmed" else f"  [{ui.certainty} placement]"
+                print(f"    {ui.label:60s} {how:44s} {conf}{cert}")
+        for t, g, label, formula in DERIVED:
+            if t == tab:
+                print(f"    {label:60s} computed: {formula}")
+        for t, g, label in UNPLACED:
+            if t == tab:
+                print(f"  {g}\n    {label:60s} no setting known")
+    print("\nPlacement observed on VEConfigure 1.33 (talas9/rvsc-tools, MIT); 'probable' = name match not yet exercised.")
     return 0
 
 
@@ -333,6 +368,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     s = sub.add_parser("fields", help="the settings table: names, aliases, confidence")
     s.add_argument("--all", action="store_true", help="include MEDIUM/LOW/UNKNOWN entries")
+    s.add_argument("--by-tab", action="store_true", help="lay the settings out as VEConfigure's tabs and groups")
     s.set_defaults(fn=cmd_fields)
 
     s = sub.add_parser("census", help="the self-check report to paste into an issue: structure, schema, inverters, key values")

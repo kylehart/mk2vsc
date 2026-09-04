@@ -60,6 +60,12 @@ class Field:
         return EPROM_NAMES[self.id] if self.id < len(EPROM_NAMES) else ""
 
     @property
+    def ui(self):
+        """Where this setting appears in VEConfigure (tab, group, label), or None; see mk2vsc.ui."""
+        from .ui import ui_for_setting
+        return ui_for_setting(self.eprom)
+
+    @property
     def offset(self) -> int:
         """Device-form block offset (add 10 for upload-form blocks)."""
         return 0x59 + 2 * self.id
@@ -105,7 +111,9 @@ FLAGS1_BITS = {0: "vsonBulkProtection", 1: "vsonTemperaturePreAlarm", 2: "vsonLo
                9: "vsonWhenGeneralFailure", 10: "vsInvert", 11: "Accept wide input frequency",
                12: "Dynamic current limiter", 13: "Tubular plate traction battery curve",
                14: "Remote overrules AC1", 15: "Low power shutdown in AES"}
-FLAGS2_BITS = {0: "vs2offWhenAC1Available", 1: "vs2Invert", 2: "vsSetInverterPeriodTime"}
+FLAGS2_BITS = {0: "vs2offWhenAC1Available", 1: "vs2Invert", 2: "vsSetInverterPeriodTime", 3: "vsInverterPeriodTimeOnUBat",
+               4: "LithiumBattery", 5: "AllowEnableFeedIn", 6: "AllowIMainsHigherThanMaxRelayCurrent",
+               7: "ConfiguredForVEBusBMS", 8: "DisableVSense", 9: "PreferRenewableEnergy"}   # 3-9 from VEConfigure identifiers (talas9/rvsc-tools)
 
 
 def _f(id, name, label, scale=1, unit="", conf=UNKNOWN, desc="", ev="", obs="", src="", **kw):
