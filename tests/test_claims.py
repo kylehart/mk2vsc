@@ -141,3 +141,26 @@ def test_virtual_switch_load_thresholds_are_current_in_centiamps(good_files):
         assert 3 <= u.setting(56) / 100 <= 30, (name, u.setting(56))
         assert u.setting(51) == 40 and u.setting(50) == 60, name       # 0.40 and 0.60 at the schema's /100 scale
         assert u.setting(70) in (0, 50), name                            # VS SoC threshold: 25 % (0 on an unconfigured system)
+
+
+# 128 == 191 per inverter on every GUI-authored ESS download; != on every never-started byte graft.
+GUI_AUTHORED_ESS = ("system_b_", "system_c_", "system_a_2026-09-03", "system_d_2026-09-04")
+NEVER_STARTED_GRAFT = ("system_a_2026-08-13", "system_a_2026-08-14", "system_d_2026-08-13", "system_d_2026-08-14")
+
+
+def test_grid_code_checker_words_agree_on_gui_authored_ess_downloads(good_files, manifest):
+    by_file = {e["file"]: e for e in manifest["entries"]}
+    seen = {"gui": 0, "graft": 0, "graft_unequal": 0}
+    for name, u in _units(good_files):
+        e = by_file[name]
+        base = name.split("/")[-1]
+        if e["state"] != "ess" or e["origin"] not in ("download", "gui-export"):
+            continue
+        if base.startswith(GUI_AUTHORED_ESS):
+            assert u.setting(128) == u.setting(191), (name, hex(u.setting(128)), hex(u.setting(191)))
+            seen["gui"] += 1
+        elif base.startswith(NEVER_STARTED_GRAFT):
+            seen["graft"] += 1
+            seen["graft_unequal"] += u.setting(128) != u.setting(191)
+    assert seen["gui"] >= 10 and seen["graft"] >= 10, seen
+    assert seen["graft_unequal"] >= 10, seen   # every graft file has at least one inverter with 128 != 191

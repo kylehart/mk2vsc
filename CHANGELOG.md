@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+* The writer refuses the grid-code block and its validity words, settings 81, 128, 129-189, 190 and 191 (`fields.GRID_CODE_LOCKED`), with no override flag; `EDITABLE` excludes them. Observed 2026-09-04: a live System A took a device-form file that changed only setting 191 (0x0101 -> 0xff00); it was not refused before the reset began, the dialog ran "Resetting VE.Bus products", and the GX went offline within ten seconds (docs/HISTORY.md, docs/SAFETY.md); cause Unknown pending the re-download. 128/191 descriptions carry VEConfigure's GridSettingsValidCheckerA/B name. mk2vsc-36 reading (a) recorded as tested: a 191-only mismatch is not a pre-write gate. The CLI flag is `--allow-unverified` in every doc.
 * The +0x4f timestamp is a file-generation stamp, not an acceptance gate: four System B fixtures from 2026-09-04 (three downloads of unchanged content with increasing stamps, and a back-stamped file the device accepted) and a test. mk2vsc-36 rewritten around the observed rejections; the fixtures show the device had written its grid-code words (190/191) during the August attempts and the archived files it refused carried the earlier words, but a device-form file with differing words was accepted on 2026-08-14, so the cause is recorded as unknown with both readings. Rule 2 kept as practice. 92 fixtures.
 
 ## 0.10.0 (2026-09-04)
