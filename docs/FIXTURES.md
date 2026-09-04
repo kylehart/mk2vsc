@@ -12,14 +12,17 @@ between June and September 2026: 84 unique files (duplicates by SHA-256 were dro
 ## Where the files come from
 
 Four two-inverter, split-phase MultiPlus systems, each with its own battery. They are referred to
-as System A to D throughout this repository; the letters are public aliases, not the systems' names:
+as System A to D throughout this repository; the letters are public aliases, not the systems' names.
+Inverter serials in the files are pseudonyms of the same shape as real ones (`HQ0000A0001` = System A,
+first inverter): the 11 serial bytes in each block were replaced and the section checksums recomputed;
+every other byte is as downloaded. The two deliberately broken negatives keep their broken checksums.
 
 | system | inverters |
 |---|---|
-| System A | HQ2414U6FVN, HQ2414AXENJ |
-| System B | HQ24149MY9U, HQ2240FKJDE |
-| System C | HQ24142MJUA, HQ2414N7NAJ |
-| System D | HQ2240PY7CF, HQ22407X3WT |
+| System A | HQ0000A0001, HQ0000A0002 |
+| System B | HQ0000B0001, HQ0000B0002 |
+| System C | HQ0000C0001, HQ0000C0002 |
+| System D | HQ0000D0001, HQ0000D0002 |
 
 All eight inverters run firmware 2729560 (shown as "v560" in VRM) and every file carries format
 version 1.33 in its `Mk2vscInfo` section. That is the whole range of hardware and software the corpus
@@ -115,87 +118,87 @@ fixture and paste the output here.
 
 | file | bytes | state | form | origin | inverters (block length, flag) |
 |---|---:|---|---|---|---|
-| system_a/system_a_2026-06-18_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ2414AXENJ (484, f5), HQ2414U6FVN (482, f4) |
-| system_a/system_a_2026-06-18_experiment_bare_deviceform_1.rvms | 5055 | bare | deviceform | experiment | HQ2414AXENJ (484, f5), HQ2414U6FVN (482, f4) |
-| system_a/system_a_2026-06-19_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ2414U6FVN (484, f4), HQ2414AXENJ (482, f5) |
-| system_a/system_a_2026-07-13_prepared_half-ess_uploadform_1.rvms | 6182 | half-ess | uploadform | prepared | HQ2414U6FVN (484, f4), HQ2414AXENJ (1609, e4) |
-| system_a/system_a_2026-07-13_prepared_half-ess_uploadform_2.rvms | 6182 | half-ess | uploadform | prepared | HQ24149MY9U (484, f5), HQ2240FKJDE (1609, e4) |
-| system_a/system_a_2026-07-20_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ2414U6FVN (484, f4), HQ2414AXENJ (482, f5) |
-| system_a/system_a_2026-07-20_download_bare_deviceform_2.rvms | 5055 | bare | deviceform | download | HQ2414U6FVN (484, f4), HQ2414AXENJ (482, f5) |
-| system_a/system_a_2026-07-20_download_bare_deviceform_3.rvms | 5055 | bare | deviceform | download | HQ2414U6FVN (484, f4), HQ2414AXENJ (482, f5) |
-| system_a/system_a_2026-07-20_prepared_bare_deviceform_1.rvms | 5055 | bare | deviceform | prepared | HQ2414U6FVN (484, f4), HQ2414AXENJ (482, f5) |
-| system_a/system_a_2026-07-21_prepared_ess_uploadform_1.rvms | 6877 | ess | uploadform | prepared | HQ2414AXENJ (1177, e5), HQ2414U6FVN (1611, e4) |
-| system_a/system_a_2026-08-12_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ2414AXENJ (484, f5), HQ2414U6FVN (482, f4) |
-| system_a/system_a_2026-08-12_download_bare_deviceform_2.rvms | 5055 | bare | deviceform | download | HQ2414AXENJ (484, f5), HQ2414U6FVN (482, f4) |
-| system_a/system_a_2026-08-12_download_bare_deviceform_3.rvms | 5055 | bare | deviceform | download | HQ2414U6FVN (484, f4), HQ2414AXENJ (482, f5) |
-| system_a/system_a_2026-08-12_download_bare_deviceform_4.rvms | 5055 | bare | deviceform | download | HQ2414U6FVN (484, f4), HQ2414AXENJ (482, f5) |
-| system_a/system_a_2026-08-12_download_stub_deviceform_1.rvms | 5183 | stub | deviceform | download | HQ2414AXENJ (548, e5), HQ2414U6FVN (546, e4) |
-| system_a/system_a_2026-08-12_download_stub_deviceform_2.rvms | 5183 | stub | deviceform | download | HQ2414U6FVN (548, e4), HQ2414AXENJ (546, e5) |
-| system_a/system_a_2026-08-12_prepared_ess_deviceform_1.rvms | 7049 | ess | deviceform | prepared | HQ2414AXENJ (1257, e5), HQ2414U6FVN (1703, e4) |
-| system_a/system_a_2026-08-12_prepared_ess_deviceform_2.rvms | 7049 | ess | deviceform | prepared | HQ2414U6FVN (1705, e4), HQ2414AXENJ (1255, e5) |
-| system_a/system_a_2026-08-12_prepared_ess_deviceform_3.rvms | 7049 | ess | deviceform | prepared | HQ2414U6FVN (1705, e4), HQ2414AXENJ (1255, e5) |
-| system_a/system_a_2026-08-13_download_ess_deviceform_1.rvms | 7049 | ess | deviceform | download | HQ2414AXENJ (1257, e5), HQ2414U6FVN (1703, e4) |
-| system_a/system_a_2026-08-13_download_ess_deviceform_2.rvms | 7049 | ess | deviceform | download | HQ2414AXENJ (1257, e5), HQ2414U6FVN (1703, e4) |
-| system_a/system_a_2026-08-13_download_ess_deviceform_3.rvms | 7049 | ess | deviceform | download | HQ2414U6FVN (1705, e4), HQ2414AXENJ (1255, e5) |
-| system_a/system_a_2026-08-13_download_ess_deviceform_4.rvms | 7049 | ess | deviceform | download | HQ2414AXENJ (1257, e5), HQ2414U6FVN (1703, e4) |
-| system_a/system_a_2026-08-13_download_ess_deviceform_5.rvms | 7049 | ess | deviceform | download | HQ2414U6FVN (1705, e4), HQ2414AXENJ (1255, e5) |
-| system_a/system_a_2026-08-13_download_ess_deviceform_6.rvms | 7049 | ess | deviceform | download | HQ2414U6FVN (1705, e4), HQ2414AXENJ (1255, e5) |
-| system_a/system_a_2026-08-13_download_ess_deviceform_7.rvms | 7049 | ess | deviceform | download | HQ2414AXENJ (1257, e5), HQ2414U6FVN (1703, e4) |
-| system_a/system_a_2026-08-13_prepared_bare_deviceform_1.rvms | 5055 | bare | deviceform | prepared | HQ2414U6FVN (484, f4), HQ2414AXENJ (482, f5) |
-| system_a/system_a_2026-08-13_prepared_ess_deviceform_1.rvms | 7049 | ess | deviceform | prepared | HQ2414U6FVN (1705, e4), HQ2414AXENJ (1255, e5) |
-| system_a/system_a_2026-08-13_prepared_ess_deviceform_2.rvms | 7049 | ess | deviceform | prepared | HQ2414U6FVN (1705, e4), HQ2414AXENJ (1255, e5) |
-| system_a/system_a_2026-08-13_prepared_ess_uploadform_1.rvms | 6877 | ess | uploadform | prepared | HQ2414U6FVN (1611, e4), HQ2414AXENJ (1177, e5) |
-| system_a/system_a_2026-08-14_download_ess_deviceform_1.rvms | 7049 | ess | deviceform | download | HQ2414U6FVN (1705, e4), HQ2414AXENJ (1255, e5) |
-| system_a/system_a_2026-08-14_prepared_bare_deviceform_1.rvms | 5055 | bare | deviceform | prepared | HQ2414U6FVN (484, f4), HQ2414AXENJ (482, f5) |
-| system_a/system_a_2026-08-14_prepared_bare_deviceform_2.rvms | 5055 | bare | deviceform | prepared | HQ2414U6FVN (484, f4), HQ2414AXENJ (482, f5) |
-| system_a/system_a_2026-08-19_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ2414U6FVN (484, f4), HQ2414AXENJ (482, f5) |
-| system_a/system_a_2026-09-03_download_ess_deviceform_1.rvms | 7049 | ess | deviceform | download | HQ2414AXENJ (1257, e5), HQ2414U6FVN (1703, e4) |
-| system_b/system_b_2026-06-08_download_bare_deviceform_1.rvms | 5067 | bare | deviceform | download | HQ2240FKJDE (490, f4), HQ24149MY9U (488, f5) |
-| system_b/system_b_2026-06-08_download_bare_deviceform_2.rvms | 5067 | bare | deviceform | download | HQ2240FKJDE (490, f4), HQ24149MY9U (488, f5) |
-| system_b/system_b_2026-06-18_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ24149MY9U (484, f5), HQ2240FKJDE (482, f4) |
-| system_b/system_b_2026-07-20_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ24149MY9U (484, f5), HQ2240FKJDE (482, f4) |
-| system_b/system_b_2026-07-20_download_bare_deviceform_2.rvms | 5055 | bare | deviceform | download | HQ24149MY9U (484, f5), HQ2240FKJDE (482, f4) |
-| system_b/system_b_2026-07-20_download_bare_deviceform_3.rvms | 5055 | bare | deviceform | download | HQ2240FKJDE (484, f4), HQ24149MY9U (482, f5) |
-| system_b/system_b_2026-07-20_prepared_bare_deviceform_1.rvms | 5055 | bare | deviceform | prepared | HQ24149MY9U (484, f5), HQ2240FKJDE (482, f4) |
-| system_b/system_b_2026-07-20_prepared_half-ess_deviceform_1.rvms | 7497 | half-ess | deviceform | prepared | HQ2240FKJDE (1705, e4), HQ24149MY9U (1703, e4) |
-| system_b/system_b_2026-07-21_prepared_ess_uploadform_1.rvms | 6877 | ess | uploadform | prepared | HQ24149MY9U (1179, e5), HQ2240FKJDE (1609, e4) |
-| system_b/system_b_2026-07-24_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ24149MY9U (484, f5), HQ2240FKJDE (482, f4) |
-| system_b/system_b_2026-07-24_download_bare_deviceform_2.rvms | 5055 | bare | deviceform | download | HQ24149MY9U (484, f5), HQ2240FKJDE (482, f4) |
-| system_b/system_b_2026-07-24_download_bare_deviceform_3.rvms | 5055 | bare | deviceform | download | HQ2240FKJDE (484, f4), HQ24149MY9U (482, f5) |
-| system_b/system_b_2026-07-24_download_stub_deviceform_1.rvms | 5183 | stub | deviceform | download | HQ24149MY9U (548, e5), HQ2240FKJDE (546, e4) |
-| system_b/system_b_2026-07-24_prepared_ess_deviceform_1.rvms | 7049 | ess | deviceform | prepared | HQ24149MY9U (1257, e5), HQ2240FKJDE (1703, e4) |
-| system_b/system_b_2026-07-24_prepared_ess_deviceform_2.rvms | 7049 | ess | deviceform | prepared | HQ24149MY9U (1257, e5), HQ2240FKJDE (1703, e4) |
-| system_b/system_b_2026-08-12_download_ess_deviceform_1.rvms | 7049 | ess | deviceform | download | HQ2240FKJDE (1705, e4), HQ24149MY9U (1255, e5) |
-| system_c/system_c_2026-06-18_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ24142MJUA (484, f4), HQ2414N7NAJ (482, f5) |
-| system_c/system_c_2026-06-23_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ2414N7NAJ (484, f5), HQ24142MJUA (482, f4) |
-| system_c/system_c_2026-07-13_gui-export_half-ess_uploadform_1.rvms | 6182 | half-ess | uploadform | gui-export | HQ2414N7NAJ (484, f5), HQ24142MJUA (1609, e4) |
-| system_c/system_c_2026-07-17_download_half-ess_deviceform_1.rvms | 6276 | half-ess | deviceform | download | HQ2414N7NAJ (484, f5), HQ24142MJUA (1703, e4) |
-| system_c/system_c_2026-07-20_download_half-ess_deviceform_1.rvms | 6276 | half-ess | deviceform | download | HQ24142MJUA (1705, e4), HQ2414N7NAJ (482, f5) |
-| system_c/system_c_2026-07-20_download_half-ess_deviceform_2.rvms | 6276 | half-ess | deviceform | download | HQ24142MJUA (1705, e4), HQ2414N7NAJ (482, f5) |
-| system_c/system_c_2026-07-20_download_half-ess_deviceform_3.rvms | 6276 | half-ess | deviceform | download | HQ2414N7NAJ (484, f5), HQ24142MJUA (1703, e4) |
-| system_c/system_c_2026-07-20_download_half-ess_deviceform_4.rvms | 6276 | half-ess | deviceform | download | HQ24142MJUA (1705, e4), HQ2414N7NAJ (482, f5) |
-| system_c/system_c_2026-07-20_download_half-ess_deviceform_5.rvms | 6276 | half-ess | deviceform | download | HQ2414N7NAJ (484, f5), HQ24142MJUA (1703, e4) |
-| system_c/system_c_2026-07-20_download_half-ess_deviceform_6.rvms | 6276 | half-ess | deviceform | download | HQ24142MJUA (1705, e4), HQ2414N7NAJ (482, f5) |
-| system_c/system_c_2026-07-20_prepared_ess_deviceform_1.rvms | 7495 | ess | deviceform | prepared | HQ2414N7NAJ (1703, e4), HQ24142MJUA (1703, e4) |
-| system_c/system_c_2026-07-20_prepared_half-ess_deviceform_1.rvms | 6276 | half-ess | deviceform | prepared | HQ24142MJUA (1705, e4), HQ2414N7NAJ (482, f5) |
-| system_c/system_c_2026-07-20_prepared_half-ess_deviceform_2.rvms | 6276 | half-ess | deviceform | prepared | HQ24142MJUA (1705, e4), HQ2414N7NAJ (482, f5) |
-| system_c/system_c_2026-07-20_prepared_half-ess_deviceform_3.rvms | 7497 | half-ess | deviceform | prepared | HQ2414N7NAJ (1705, e4), HQ24142MJUA (1703, e4) |
-| system_c/system_c_2026-07-20_prepared_half-ess_deviceform_4.rvms | 5055 | half-ess | deviceform | prepared | HQ24142MJUA (484, e4), HQ2414N7NAJ (482, f5) |
-| system_c/system_c_2026-07-21_gui-export_ess_uploadform_1.rvms | 6877 | ess | uploadform | gui-export | HQ24142MJUA (1611, e4), HQ2414N7NAJ (1177, e5) |
-| system_c/system_c_2026-07-24_download_ess_deviceform_1.rvms | 7049 | ess | deviceform | download | HQ2414N7NAJ (1257, e5), HQ24142MJUA (1703, e4) |
-| system_d/system_d_2026-06-18_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ22407X3WT (484, f4), HQ2240PY7CF (482, f5) |
-| system_d/system_d_2026-07-20_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ2240PY7CF (484, f5), HQ22407X3WT (482, f4) |
-| system_d/system_d_2026-07-20_download_bare_deviceform_2.rvms | 5055 | bare | deviceform | download | HQ2240PY7CF (484, f5), HQ22407X3WT (482, f4) |
-| system_d/system_d_2026-07-20_download_bare_deviceform_3.rvms | 5055 | bare | deviceform | download | HQ2240PY7CF (484, f5), HQ22407X3WT (482, f4) |
-| system_d/system_d_2026-07-20_download_bare_deviceform_4.rvms | 5055 | bare | deviceform | download | HQ2240PY7CF (484, f5), HQ22407X3WT (482, f4) |
-| system_d/system_d_2026-07-20_prepared_bare_deviceform_1.rvms | 5055 | bare | deviceform | prepared | HQ2240PY7CF (484, f5), HQ22407X3WT (482, f4) |
-| system_d/system_d_2026-07-23_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ22407X3WT (484, f4), HQ2240PY7CF (482, f5) |
-| system_d/system_d_2026-07-23_prepared_bare_deviceform_1.rvms | 5055 | bare | deviceform | prepared | HQ22407X3WT (484, f4), HQ2240PY7CF (482, f5) |
-| system_d/system_d_2026-08-12_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ2240PY7CF (484, f5), HQ22407X3WT (482, f4) |
-| system_d/system_d_2026-08-12_prepared_ess_deviceform_1.rvms | 7049 | ess | deviceform | prepared | HQ2240PY7CF (1257, e5), HQ22407X3WT (1703, e4) |
-| system_d/system_d_2026-08-13_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ22407X3WT (484, f4), HQ2240PY7CF (482, f5) |
-| system_d/system_d_2026-08-13_download_ess_deviceform_1.rvms | 7049 | ess | deviceform | download | HQ2240PY7CF (1257, e5), HQ22407X3WT (1703, e4) |
-| system_d/system_d_2026-08-13_prepared_ess_deviceform_1.rvms | 7049 | ess | deviceform | prepared | HQ22407X3WT (1705, e4), HQ2240PY7CF (1255, e5) |
-| system_d/system_d_2026-08-14_download_ess_deviceform_1.rvms | 7049 | ess | deviceform | download | HQ2240PY7CF (1257, e5), HQ22407X3WT (1703, e4) |
-| system_d/system_d_2026-08-14_prepared_bare_deviceform_1.rvms | 5055 | bare | deviceform | prepared | HQ22407X3WT (484, f4), HQ2240PY7CF (482, f5) |
-| system_d/system_d_2026-08-14_prepared_bare_deviceform_2.rvms | 5055 | bare | deviceform | prepared | HQ2240PY7CF (484, f5), HQ22407X3WT (482, f4) |
+| system_a/system_a_2026-06-18_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ0000A0002 (484, f5), HQ0000A0001 (482, f4) |
+| system_a/system_a_2026-06-18_experiment_bare_deviceform_1.rvms | 5055 | bare | deviceform | experiment | HQ0000A0002 (484, f5), HQ0000A0001 (482, f4) |
+| system_a/system_a_2026-06-19_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ0000A0001 (484, f4), HQ0000A0002 (482, f5) |
+| system_a/system_a_2026-07-13_prepared_half-ess_uploadform_1.rvms | 6182 | half-ess | uploadform | prepared | HQ0000A0001 (484, f4), HQ0000A0002 (1609, e4) |
+| system_a/system_a_2026-07-13_prepared_half-ess_uploadform_2.rvms | 6182 | half-ess | uploadform | prepared | HQ0000B0001 (484, f5), HQ0000B0002 (1609, e4) |
+| system_a/system_a_2026-07-20_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ0000A0001 (484, f4), HQ0000A0002 (482, f5) |
+| system_a/system_a_2026-07-20_download_bare_deviceform_2.rvms | 5055 | bare | deviceform | download | HQ0000A0001 (484, f4), HQ0000A0002 (482, f5) |
+| system_a/system_a_2026-07-20_download_bare_deviceform_3.rvms | 5055 | bare | deviceform | download | HQ0000A0001 (484, f4), HQ0000A0002 (482, f5) |
+| system_a/system_a_2026-07-20_prepared_bare_deviceform_1.rvms | 5055 | bare | deviceform | prepared | HQ0000A0001 (484, f4), HQ0000A0002 (482, f5) |
+| system_a/system_a_2026-07-21_prepared_ess_uploadform_1.rvms | 6877 | ess | uploadform | prepared | HQ0000A0002 (1177, e5), HQ0000A0001 (1611, e4) |
+| system_a/system_a_2026-08-12_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ0000A0002 (484, f5), HQ0000A0001 (482, f4) |
+| system_a/system_a_2026-08-12_download_bare_deviceform_2.rvms | 5055 | bare | deviceform | download | HQ0000A0002 (484, f5), HQ0000A0001 (482, f4) |
+| system_a/system_a_2026-08-12_download_bare_deviceform_3.rvms | 5055 | bare | deviceform | download | HQ0000A0001 (484, f4), HQ0000A0002 (482, f5) |
+| system_a/system_a_2026-08-12_download_bare_deviceform_4.rvms | 5055 | bare | deviceform | download | HQ0000A0001 (484, f4), HQ0000A0002 (482, f5) |
+| system_a/system_a_2026-08-12_download_stub_deviceform_1.rvms | 5183 | stub | deviceform | download | HQ0000A0002 (548, e5), HQ0000A0001 (546, e4) |
+| system_a/system_a_2026-08-12_download_stub_deviceform_2.rvms | 5183 | stub | deviceform | download | HQ0000A0001 (548, e4), HQ0000A0002 (546, e5) |
+| system_a/system_a_2026-08-12_prepared_ess_deviceform_1.rvms | 7049 | ess | deviceform | prepared | HQ0000A0002 (1257, e5), HQ0000A0001 (1703, e4) |
+| system_a/system_a_2026-08-12_prepared_ess_deviceform_2.rvms | 7049 | ess | deviceform | prepared | HQ0000A0001 (1705, e4), HQ0000A0002 (1255, e5) |
+| system_a/system_a_2026-08-12_prepared_ess_deviceform_3.rvms | 7049 | ess | deviceform | prepared | HQ0000A0001 (1705, e4), HQ0000A0002 (1255, e5) |
+| system_a/system_a_2026-08-13_download_ess_deviceform_1.rvms | 7049 | ess | deviceform | download | HQ0000A0002 (1257, e5), HQ0000A0001 (1703, e4) |
+| system_a/system_a_2026-08-13_download_ess_deviceform_2.rvms | 7049 | ess | deviceform | download | HQ0000A0002 (1257, e5), HQ0000A0001 (1703, e4) |
+| system_a/system_a_2026-08-13_download_ess_deviceform_3.rvms | 7049 | ess | deviceform | download | HQ0000A0001 (1705, e4), HQ0000A0002 (1255, e5) |
+| system_a/system_a_2026-08-13_download_ess_deviceform_4.rvms | 7049 | ess | deviceform | download | HQ0000A0002 (1257, e5), HQ0000A0001 (1703, e4) |
+| system_a/system_a_2026-08-13_download_ess_deviceform_5.rvms | 7049 | ess | deviceform | download | HQ0000A0001 (1705, e4), HQ0000A0002 (1255, e5) |
+| system_a/system_a_2026-08-13_download_ess_deviceform_6.rvms | 7049 | ess | deviceform | download | HQ0000A0001 (1705, e4), HQ0000A0002 (1255, e5) |
+| system_a/system_a_2026-08-13_download_ess_deviceform_7.rvms | 7049 | ess | deviceform | download | HQ0000A0002 (1257, e5), HQ0000A0001 (1703, e4) |
+| system_a/system_a_2026-08-13_prepared_bare_deviceform_1.rvms | 5055 | bare | deviceform | prepared | HQ0000A0001 (484, f4), HQ0000A0002 (482, f5) |
+| system_a/system_a_2026-08-13_prepared_ess_deviceform_1.rvms | 7049 | ess | deviceform | prepared | HQ0000A0001 (1705, e4), HQ0000A0002 (1255, e5) |
+| system_a/system_a_2026-08-13_prepared_ess_deviceform_2.rvms | 7049 | ess | deviceform | prepared | HQ0000A0001 (1705, e4), HQ0000A0002 (1255, e5) |
+| system_a/system_a_2026-08-13_prepared_ess_uploadform_1.rvms | 6877 | ess | uploadform | prepared | HQ0000A0001 (1611, e4), HQ0000A0002 (1177, e5) |
+| system_a/system_a_2026-08-14_download_ess_deviceform_1.rvms | 7049 | ess | deviceform | download | HQ0000A0001 (1705, e4), HQ0000A0002 (1255, e5) |
+| system_a/system_a_2026-08-14_prepared_bare_deviceform_1.rvms | 5055 | bare | deviceform | prepared | HQ0000A0001 (484, f4), HQ0000A0002 (482, f5) |
+| system_a/system_a_2026-08-14_prepared_bare_deviceform_2.rvms | 5055 | bare | deviceform | prepared | HQ0000A0001 (484, f4), HQ0000A0002 (482, f5) |
+| system_a/system_a_2026-08-19_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ0000A0001 (484, f4), HQ0000A0002 (482, f5) |
+| system_a/system_a_2026-09-03_download_ess_deviceform_1.rvms | 7049 | ess | deviceform | download | HQ0000A0002 (1257, e5), HQ0000A0001 (1703, e4) |
+| system_b/system_b_2026-06-08_download_bare_deviceform_1.rvms | 5067 | bare | deviceform | download | HQ0000B0002 (490, f4), HQ0000B0001 (488, f5) |
+| system_b/system_b_2026-06-08_download_bare_deviceform_2.rvms | 5067 | bare | deviceform | download | HQ0000B0002 (490, f4), HQ0000B0001 (488, f5) |
+| system_b/system_b_2026-06-18_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ0000B0001 (484, f5), HQ0000B0002 (482, f4) |
+| system_b/system_b_2026-07-20_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ0000B0001 (484, f5), HQ0000B0002 (482, f4) |
+| system_b/system_b_2026-07-20_download_bare_deviceform_2.rvms | 5055 | bare | deviceform | download | HQ0000B0001 (484, f5), HQ0000B0002 (482, f4) |
+| system_b/system_b_2026-07-20_download_bare_deviceform_3.rvms | 5055 | bare | deviceform | download | HQ0000B0002 (484, f4), HQ0000B0001 (482, f5) |
+| system_b/system_b_2026-07-20_prepared_bare_deviceform_1.rvms | 5055 | bare | deviceform | prepared | HQ0000B0001 (484, f5), HQ0000B0002 (482, f4) |
+| system_b/system_b_2026-07-20_prepared_half-ess_deviceform_1.rvms | 7497 | half-ess | deviceform | prepared | HQ0000B0002 (1705, e4), HQ0000B0001 (1703, e4) |
+| system_b/system_b_2026-07-21_prepared_ess_uploadform_1.rvms | 6877 | ess | uploadform | prepared | HQ0000B0001 (1179, e5), HQ0000B0002 (1609, e4) |
+| system_b/system_b_2026-07-24_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ0000B0001 (484, f5), HQ0000B0002 (482, f4) |
+| system_b/system_b_2026-07-24_download_bare_deviceform_2.rvms | 5055 | bare | deviceform | download | HQ0000B0001 (484, f5), HQ0000B0002 (482, f4) |
+| system_b/system_b_2026-07-24_download_bare_deviceform_3.rvms | 5055 | bare | deviceform | download | HQ0000B0002 (484, f4), HQ0000B0001 (482, f5) |
+| system_b/system_b_2026-07-24_download_stub_deviceform_1.rvms | 5183 | stub | deviceform | download | HQ0000B0001 (548, e5), HQ0000B0002 (546, e4) |
+| system_b/system_b_2026-07-24_prepared_ess_deviceform_1.rvms | 7049 | ess | deviceform | prepared | HQ0000B0001 (1257, e5), HQ0000B0002 (1703, e4) |
+| system_b/system_b_2026-07-24_prepared_ess_deviceform_2.rvms | 7049 | ess | deviceform | prepared | HQ0000B0001 (1257, e5), HQ0000B0002 (1703, e4) |
+| system_b/system_b_2026-08-12_download_ess_deviceform_1.rvms | 7049 | ess | deviceform | download | HQ0000B0002 (1705, e4), HQ0000B0001 (1255, e5) |
+| system_c/system_c_2026-06-18_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ0000C0001 (484, f4), HQ0000C0002 (482, f5) |
+| system_c/system_c_2026-06-23_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ0000C0002 (484, f5), HQ0000C0001 (482, f4) |
+| system_c/system_c_2026-07-13_gui-export_half-ess_uploadform_1.rvms | 6182 | half-ess | uploadform | gui-export | HQ0000C0002 (484, f5), HQ0000C0001 (1609, e4) |
+| system_c/system_c_2026-07-17_download_half-ess_deviceform_1.rvms | 6276 | half-ess | deviceform | download | HQ0000C0002 (484, f5), HQ0000C0001 (1703, e4) |
+| system_c/system_c_2026-07-20_download_half-ess_deviceform_1.rvms | 6276 | half-ess | deviceform | download | HQ0000C0001 (1705, e4), HQ0000C0002 (482, f5) |
+| system_c/system_c_2026-07-20_download_half-ess_deviceform_2.rvms | 6276 | half-ess | deviceform | download | HQ0000C0001 (1705, e4), HQ0000C0002 (482, f5) |
+| system_c/system_c_2026-07-20_download_half-ess_deviceform_3.rvms | 6276 | half-ess | deviceform | download | HQ0000C0002 (484, f5), HQ0000C0001 (1703, e4) |
+| system_c/system_c_2026-07-20_download_half-ess_deviceform_4.rvms | 6276 | half-ess | deviceform | download | HQ0000C0001 (1705, e4), HQ0000C0002 (482, f5) |
+| system_c/system_c_2026-07-20_download_half-ess_deviceform_5.rvms | 6276 | half-ess | deviceform | download | HQ0000C0002 (484, f5), HQ0000C0001 (1703, e4) |
+| system_c/system_c_2026-07-20_download_half-ess_deviceform_6.rvms | 6276 | half-ess | deviceform | download | HQ0000C0001 (1705, e4), HQ0000C0002 (482, f5) |
+| system_c/system_c_2026-07-20_prepared_ess_deviceform_1.rvms | 7495 | ess | deviceform | prepared | HQ0000C0002 (1703, e4), HQ0000C0001 (1703, e4) |
+| system_c/system_c_2026-07-20_prepared_half-ess_deviceform_1.rvms | 6276 | half-ess | deviceform | prepared | HQ0000C0001 (1705, e4), HQ0000C0002 (482, f5) |
+| system_c/system_c_2026-07-20_prepared_half-ess_deviceform_2.rvms | 6276 | half-ess | deviceform | prepared | HQ0000C0001 (1705, e4), HQ0000C0002 (482, f5) |
+| system_c/system_c_2026-07-20_prepared_half-ess_deviceform_3.rvms | 7497 | half-ess | deviceform | prepared | HQ0000C0002 (1705, e4), HQ0000C0001 (1703, e4) |
+| system_c/system_c_2026-07-20_prepared_half-ess_deviceform_4.rvms | 5055 | half-ess | deviceform | prepared | HQ0000C0001 (484, e4), HQ0000C0002 (482, f5) |
+| system_c/system_c_2026-07-21_gui-export_ess_uploadform_1.rvms | 6877 | ess | uploadform | gui-export | HQ0000C0001 (1611, e4), HQ0000C0002 (1177, e5) |
+| system_c/system_c_2026-07-24_download_ess_deviceform_1.rvms | 7049 | ess | deviceform | download | HQ0000C0002 (1257, e5), HQ0000C0001 (1703, e4) |
+| system_d/system_d_2026-06-18_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ0000D0002 (484, f4), HQ0000D0001 (482, f5) |
+| system_d/system_d_2026-07-20_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ0000D0001 (484, f5), HQ0000D0002 (482, f4) |
+| system_d/system_d_2026-07-20_download_bare_deviceform_2.rvms | 5055 | bare | deviceform | download | HQ0000D0001 (484, f5), HQ0000D0002 (482, f4) |
+| system_d/system_d_2026-07-20_download_bare_deviceform_3.rvms | 5055 | bare | deviceform | download | HQ0000D0001 (484, f5), HQ0000D0002 (482, f4) |
+| system_d/system_d_2026-07-20_download_bare_deviceform_4.rvms | 5055 | bare | deviceform | download | HQ0000D0001 (484, f5), HQ0000D0002 (482, f4) |
+| system_d/system_d_2026-07-20_prepared_bare_deviceform_1.rvms | 5055 | bare | deviceform | prepared | HQ0000D0001 (484, f5), HQ0000D0002 (482, f4) |
+| system_d/system_d_2026-07-23_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ0000D0002 (484, f4), HQ0000D0001 (482, f5) |
+| system_d/system_d_2026-07-23_prepared_bare_deviceform_1.rvms | 5055 | bare | deviceform | prepared | HQ0000D0002 (484, f4), HQ0000D0001 (482, f5) |
+| system_d/system_d_2026-08-12_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ0000D0001 (484, f5), HQ0000D0002 (482, f4) |
+| system_d/system_d_2026-08-12_prepared_ess_deviceform_1.rvms | 7049 | ess | deviceform | prepared | HQ0000D0001 (1257, e5), HQ0000D0002 (1703, e4) |
+| system_d/system_d_2026-08-13_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ0000D0002 (484, f4), HQ0000D0001 (482, f5) |
+| system_d/system_d_2026-08-13_download_ess_deviceform_1.rvms | 7049 | ess | deviceform | download | HQ0000D0001 (1257, e5), HQ0000D0002 (1703, e4) |
+| system_d/system_d_2026-08-13_prepared_ess_deviceform_1.rvms | 7049 | ess | deviceform | prepared | HQ0000D0002 (1705, e4), HQ0000D0001 (1255, e5) |
+| system_d/system_d_2026-08-14_download_ess_deviceform_1.rvms | 7049 | ess | deviceform | download | HQ0000D0001 (1257, e5), HQ0000D0002 (1703, e4) |
+| system_d/system_d_2026-08-14_prepared_bare_deviceform_1.rvms | 5055 | bare | deviceform | prepared | HQ0000D0002 (484, f4), HQ0000D0001 (482, f5) |
+| system_d/system_d_2026-08-14_prepared_bare_deviceform_2.rvms | 5055 | bare | deviceform | prepared | HQ0000D0001 (484, f5), HQ0000D0002 (482, f4) |

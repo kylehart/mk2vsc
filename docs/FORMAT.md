@@ -121,7 +121,7 @@ The same System A file, first unit block:
 00000ff8: 0f 0042 6172 6553 6574 7469 6e67 4461 7461  ..BareSettingData
 00001008: db11 0000 0300 0000 7b20 1b7a 58a6 2900      next=0x11db  3  unit-const  fw 2729560
 00001018: ff01 0158 a629 0006 0008 1900 00fa 1b02      (unknown header bytes)
-00001028: 0101 0300 0000 00f4 000b 0048 5132 3431      slot=00 flag=f4 slot=00 ... "HQ2414U6FVN"
+00001028: 0101 0300 0000 00f4 000b 0048 5132 3431      slot=00 flag=f4 slot=00 ... "HQ0000A0001"
 00001038: 3455 3646 564e 0000 0000 0000 0000 0000
 00001048: d86b 5e6a 0000 0000 8001 f481 fe4d e015      save ts 0x6a5e6bd8  0x0180  settings[0..]
 ```
@@ -133,7 +133,7 @@ The same System A file, first unit block:
 | +0x00 | 15 | `BareSettingData` | Observed |
 | +0x0f | u32 | next-section pointer (see grammar) | Observed |
 | +0x13 | u32 | value 3 in every block | Observed; meaning Unknown |
-| +0x17 | u32 | per-unit constant; bytes +0x18..0x19 track the serial's date code (`HQ2240*` → `19`, `HQ2414*` → `1b`) | Observed; Inferred: hardware revision / production batch, not firmware |
+| +0x17 | u32 | per-unit constant; bytes +0x18..0x19 track the serial's date code (2022-built units → `19`, 2024-built units → `1b`) | Observed; Inferred: hardware revision / production batch, not firmware |
 | +0x1b | u32 | 2729560 = firmware "v560" | Observed |
 | +0x1f | 22 | header bytes, e.g. `ff 01 01 58 a6 29 00 06 00 08 19 00 00 fa 1b 02 01 01 03 00 00 00` (contains the firmware word again at +0x22) | Unknown |
 | +0x35 | u8 | slot byte A: `00` or `86` | Observed |

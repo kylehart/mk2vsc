@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0 (2026-09-04)
+
+* Fixture serials are pseudonyms (`HQ0000A0001` style); every other byte unchanged, checksums recomputed. The leak scan refuses real-format serials.
+* Alignment self-check (`mk2vsc.align`): the settings-array offset is scored against the file's own schema ranges; `census` reports it and the writer refuses files whose array is not where the layout model expects.
+* CI checks that the generated settings table in docs/FIELDS.md matches `fields.py` (`tools/check_generated.py`).
+
 ## 0.5.1 (2026-09-04)
 
 * Documentation site at https://kylehart.github.io/mk2vsc/ (GitHub Pages from `docs/`), CITATION.cff, NOTICE.md (interoperability and trademark notice, editing guards stated), PyPI project links, README opening rewritten around the terms people search for. No code changes.

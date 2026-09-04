@@ -44,8 +44,8 @@ def test_edit_writes_next_to_input_and_never_overwrites(tmp_path, capsys):
     assert main(["edit", str(src), "absorption=56.8", "--overwrite"]) == 0
     # explicit output path, one inverter, numeric id
     out2 = tmp_path / "one.rvms"
-    assert main(["edit", str(src), "3=54.1", "--serial", "HQ2414U6FVN", "-o", str(out2)]) == 0
-    assert "HQ2414U6FVN" in capsys.readouterr().out and out2.exists()
+    assert main(["edit", str(src), "3=54.1", "--serial", "HQ0000A0001", "-o", str(out2)]) == 0
+    assert "HQ0000A0001" in capsys.readouterr().out and out2.exists()
 
 
 def test_edit_refusals(tmp_path, capsys):

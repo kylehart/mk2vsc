@@ -7,8 +7,8 @@ Quick tour::
 
     import mk2vsc
     cfg = mk2vsc.load("download.rvms")
-    cfg.serials                            # ["HQ2414AXENJ", "HQ2414U6FVN"]
-    cfg["HQ2414U6FVN"]["absorption"]       # 56.0 (volts)
+    cfg.serials                            # ["HQ0000A0002", "HQ0000A0001"]
+    cfg["HQ0000A0001"]["absorption"]       # 56.0 (volts)
     cfg.set("absorption", 56.8)            # every inverter (a shared battery wants them equal)
     path = cfg.save()                      # download.edited.rvms; the input is never overwritten
     # upload `path` through VRM Remote VEConfigure, download again, then:
@@ -33,7 +33,7 @@ from .diff import diff_files, diff_bytes
 from .qualify import qualify_file, Intent
 from .api import load, loads, verify, Config, Unit
 
-__version__ = "0.5.1"
+__version__ = "0.6.0"
 __all__ = [
     "load", "loads", "verify", "Config", "Unit",
     "RvmsFile", "Section", "RvmsParseError", "sum32_le", "scan_unit_blocks",

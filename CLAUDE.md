@@ -23,8 +23,8 @@ of these rules is docs/PRACTICES.md; this file is the operational checklist.
   test is Inferred at best.
 - Every field in `mk2vsc/fields.py` carries confidence, evidence, and observed values. Promoting a
   field requires a new fixture pair or a screenshot, referenced in the commit.
-- Counts in docs (files, blocks, tests) are regenerated, not hand-edited. If a number is typed by hand,
-  it is wrong within a week.
+- Generated tables are checked in CI (`tools/check_generated.py`); regenerate with `--fix`, never hand-edit.
+  Counts in docs (files, blocks, tests) are regenerated, not typed.
 - Reference docs describe the current state only. No "earlier tooling", "previously", "retracted",
   "used to", old names kept "so they raise an error". Narrative with dates and mistakes belongs in
   docs/HISTORY.md and docs/ESS_INJECTION.md, where the learning is the deliverable, and in CHANGELOG.md

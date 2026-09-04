@@ -14,13 +14,13 @@ REDL = os.path.join(FIXTURES, "system_a", "system_a_2026-07-20_download_bare_dev
 def test_load_read_aliases_and_ids():
     cfg = mk2vsc.load(BARE)
     assert cfg.valid and cfg.form == "device"
-    assert cfg.serials == ["HQ2414AXENJ", "HQ2414U6FVN"]
-    u = cfg["HQ2414U6FVN"]
+    assert cfg.serials == ["HQ0000A0001", "HQ0000A0002"]
+    u = cfg["HQ0000A0001"]
     assert u["absorption"] == u["absorption_V"] == u[2] == u["2"] == 56.0
     assert u["ac_limit"] == 50.0 and u.raw("ac_limit") == 500
     assert round(u["frequency"], 2) == 60.0
     assert u.get("nonsense") is None
-    assert cfg.value("absorption") == {"HQ2414AXENJ": 57.6, "HQ2414U6FVN": 56.0}
+    assert cfg.value("absorption") == {"HQ0000A0002": 57.6, "HQ0000A0001": 56.0}
     assert not cfg.agree("absorption") and cfg.agree("inverter_output_V")
     assert "no assistant" in u.assistant
     assert "absorption_V" in u.as_dict() and "info_id0" not in u.as_dict()
@@ -31,9 +31,9 @@ def test_set_save_verify_check(tmp_path):
     shutil.copyfile(BARE, src)
     cfg = mk2vsc.load(str(src))
     edits = cfg.set("absorption", 56.8)
-    assert sorted(e.serial for e in edits) == ["HQ2414AXENJ", "HQ2414U6FVN"]
+    assert sorted(e.serial for e in edits) == ["HQ0000A0001", "HQ0000A0002"]
     cfg.set_many({"float": 54.0})
-    assert cfg.value("absorption") == {"HQ2414AXENJ": 56.8, "HQ2414U6FVN": 56.8}
+    assert cfg.value("absorption") == {"HQ0000A0002": 56.8, "HQ0000A0001": 56.8}
     with pytest.raises(WriteRefused):
         cfg.save(str(src))                       # never the input
     out = cfg.save()

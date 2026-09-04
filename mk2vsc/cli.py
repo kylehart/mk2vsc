@@ -211,7 +211,6 @@ def cmd_census(a):
     a file, without the file itself.  One block per file; safe to paste into an issue."""
     from .schema import schema_of, firmware_of_schema
     from .fields import BY_ID
-    from .units import N_SETTINGS
     rc = 0
     for p in a.files:
         try:
@@ -240,9 +239,11 @@ def cmd_census(a):
             asst = parse_assistant_area(u)
             in_range = ""
             if sch is not None:
-                vals = u.settings()
-                bad = [r.id for r in sch[:N_SETTINGS] if not r.unused and not (BY_ID.get(r.id) and BY_ID[r.id].bits is not None) and not r.in_range(vals[r.id])]
-                in_range = f", settings in schema range {N_SETTINGS - len(bad)}/{N_SETTINGS}" + (f" (out: {bad[:6]})" if bad else "")
+                from .align import check as align_check
+                al = align_check(u, sch)
+                in_range = ", " + al.summary
+                if not al.ok:
+                    rc = 1
             when = u.save_datetime.isoformat() if u.save_datetime else "?"
             print(f"  {u.serial}: block {len(u.raw)} B, flag {u.assistant_flag:02x}, form {'upload' if u.is_upload_form else 'device'}, "
                   f"firmware {u.firmware_version}, saved {when}, assistant: {asst['summary']}{in_range}")

@@ -3,10 +3,10 @@ The one-object API.  Everything a first-time user needs, without knowing setting
 
     import mk2vsc
     cfg = mk2vsc.load("download.rvms")
-    cfg.units                      # {"HQ2414U6FVN": <Unit>, "HQ2414AXENJ": <Unit>}
-    cfg["HQ2414U6FVN"]["absorption"]          # 56.0   (volts)
+    cfg.units                      # {"HQ0000A0001": <Unit>, "HQ0000A0002": <Unit>}
+    cfg["HQ0000A0001"]["absorption"]          # 56.0   (volts)
     cfg.set("absorption", 56.8)               # every inverter (a shared battery wants them equal)
-    cfg.set("float", 54.0, serial="HQ2414U6FVN")
+    cfg.set("float", 54.0, serial="HQ0000A0001")
     out = cfg.save()                          # writes download.edited.rvms, never overwrites the input
     cfg.check(absorption=56.8, float=54.0)    # (ok, [(level, message), ...])
     mk2vsc.verify("download.edited.rvms", "redownload.rvms")   # after the VRM upload + re-download

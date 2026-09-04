@@ -4,7 +4,7 @@
  "entries": [
   {
    "file": "system_a/system_a_2026-06-18_experiment_bare_deviceform_1.rvms",
-   "sha256": "7b41bbea8e50283c3627268199dfbff3d9574e17131404d1b673dccde6d00c80",
+   "sha256": "6d7c70ee159069af2638d40d8d3fe5e0da7613fa2c3478534c660320a3a66c50",
    "size": 5055,
    "system": "A",
    "date": "2026-06-18",
@@ -13,12 +13,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 484,
      "flag": "f5"
     },
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 482,
      "flag": "f4"
     }
@@ -27,7 +27,7 @@
   },
   {
    "file": "system_a/system_a_2026-07-20_download_bare_deviceform_1.rvms",
-   "sha256": "46729f030d492b4650958616d831838ec67d2fb5a208daf9411f1ded025b2a13",
+   "sha256": "b5b1e5fd9cf48a7ba19eebe0bdec4a49fd8fca8899db3d548c1e555d8bf4ae58",
    "size": 5055,
    "system": "A",
    "date": "2026-07-20",
@@ -36,12 +36,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 484,
      "flag": "f4"
     },
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 482,
      "flag": "f5"
     }
@@ -50,7 +50,7 @@
   },
   {
    "file": "system_a/system_a_2026-07-20_prepared_bare_deviceform_1.rvms",
-   "sha256": "b44e22be2c9886b85aaa1852ca9c8cef5e1fde342cf738bff69e04c77b4e28c3",
+   "sha256": "5c5c4e9dbf708ca7f0e7d8dce9f51edd9bd132cd006c772bf520146a3e1d61c6",
    "size": 5055,
    "system": "A",
    "date": "2026-07-20",
@@ -59,12 +59,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 484,
      "flag": "f4"
     },
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 482,
      "flag": "f5"
     }
@@ -73,7 +73,7 @@
   },
   {
    "file": "system_a/system_a_2026-07-20_download_bare_deviceform_2.rvms",
-   "sha256": "d72c0f6a2905c74f892f6890d117c59de372c68af34724f2035e5792eb92ebfc",
+   "sha256": "b9655e93f06acd3ed79b4e717ec77e668b17cd7f956c696e611a15f65d61cee6",
    "size": 5055,
    "system": "A",
    "date": "2026-07-20",
@@ -82,12 +82,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 484,
      "flag": "f4"
     },
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 482,
      "flag": "f5"
     }
@@ -96,7 +96,7 @@
   },
   {
    "file": "system_b/system_b_2026-07-20_download_bare_deviceform_1.rvms",
-   "sha256": "3a82397d1e8de60ecfef15d51ad15530ff293d42b8b99ec790eeddf93c182012",
+   "sha256": "6306a3583933128f06b5bcd0c66bb2e7a8f1d8e58ba6aa707d770f1e62bf0958",
    "size": 5055,
    "system": "B",
    "date": "2026-07-20",
@@ -105,12 +105,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ24149MY9U",
+     "serial": "HQ0000B0001",
      "length": 484,
      "flag": "f5"
     },
     {
-     "serial": "HQ2240FKJDE",
+     "serial": "HQ0000B0002",
      "length": 482,
      "flag": "f4"
     }
@@ -119,7 +119,7 @@
   },
   {
    "file": "system_b/system_b_2026-07-20_prepared_bare_deviceform_1.rvms",
-   "sha256": "21c4bd229c4f40b312f8fdafbc3aecdbb6e1110b4abaa4d5c30c30d6373203b5",
+   "sha256": "aff26c9bca95d112671cda2f7da97179d2d1fe14c0b7f342543c4a50dfdd4336",
    "size": 5055,
    "system": "B",
    "date": "2026-07-20",
@@ -128,12 +128,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ24149MY9U",
+     "serial": "HQ0000B0001",
      "length": 484,
      "flag": "f5"
     },
     {
-     "serial": "HQ2240FKJDE",
+     "serial": "HQ0000B0002",
      "length": 482,
      "flag": "f4"
     }
@@ -142,7 +142,7 @@
   },
   {
    "file": "system_b/system_b_2026-07-20_download_bare_deviceform_2.rvms",
-   "sha256": "d9e8c455213ba5f39243f87a7f95f012e4501aa086de82774ad194a87293c85b",
+   "sha256": "dc294f1984e7ea234b45cd88afbb3a49930bc0335735a43488c394c735df4445",
    "size": 5055,
    "system": "B",
    "date": "2026-07-20",
@@ -151,12 +151,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ24149MY9U",
+     "serial": "HQ0000B0001",
      "length": 484,
      "flag": "f5"
     },
     {
-     "serial": "HQ2240FKJDE",
+     "serial": "HQ0000B0002",
      "length": 482,
      "flag": "f4"
     }
@@ -165,7 +165,7 @@
   },
   {
    "file": "system_c/system_c_2026-07-20_download_half-ess_deviceform_1.rvms",
-   "sha256": "62f23f8b7e075e5b7703b59ef1c03e541555652ca1b58cdd09f3c0ebe046e761",
+   "sha256": "1b6cfe66afe51d57c359b6279a90dc87f0096e702672ff66e08d377f8febf787",
    "size": 6276,
    "system": "C",
    "date": "2026-07-20",
@@ -174,12 +174,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ24142MJUA",
+     "serial": "HQ0000C0001",
      "length": 1705,
      "flag": "e4"
     },
     {
-     "serial": "HQ2414N7NAJ",
+     "serial": "HQ0000C0002",
      "length": 482,
      "flag": "f5"
     }
@@ -188,7 +188,7 @@
   },
   {
    "file": "system_c/system_c_2026-07-20_prepared_half-ess_deviceform_1.rvms",
-   "sha256": "09dc02a5a148af4722bf69b66400ae0a534b57fc8bd94d889139cd2990afd7e3",
+   "sha256": "956eebe131df23de2b993dc26ff374c83884bf002019da522470c217bcd3778f",
    "size": 6276,
    "system": "C",
    "date": "2026-07-20",
@@ -197,12 +197,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ24142MJUA",
+     "serial": "HQ0000C0001",
      "length": 1705,
      "flag": "e4"
     },
     {
-     "serial": "HQ2414N7NAJ",
+     "serial": "HQ0000C0002",
      "length": 482,
      "flag": "f5"
     }
@@ -211,7 +211,7 @@
   },
   {
    "file": "system_c/system_c_2026-07-20_download_half-ess_deviceform_2.rvms",
-   "sha256": "3448f2425eee990b51d299609a8dea063a223961533409920e60216e41eb1400",
+   "sha256": "33db18eb49c7c1a1efba1ccbd471473251e9867840cf1b5eb7cb3b39a57275a8",
    "size": 6276,
    "system": "C",
    "date": "2026-07-20",
@@ -220,12 +220,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ24142MJUA",
+     "serial": "HQ0000C0001",
      "length": 1705,
      "flag": "e4"
     },
     {
-     "serial": "HQ2414N7NAJ",
+     "serial": "HQ0000C0002",
      "length": 482,
      "flag": "f5"
     }
@@ -234,7 +234,7 @@
   },
   {
    "file": "system_c/system_c_2026-07-20_prepared_half-ess_deviceform_2.rvms",
-   "sha256": "dfc52763f76afe55e4567f2651d34814693a4a3e981464546b437fac2e9dbe3b",
+   "sha256": "a7f947cf04cb0623374680dc717a4ca7b20d546a07c1a8e9e5128ec8e94c11db",
    "size": 6276,
    "system": "C",
    "date": "2026-07-20",
@@ -243,12 +243,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ24142MJUA",
+     "serial": "HQ0000C0001",
      "length": 1705,
      "flag": "e4"
     },
     {
-     "serial": "HQ2414N7NAJ",
+     "serial": "HQ0000C0002",
      "length": 482,
      "flag": "f5"
     }
@@ -257,7 +257,7 @@
   },
   {
    "file": "system_c/system_c_2026-07-20_download_half-ess_deviceform_3.rvms",
-   "sha256": "871afeea1f5526e671b658330c1dd5559796d078a1714b4426988b3d726605f3",
+   "sha256": "65729079eb49601a6d54b2eaadf41fedf3eb7d710c17293e02a098946e3e937a",
    "size": 6276,
    "system": "C",
    "date": "2026-07-20",
@@ -266,12 +266,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414N7NAJ",
+     "serial": "HQ0000C0002",
      "length": 484,
      "flag": "f5"
     },
     {
-     "serial": "HQ24142MJUA",
+     "serial": "HQ0000C0001",
      "length": 1703,
      "flag": "e4"
     }
@@ -280,7 +280,7 @@
   },
   {
    "file": "system_c/system_c_2026-07-20_prepared_half-ess_deviceform_3.rvms",
-   "sha256": "b21395d10f9b11ec5ef5abee4a5b4560159b94cef7663a9a7561d542526defd2",
+   "sha256": "8cdd1b98e4ea894b42513963b84b623348d907393b6001236eb96ae7bfe29557",
    "size": 7497,
    "system": "C",
    "date": "2026-07-20",
@@ -289,12 +289,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414N7NAJ",
+     "serial": "HQ0000C0002",
      "length": 1705,
      "flag": "e4"
     },
     {
-     "serial": "HQ24142MJUA",
+     "serial": "HQ0000C0001",
      "length": 1703,
      "flag": "e4"
     }
@@ -303,7 +303,7 @@
   },
   {
    "file": "system_c/system_c_2026-07-20_prepared_ess_deviceform_1.rvms",
-   "sha256": "08127e410cf899a4b88d1a0ff470cf9cf8c8a8638850c99982b6b89a19e230f4",
+   "sha256": "8c65e5781252fe7b40f72584626bcd84fcdd794d434868dcce9e49d1a3f0b8eb",
    "size": 7495,
    "system": "C",
    "date": "2026-07-20",
@@ -312,12 +312,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414N7NAJ",
+     "serial": "HQ0000C0002",
      "length": 1703,
      "flag": "e4"
     },
     {
-     "serial": "HQ24142MJUA",
+     "serial": "HQ0000C0001",
      "length": 1703,
      "flag": "e4"
     }
@@ -326,7 +326,7 @@
   },
   {
    "file": "system_c/system_c_2026-07-20_prepared_half-ess_deviceform_4.rvms",
-   "sha256": "b153d2f8a21fa71de44706b986cc7206d411e92753de578bf9bd6b3db0effff3",
+   "sha256": "728372b38ebc7fd5006a5c8d9dd6ccdace2ac9ebb863107201a5541472d0a9ec",
    "size": 5055,
    "system": "C",
    "date": "2026-07-20",
@@ -335,12 +335,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ24142MJUA",
+     "serial": "HQ0000C0001",
      "length": 484,
      "flag": "e4"
     },
     {
-     "serial": "HQ2414N7NAJ",
+     "serial": "HQ0000C0002",
      "length": 482,
      "flag": "f5"
     }
@@ -349,7 +349,7 @@
   },
   {
    "file": "system_c/system_c_2026-07-20_download_half-ess_deviceform_4.rvms",
-   "sha256": "72ebbf9a3294d4ebaf284e94d3bea4ff266ef5dc65b90fd6314da292c7be9b9d",
+   "sha256": "b761d98829c70bc1320e144f9ac1d83606cd65362813b015f0fca17e4b7c30cb",
    "size": 6276,
    "system": "C",
    "date": "2026-07-20",
@@ -358,12 +358,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ24142MJUA",
+     "serial": "HQ0000C0001",
      "length": 1705,
      "flag": "e4"
     },
     {
-     "serial": "HQ2414N7NAJ",
+     "serial": "HQ0000C0002",
      "length": 482,
      "flag": "f5"
     }
@@ -372,7 +372,7 @@
   },
   {
    "file": "system_d/system_d_2026-07-20_download_bare_deviceform_1.rvms",
-   "sha256": "4019396e6e134b0d6bae3c77eb7aa6c2f39963a6355f8d3952f7aeae97e03753",
+   "sha256": "a5960ff4931b379dfe0ed0807188ca2593cb8d98cdd95336dfae9a33780f9548",
    "size": 5055,
    "system": "D",
    "date": "2026-07-20",
@@ -381,12 +381,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2240PY7CF",
+     "serial": "HQ0000D0001",
      "length": 484,
      "flag": "f5"
     },
     {
-     "serial": "HQ22407X3WT",
+     "serial": "HQ0000D0002",
      "length": 482,
      "flag": "f4"
     }
@@ -395,7 +395,7 @@
   },
   {
    "file": "system_d/system_d_2026-07-20_prepared_bare_deviceform_1.rvms",
-   "sha256": "2c7f9875c59977e41cfba407e05da9571870239c5ff0fe588317f2e7d710bf09",
+   "sha256": "2ccf4642f20ec7b60ac79b376930b116a8cd01499e0e4f28bf21199de00c6e98",
    "size": 5055,
    "system": "D",
    "date": "2026-07-20",
@@ -404,12 +404,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2240PY7CF",
+     "serial": "HQ0000D0001",
      "length": 484,
      "flag": "f5"
     },
     {
-     "serial": "HQ22407X3WT",
+     "serial": "HQ0000D0002",
      "length": 482,
      "flag": "f4"
     }
@@ -418,7 +418,7 @@
   },
   {
    "file": "system_d/system_d_2026-07-20_download_bare_deviceform_2.rvms",
-   "sha256": "7e21a8f75c7ed1636937c0ce85bbf152681d98101e61efabdb1d1d547f3e34b7",
+   "sha256": "c65a0ce381d9a757c4da029b772d565007c03195b3702fa813be6a1ad898aca0",
    "size": 5055,
    "system": "D",
    "date": "2026-07-20",
@@ -427,12 +427,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2240PY7CF",
+     "serial": "HQ0000D0001",
      "length": 484,
      "flag": "f5"
     },
     {
-     "serial": "HQ22407X3WT",
+     "serial": "HQ0000D0002",
      "length": 482,
      "flag": "f4"
     }
@@ -441,7 +441,7 @@
   },
   {
    "file": "system_a/system_a_2026-07-13_prepared_half-ess_uploadform_1.rvms",
-   "sha256": "b083ad08d4b1c1833b51aae0f7e30ee925ba67a5c86d833fa2e16f941971a724",
+   "sha256": "8b61cc867eab3f47c2b47f596fb31a37004d7eb6f8518bd49fa354e2f3638342",
    "size": 6182,
    "system": "A",
    "date": "2026-07-13",
@@ -450,12 +450,12 @@
    "form": "uploadform",
    "blocks": [
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 484,
      "flag": "f4"
     },
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 1609,
      "flag": "e4"
     }
@@ -464,7 +464,7 @@
   },
   {
    "file": "system_a/system_a_2026-07-13_prepared_half-ess_uploadform_2.rvms",
-   "sha256": "2042663d56f4b3eaec9d798f88556a7ae0a475e12a3159be86bf7b0ec50086a6",
+   "sha256": "9f49b072b91c2ed10730d58a73824ef31ebf23a3565b2bff2b2e46dbe82b34bc",
    "size": 6182,
    "system": "A",
    "date": "2026-07-13",
@@ -473,12 +473,12 @@
    "form": "uploadform",
    "blocks": [
     {
-     "serial": "HQ24149MY9U",
+     "serial": "HQ0000B0001",
      "length": 484,
      "flag": "f5"
     },
     {
-     "serial": "HQ2240FKJDE",
+     "serial": "HQ0000B0002",
      "length": 1609,
      "flag": "e4"
     }
@@ -487,7 +487,7 @@
   },
   {
    "file": "system_b/system_b_2026-07-20_prepared_half-ess_deviceform_1.rvms",
-   "sha256": "58e44360abfee7d47319ff2bcb68789c5915e60d1df6dbbdf1576ff2ce443b1c",
+   "sha256": "8104acd5da9c842e8e4d6e1014863bc07e189c4f33492added0ac64b97b6575b",
    "size": 7497,
    "system": "B",
    "date": "2026-07-20",
@@ -496,12 +496,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2240FKJDE",
+     "serial": "HQ0000B0002",
      "length": 1705,
      "flag": "e4"
     },
     {
-     "serial": "HQ24149MY9U",
+     "serial": "HQ0000B0001",
      "length": 1703,
      "flag": "e4"
     }
@@ -510,7 +510,7 @@
   },
   {
    "file": "system_c/system_c_2026-07-13_gui-export_half-ess_uploadform_1.rvms",
-   "sha256": "6a0724bf23cf703a5841a26c4fc7deae3dfb2d498d269cc804264bdd1833282c",
+   "sha256": "bc936dc0becaefc03b3c799c87ef570e3c17dffaf703d575e4a01db7f510240b",
    "size": 6182,
    "system": "C",
    "date": "2026-07-13",
@@ -519,12 +519,12 @@
    "form": "uploadform",
    "blocks": [
     {
-     "serial": "HQ2414N7NAJ",
+     "serial": "HQ0000C0002",
      "length": 484,
      "flag": "f5"
     },
     {
-     "serial": "HQ24142MJUA",
+     "serial": "HQ0000C0001",
      "length": 1609,
      "flag": "e4"
     }
@@ -533,7 +533,7 @@
   },
   {
    "file": "system_d/system_d_2026-07-23_download_bare_deviceform_1.rvms",
-   "sha256": "bc7a00a3de93efff97cc3ce4aabae7542083d40b2c0e48ac4e84bab9caa70ee8",
+   "sha256": "0c0c636edd87f2850c7f21d6637f2b72920af11ae967af3fc96213201102a444",
    "size": 5055,
    "system": "D",
    "date": "2026-07-23",
@@ -542,12 +542,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ22407X3WT",
+     "serial": "HQ0000D0002",
      "length": 484,
      "flag": "f4"
     },
     {
-     "serial": "HQ2240PY7CF",
+     "serial": "HQ0000D0001",
      "length": 482,
      "flag": "f5"
     }
@@ -556,7 +556,7 @@
   },
   {
    "file": "system_d/system_d_2026-07-23_prepared_bare_deviceform_1.rvms",
-   "sha256": "30fe4103b30344c16df0057a6a664bde9995b9dbb628c14004773bc2278d2254",
+   "sha256": "25d400f7adf4acd6ff24cd15e0adf8049f2493c5f8d57035e9ec4a0f7951696f",
    "size": 5055,
    "system": "D",
    "date": "2026-07-23",
@@ -565,12 +565,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ22407X3WT",
+     "serial": "HQ0000D0002",
      "length": 484,
      "flag": "f4"
     },
     {
-     "serial": "HQ2240PY7CF",
+     "serial": "HQ0000D0001",
      "length": 482,
      "flag": "f5"
     }
@@ -579,7 +579,7 @@
   },
   {
    "file": "system_b/system_b_2026-07-24_download_bare_deviceform_1.rvms",
-   "sha256": "b422bb22711d096eeed2f1a364053c27ba257ac41e2f03a6369ce3e5129b769a",
+   "sha256": "63ccba4309095f30f9b2d3402022d91d9f03c3d834e696e0f640b48550ffa1df",
    "size": 5055,
    "system": "B",
    "date": "2026-07-24",
@@ -588,12 +588,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ24149MY9U",
+     "serial": "HQ0000B0001",
      "length": 484,
      "flag": "f5"
     },
     {
-     "serial": "HQ2240FKJDE",
+     "serial": "HQ0000B0002",
      "length": 482,
      "flag": "f4"
     }
@@ -602,7 +602,7 @@
   },
   {
    "file": "system_b/system_b_2026-07-24_download_bare_deviceform_2.rvms",
-   "sha256": "dcbe876826493b8daa50e95acc2654c6f0b939401cd456dc244a42562dbeb70f",
+   "sha256": "fcadc2165cdf335add9c193d4d2ed3e5b36bd52869c6b61de920452dee056f9e",
    "size": 5055,
    "system": "B",
    "date": "2026-07-24",
@@ -611,12 +611,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ24149MY9U",
+     "serial": "HQ0000B0001",
      "length": 484,
      "flag": "f5"
     },
     {
-     "serial": "HQ2240FKJDE",
+     "serial": "HQ0000B0002",
      "length": 482,
      "flag": "f4"
     }
@@ -625,7 +625,7 @@
   },
   {
    "file": "system_b/system_b_2026-07-21_prepared_ess_uploadform_1.rvms",
-   "sha256": "7993f99ad0df4b4a91b7635019cc28e93c3afcdba1ab01a6898103f91867186c",
+   "sha256": "ada042ae2cfead3e81b4b6f13450c9d4da2f7a3a69303c8c46f5ed7e1cd235dc",
    "size": 6877,
    "system": "B",
    "date": "2026-07-21",
@@ -634,12 +634,12 @@
    "form": "uploadform",
    "blocks": [
     {
-     "serial": "HQ24149MY9U",
+     "serial": "HQ0000B0001",
      "length": 1179,
      "flag": "e5"
     },
     {
-     "serial": "HQ2240FKJDE",
+     "serial": "HQ0000B0002",
      "length": 1609,
      "flag": "e4"
     }
@@ -648,7 +648,7 @@
   },
   {
    "file": "system_b/system_b_2026-07-24_prepared_ess_deviceform_1.rvms",
-   "sha256": "2980666304244d5605bb1b89b0b5ee22dae2c532f046c36220288d80495ca722",
+   "sha256": "d88fe735c765c8ca92ad76f596ee081d9bb22af89e0feb445d6e3a0275951821",
    "size": 7049,
    "system": "B",
    "date": "2026-07-24",
@@ -657,12 +657,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ24149MY9U",
+     "serial": "HQ0000B0001",
      "length": 1257,
      "flag": "e5"
     },
     {
-     "serial": "HQ2240FKJDE",
+     "serial": "HQ0000B0002",
      "length": 1703,
      "flag": "e4"
     }
@@ -671,7 +671,7 @@
   },
   {
    "file": "system_b/system_b_2026-07-24_prepared_ess_deviceform_2.rvms",
-   "sha256": "15cd164d57d7b76f2208e14a43ea2dfe9c40c05589a435f02b9cbeace7b8a1b0",
+   "sha256": "c6367c1053edfc1131c02205c97f1757d957b923747921408ee984381444ed60",
    "size": 7049,
    "system": "B",
    "date": "2026-07-24",
@@ -680,12 +680,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ24149MY9U",
+     "serial": "HQ0000B0001",
      "length": 1257,
      "flag": "e5"
     },
     {
-     "serial": "HQ2240FKJDE",
+     "serial": "HQ0000B0002",
      "length": 1703,
      "flag": "e4"
     }
@@ -694,7 +694,7 @@
   },
   {
    "file": "system_b/system_b_2026-07-24_download_bare_deviceform_3.rvms",
-   "sha256": "d6e9f468bfdfaf0c00b7ca5aa8e5fd504362bd08e0115ce9d5c9c42ecfe79164",
+   "sha256": "d3782d9b01438db62fbbc9451a7014f77b6f6fd4ddc37029de8a43631e4e4e23",
    "size": 5055,
    "system": "B",
    "date": "2026-07-24",
@@ -703,12 +703,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2240FKJDE",
+     "serial": "HQ0000B0002",
      "length": 484,
      "flag": "f4"
     },
     {
-     "serial": "HQ24149MY9U",
+     "serial": "HQ0000B0001",
      "length": 482,
      "flag": "f5"
     }
@@ -717,7 +717,7 @@
   },
   {
    "file": "system_b/system_b_2026-07-24_download_stub_deviceform_1.rvms",
-   "sha256": "f3682b432dc474e45359bb6e184f3eda0e182ab736e0cc3ffbeb94fae4be66b0",
+   "sha256": "d659816e4ef61303e7e29f976a42453e45a3062030eebdf89471a5ebbd722713",
    "size": 5183,
    "system": "B",
    "date": "2026-07-24",
@@ -726,12 +726,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ24149MY9U",
+     "serial": "HQ0000B0001",
      "length": 548,
      "flag": "e5"
     },
     {
-     "serial": "HQ2240FKJDE",
+     "serial": "HQ0000B0002",
      "length": 546,
      "flag": "e4"
     }
@@ -740,7 +740,7 @@
   },
   {
    "file": "system_a/system_a_2026-08-13_prepared_bare_deviceform_1.rvms",
-   "sha256": "6269f3bd4b5e7c71b5cab9fde67dde5593d9e26b644a05662cf23868840dc012",
+   "sha256": "5919c137d6fba98c35739bd6086e42279c2e5d8bcd69160c2829ac1e8f1e173f",
    "size": 5055,
    "system": "A",
    "date": "2026-08-13",
@@ -749,12 +749,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 484,
      "flag": "f4"
     },
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 482,
      "flag": "f5"
     }
@@ -763,7 +763,7 @@
   },
   {
    "file": "system_a/system_a_2026-08-13_download_ess_deviceform_1.rvms",
-   "sha256": "b0a66df194882aa034dc9b3772454ecdd60c4bab6ec75a8dedc6752f2ae2910e",
+   "sha256": "54c09af9083f5cb72b29404e0abd38ca7cd937fd27fb0897204e2b1df11b48df",
    "size": 7049,
    "system": "A",
    "date": "2026-08-13",
@@ -772,12 +772,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 1257,
      "flag": "e5"
     },
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 1703,
      "flag": "e4"
     }
@@ -786,7 +786,7 @@
   },
   {
    "file": "system_a/system_a_2026-08-14_download_ess_deviceform_1.rvms",
-   "sha256": "14c83b7112cea35185f797585fc917049c722dfe3fe5c31a6c3707b33bfe8740",
+   "sha256": "5976069e912f2e3b81deca44e1dcacfae3a76da97134c4fa3701b0f643a6f9fb",
    "size": 7049,
    "system": "A",
    "date": "2026-08-14",
@@ -795,12 +795,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 1705,
      "flag": "e4"
     },
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 1255,
      "flag": "e5"
     }
@@ -809,7 +809,7 @@
   },
   {
    "file": "system_a/system_a_2026-08-14_prepared_bare_deviceform_1.rvms",
-   "sha256": "cc56c3845fe58e84127ed1dfe355d1781fc09c41568765ca52402f5d17020562",
+   "sha256": "58824d6d84b19801dc00bffebbfb5fc4b298314494fc2ff5fe07799b1f511595",
    "size": 5055,
    "system": "A",
    "date": "2026-08-14",
@@ -818,12 +818,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 484,
      "flag": "f4"
     },
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 482,
      "flag": "f5"
     }
@@ -832,7 +832,7 @@
   },
   {
    "file": "system_a/system_a_2026-08-14_prepared_bare_deviceform_2.rvms",
-   "sha256": "60043d4dc5a6eca5d89c101fdaa209a7f01e269a78e64886526712bf096de49b",
+   "sha256": "95184e070f46ebb65f5103a75087b8930ef7723ed7b6a4ee983779b932195f28",
    "size": 5055,
    "system": "A",
    "date": "2026-08-14",
@@ -841,12 +841,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 484,
      "flag": "f4"
     },
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 482,
      "flag": "f5"
     }
@@ -855,7 +855,7 @@
   },
   {
    "file": "system_d/system_d_2026-08-14_download_ess_deviceform_1.rvms",
-   "sha256": "8d2f5adefc9f5fdbcb41d1e126590d7b51f80bbc26a1d25075e8042bf9d7f493",
+   "sha256": "6ef3b229276805437d9658cd7111c878bf33a2f6a2a87a4d025218644ff42dd7",
    "size": 7049,
    "system": "D",
    "date": "2026-08-14",
@@ -864,12 +864,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2240PY7CF",
+     "serial": "HQ0000D0001",
      "length": 1257,
      "flag": "e5"
     },
     {
-     "serial": "HQ22407X3WT",
+     "serial": "HQ0000D0002",
      "length": 1703,
      "flag": "e4"
     }
@@ -878,7 +878,7 @@
   },
   {
    "file": "system_d/system_d_2026-08-13_download_bare_deviceform_1.rvms",
-   "sha256": "c2350152acbe61de3f031343e56935826753254188b1a8b30eb26269a9284652",
+   "sha256": "412fd8d80fa25ca598c957453ecb87987612c028d8f5a4e423de4eb96a8984ca",
    "size": 5055,
    "system": "D",
    "date": "2026-08-13",
@@ -887,12 +887,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ22407X3WT",
+     "serial": "HQ0000D0002",
      "length": 484,
      "flag": "f4"
     },
     {
-     "serial": "HQ2240PY7CF",
+     "serial": "HQ0000D0001",
      "length": 482,
      "flag": "f5"
     }
@@ -901,7 +901,7 @@
   },
   {
    "file": "system_d/system_d_2026-08-14_prepared_bare_deviceform_1.rvms",
-   "sha256": "82bba4fc0bd4855f7acc70275dfa8aa8bcd480014df6e13913240443e992e0bf",
+   "sha256": "02f8b4c702574b416f6cf522ede75c7cf0b6e1933430589200e9e0645d4fdabc",
    "size": 5055,
    "system": "D",
    "date": "2026-08-14",
@@ -910,12 +910,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ22407X3WT",
+     "serial": "HQ0000D0002",
      "length": 484,
      "flag": "f4"
     },
     {
-     "serial": "HQ2240PY7CF",
+     "serial": "HQ0000D0001",
      "length": 482,
      "flag": "f5"
     }
@@ -924,7 +924,7 @@
   },
   {
    "file": "system_d/system_d_2026-08-14_prepared_bare_deviceform_2.rvms",
-   "sha256": "fc2f74731546275cefb17604c77b84d5da66c33be82a6259bc1c41cce9635fef",
+   "sha256": "5a41ba633932c9f884f9e3daea548c8f82466734b49e2e1d8fd8446bed7ba052",
    "size": 5055,
    "system": "D",
    "date": "2026-08-14",
@@ -933,12 +933,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2240PY7CF",
+     "serial": "HQ0000D0001",
      "length": 484,
      "flag": "f5"
     },
     {
-     "serial": "HQ22407X3WT",
+     "serial": "HQ0000D0002",
      "length": 482,
      "flag": "f4"
     }
@@ -947,7 +947,7 @@
   },
   {
    "file": "system_a/system_a_2026-08-19_download_bare_deviceform_1.rvms",
-   "sha256": "0b8aa874f56d245d2ec460c81a63d153700b90286b51928e52c947dd080fcc4d",
+   "sha256": "f381ad57c5bea6b27d597c0e248725ac824c2c879d31d7b8f3c218eaf2fd4d96",
    "size": 5055,
    "system": "A",
    "date": "2026-08-19",
@@ -956,12 +956,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 484,
      "flag": "f4"
     },
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 482,
      "flag": "f5"
     }
@@ -970,7 +970,7 @@
   },
   {
    "file": "system_a/system_a_2026-09-03_download_ess_deviceform_1.rvms",
-   "sha256": "4cc5a0e7fd4e4bf4f7a9592793ef8431aa6ac2fff26c9cc1f0eb5f0a2cf6cf90",
+   "sha256": "54156c492cddf5525b71711c77d7afeee19fe0fcfd4df9beb86fe521c50aad49",
    "size": 7049,
    "system": "A",
    "date": "2026-09-03",
@@ -979,12 +979,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 1257,
      "flag": "e5"
     },
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 1703,
      "flag": "e4"
     }
@@ -993,7 +993,7 @@
   },
   {
    "file": "system_c/system_c_2026-07-21_gui-export_ess_uploadform_1.rvms",
-   "sha256": "afc57ba6ce26305450720f0d239ac284167388ba3e50148406c624b3be1684dd",
+   "sha256": "37374300a6db0807aa099715e4e6f3915e5f266408243e4cad94843efad9e05f",
    "size": 6877,
    "system": "C",
    "date": "2026-07-21",
@@ -1002,12 +1002,12 @@
    "form": "uploadform",
    "blocks": [
     {
-     "serial": "HQ24142MJUA",
+     "serial": "HQ0000C0001",
      "length": 1611,
      "flag": "e4"
     },
     {
-     "serial": "HQ2414N7NAJ",
+     "serial": "HQ0000C0002",
      "length": 1177,
      "flag": "e5"
     }
@@ -1016,7 +1016,7 @@
   },
   {
    "file": "system_c/system_c_2026-07-24_download_ess_deviceform_1.rvms",
-   "sha256": "32b2516d6918f00578a1660ff893faf85b0d4da785e20e62dd361864f2e5ea38",
+   "sha256": "832f6c0fb6bd9ab7d01020c1d4e370e9cae43a5bf742b319d5a05eb6f26ce740",
    "size": 7049,
    "system": "C",
    "date": "2026-07-24",
@@ -1025,12 +1025,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414N7NAJ",
+     "serial": "HQ0000C0002",
      "length": 1257,
      "flag": "e5"
     },
     {
-     "serial": "HQ24142MJUA",
+     "serial": "HQ0000C0001",
      "length": 1703,
      "flag": "e4"
     }
@@ -1039,7 +1039,7 @@
   },
   {
    "file": "system_b/system_b_2026-06-08_download_bare_deviceform_1.rvms",
-   "sha256": "d9d51950196769d9771d12df3642b05b429c9dc74d3ba81efd1499901870f283",
+   "sha256": "25aae364477b06815e5bf2b62427bc2e1187a0d85d1b9f2ee3966cd8726a0e4e",
    "size": 5067,
    "system": "B",
    "date": "2026-06-08",
@@ -1048,12 +1048,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2240FKJDE",
+     "serial": "HQ0000B0002",
      "length": 490,
      "flag": "f4"
     },
     {
-     "serial": "HQ24149MY9U",
+     "serial": "HQ0000B0001",
      "length": 488,
      "flag": "f5"
     }
@@ -1062,7 +1062,7 @@
   },
   {
    "file": "system_b/system_b_2026-06-08_download_bare_deviceform_2.rvms",
-   "sha256": "2747225c847b667ac93cab8be9ab7b5135551cd05f0b0cab7f221d29289e3f79",
+   "sha256": "2b6c45549fdd7359786ea66f0d7fbf3bb449f110102f73c551efa3ebff79bd51",
    "size": 5067,
    "system": "B",
    "date": "2026-06-08",
@@ -1071,12 +1071,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2240FKJDE",
+     "serial": "HQ0000B0002",
      "length": 490,
      "flag": "f4"
     },
     {
-     "serial": "HQ24149MY9U",
+     "serial": "HQ0000B0001",
      "length": 488,
      "flag": "f5"
     }
@@ -1085,7 +1085,7 @@
   },
   {
    "file": "system_a/system_a_2026-06-19_download_bare_deviceform_1.rvms",
-   "sha256": "18eef9f346f50a3ffadbdc0f7b24fbe8d6624a5ddf976c50b1a9e21b35f62e9b",
+   "sha256": "06ba956a3ab58d226e8d70c0ad81ce4444de2097d59f8f72a4ac60deb2cde92f",
    "size": 5055,
    "system": "A",
    "date": "2026-06-19",
@@ -1094,12 +1094,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 484,
      "flag": "f4"
     },
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 482,
      "flag": "f5"
     }
@@ -1108,7 +1108,7 @@
   },
   {
    "file": "system_a/system_a_2026-07-20_download_bare_deviceform_3.rvms",
-   "sha256": "0bc1416e36d944bdc983bdf3ac86f1e59359210d55849cbc105bc44420feface",
+   "sha256": "1919576b33fd6b8bb909d9111c6826d58f2320722359db2826716c9f825f92ee",
    "size": 5055,
    "system": "A",
    "date": "2026-07-20",
@@ -1117,12 +1117,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 484,
      "flag": "f4"
     },
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 482,
      "flag": "f5"
     }
@@ -1131,7 +1131,7 @@
   },
   {
    "file": "system_a/system_a_2026-06-18_download_bare_deviceform_1.rvms",
-   "sha256": "c49cfb226900276cf831d8e692d16cadce005f6ff384d788c95eac9622022d28",
+   "sha256": "fd2a435ac38afb0ac32ec71ab6b3e465b0848a13e3e92c679fad44bccd5ee8be",
    "size": 5055,
    "system": "A",
    "date": "2026-06-18",
@@ -1140,12 +1140,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 484,
      "flag": "f5"
     },
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 482,
      "flag": "f4"
     }
@@ -1154,7 +1154,7 @@
   },
   {
    "file": "system_b/system_b_2026-07-20_download_bare_deviceform_3.rvms",
-   "sha256": "9a8178be50fe705b676a00475cce8b24aa8ba2070a2a2cce235e27274823c5e9",
+   "sha256": "ccb5b78cd489311a5f8e2fcfec2d632ad4e9c387f32f0242042a04c29f6b4eaa",
    "size": 5055,
    "system": "B",
    "date": "2026-07-20",
@@ -1163,12 +1163,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2240FKJDE",
+     "serial": "HQ0000B0002",
      "length": 484,
      "flag": "f4"
     },
     {
-     "serial": "HQ24149MY9U",
+     "serial": "HQ0000B0001",
      "length": 482,
      "flag": "f5"
     }
@@ -1177,7 +1177,7 @@
   },
   {
    "file": "system_b/system_b_2026-06-18_download_bare_deviceform_1.rvms",
-   "sha256": "7549994dac068843efa87bff31695761a832d6dc928dfb4d50edbfbbf1a677ad",
+   "sha256": "5dccfc06109cd265dd877af4451fff460a3661892938d962503980351417d45f",
    "size": 5055,
    "system": "B",
    "date": "2026-06-18",
@@ -1186,12 +1186,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ24149MY9U",
+     "serial": "HQ0000B0001",
      "length": 484,
      "flag": "f5"
     },
     {
-     "serial": "HQ2240FKJDE",
+     "serial": "HQ0000B0002",
      "length": 482,
      "flag": "f4"
     }
@@ -1200,7 +1200,7 @@
   },
   {
    "file": "system_c/system_c_2026-07-20_download_half-ess_deviceform_5.rvms",
-   "sha256": "488aa69691f660937944be555ed5bd6b672a8ded85d3d186f04e0303a57c45d2",
+   "sha256": "f53be71c91d7118dccd6c9ea64e33a4d72e9ea370f2f85182ee67a391e3adadd",
    "size": 6276,
    "system": "C",
    "date": "2026-07-20",
@@ -1209,12 +1209,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414N7NAJ",
+     "serial": "HQ0000C0002",
      "length": 484,
      "flag": "f5"
     },
     {
-     "serial": "HQ24142MJUA",
+     "serial": "HQ0000C0001",
      "length": 1703,
      "flag": "e4"
     }
@@ -1223,7 +1223,7 @@
   },
   {
    "file": "system_c/system_c_2026-06-23_download_bare_deviceform_1.rvms",
-   "sha256": "fc11e50c283efe973f95ecd31b209313e7757c22e40b9667b9d1f507a4bc3e2d",
+   "sha256": "36f2fb80a3a11704cb74f08b6211547ed0eb3d6200af34514849ba55e746d4cc",
    "size": 5055,
    "system": "C",
    "date": "2026-06-23",
@@ -1232,12 +1232,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414N7NAJ",
+     "serial": "HQ0000C0002",
      "length": 484,
      "flag": "f5"
     },
     {
-     "serial": "HQ24142MJUA",
+     "serial": "HQ0000C0001",
      "length": 482,
      "flag": "f4"
     }
@@ -1246,7 +1246,7 @@
   },
   {
    "file": "system_c/system_c_2026-07-17_download_half-ess_deviceform_1.rvms",
-   "sha256": "520afcf1752fe4f8145194513483bf156cd78e1664f31a288baa5a8e30dbcd42",
+   "sha256": "ff84fbe4658a9f1a27c264f22541c5f62b45e309a34fc05be370bd3f33bd2423",
    "size": 6276,
    "system": "C",
    "date": "2026-07-17",
@@ -1255,12 +1255,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414N7NAJ",
+     "serial": "HQ0000C0002",
      "length": 484,
      "flag": "f5"
     },
     {
-     "serial": "HQ24142MJUA",
+     "serial": "HQ0000C0001",
      "length": 1703,
      "flag": "e4"
     }
@@ -1269,7 +1269,7 @@
   },
   {
    "file": "system_c/system_c_2026-07-20_download_half-ess_deviceform_6.rvms",
-   "sha256": "dbacf0deec32641cbc330334329c0532d428b09d0c38585cb68f96853e6ca837",
+   "sha256": "c0a88c4667a9260aa3fcf3d2f0271a41f422e3f3bcf638c3f316bcdb3ba53094",
    "size": 6276,
    "system": "C",
    "date": "2026-07-20",
@@ -1278,12 +1278,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ24142MJUA",
+     "serial": "HQ0000C0001",
      "length": 1705,
      "flag": "e4"
     },
     {
-     "serial": "HQ2414N7NAJ",
+     "serial": "HQ0000C0002",
      "length": 482,
      "flag": "f5"
     }
@@ -1292,7 +1292,7 @@
   },
   {
    "file": "system_c/system_c_2026-06-18_download_bare_deviceform_1.rvms",
-   "sha256": "d2b78ca6e324c82f0870104f28fa088eb42ac0932812291d482ffd1bdd26b333",
+   "sha256": "217bf370b88e45cd399d9fe0a01bc566aae3bfb60ca7b725a4bfd1374cd8f1fc",
    "size": 5055,
    "system": "C",
    "date": "2026-06-18",
@@ -1301,12 +1301,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ24142MJUA",
+     "serial": "HQ0000C0001",
      "length": 484,
      "flag": "f4"
     },
     {
-     "serial": "HQ2414N7NAJ",
+     "serial": "HQ0000C0002",
      "length": 482,
      "flag": "f5"
     }
@@ -1315,7 +1315,7 @@
   },
   {
    "file": "system_d/system_d_2026-07-20_download_bare_deviceform_3.rvms",
-   "sha256": "c40522bb0d10ba3d14c938e3a17199b21ee488fdbdcd94cdc08c0060d4a5b938",
+   "sha256": "00ae1df1918c8415dc3cafb89a7a3909d122d2a8a9654aa3f60d4adf12c28949",
    "size": 5055,
    "system": "D",
    "date": "2026-07-20",
@@ -1324,12 +1324,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2240PY7CF",
+     "serial": "HQ0000D0001",
      "length": 484,
      "flag": "f5"
     },
     {
-     "serial": "HQ22407X3WT",
+     "serial": "HQ0000D0002",
      "length": 482,
      "flag": "f4"
     }
@@ -1338,7 +1338,7 @@
   },
   {
    "file": "system_d/system_d_2026-07-20_download_bare_deviceform_4.rvms",
-   "sha256": "c51a76d7d445aa9d1f046707549763b7bf754bba5fe9deef5b084244a54dab60",
+   "sha256": "4c6aeb0df7a389a03ad9380eadf1c6d88d7f0cf65cc2c7e7aba93e262df7d35a",
    "size": 5055,
    "system": "D",
    "date": "2026-07-20",
@@ -1347,12 +1347,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2240PY7CF",
+     "serial": "HQ0000D0001",
      "length": 484,
      "flag": "f5"
     },
     {
-     "serial": "HQ22407X3WT",
+     "serial": "HQ0000D0002",
      "length": 482,
      "flag": "f4"
     }
@@ -1361,7 +1361,7 @@
   },
   {
    "file": "system_d/system_d_2026-06-18_download_bare_deviceform_1.rvms",
-   "sha256": "cb75c318d8985cdf41219ad5d0221d9bc43f4cda86a5bdf925317301f97b6b79",
+   "sha256": "3ce72d9007886b791e4f4f4432e38997df21a2a990d3399e465c8acbed270f68",
    "size": 5055,
    "system": "D",
    "date": "2026-06-18",
@@ -1370,12 +1370,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ22407X3WT",
+     "serial": "HQ0000D0002",
      "length": 484,
      "flag": "f4"
     },
     {
-     "serial": "HQ2240PY7CF",
+     "serial": "HQ0000D0001",
      "length": 482,
      "flag": "f5"
     }
@@ -1384,7 +1384,7 @@
   },
   {
    "file": "system_a/system_a_2026-08-12_download_bare_deviceform_1.rvms",
-   "sha256": "e52bd5331738dc0eef1f6b80db716f2b18b90db6da9059d770a4bf75d84647d1",
+   "sha256": "71729c9a346129616a9eb5714991a5f28b392a09eee2bdd05c41fce57abd6c66",
    "size": 5055,
    "system": "A",
    "date": "2026-08-12",
@@ -1393,12 +1393,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 484,
      "flag": "f5"
     },
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 482,
      "flag": "f4"
     }
@@ -1407,7 +1407,7 @@
   },
   {
    "file": "system_a/system_a_2026-08-12_prepared_ess_deviceform_1.rvms",
-   "sha256": "9f0a8c58e5a88ba4a8f06c8ad2952d3dc95e568f94f8f1e245815799893a011f",
+   "sha256": "773b53316552872607da7a17d651d653738a8ddbe3cf15540bb5d7ca6931e5f0",
    "size": 7049,
    "system": "A",
    "date": "2026-08-12",
@@ -1416,12 +1416,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 1257,
      "flag": "e5"
     },
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 1703,
      "flag": "e4"
     }
@@ -1430,7 +1430,7 @@
   },
   {
    "file": "system_a/system_a_2026-08-12_download_bare_deviceform_2.rvms",
-   "sha256": "8f54aebc71f3cd91a2db29f5c6a7db6303e0022b8724377bde31c078f14eef79",
+   "sha256": "62ef20bbcf1503e97dfb956666f7ac2425622dc4d49a5ef30648eaf47e36aacd",
    "size": 5055,
    "system": "A",
    "date": "2026-08-12",
@@ -1439,12 +1439,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 484,
      "flag": "f5"
     },
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 482,
      "flag": "f4"
     }
@@ -1453,7 +1453,7 @@
   },
   {
    "file": "system_a/system_a_2026-08-12_download_bare_deviceform_3.rvms",
-   "sha256": "85232dc474f96c6d5895d6429558d586020de710c34fdeab9750889c0f49cb79",
+   "sha256": "36c87f97ea644955c9e77da873ac49d2f907604d9c495d59267de910ce9a426f",
    "size": 5055,
    "system": "A",
    "date": "2026-08-12",
@@ -1462,12 +1462,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 484,
      "flag": "f4"
     },
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 482,
      "flag": "f5"
     }
@@ -1476,7 +1476,7 @@
   },
   {
    "file": "system_a/system_a_2026-08-12_download_bare_deviceform_4.rvms",
-   "sha256": "fc3b6978eb4fcfb497f228f67c056c5dd9925704266857e37bac8700f7b3c5d3",
+   "sha256": "f86d2f9177c6e16243dd42ad9471da945b67cab0fcae370c75e383b5967a5c44",
    "size": 5055,
    "system": "A",
    "date": "2026-08-12",
@@ -1485,12 +1485,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 484,
      "flag": "f4"
     },
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 482,
      "flag": "f5"
     }
@@ -1499,7 +1499,7 @@
   },
   {
    "file": "system_a/system_a_2026-08-12_prepared_ess_deviceform_2.rvms",
-   "sha256": "6cc42d8577f174cc4ca48563ba5a4f1679356aa252d456e2176721d4e31ce104",
+   "sha256": "3a91af981a609cbc0700491404f21af178e7e4d9333515d802470d2d700d9d8a",
    "size": 7049,
    "system": "A",
    "date": "2026-08-12",
@@ -1508,12 +1508,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 1705,
      "flag": "e4"
     },
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 1255,
      "flag": "e5"
     }
@@ -1522,7 +1522,7 @@
   },
   {
    "file": "system_a/system_a_2026-08-12_download_stub_deviceform_1.rvms",
-   "sha256": "35a90ae828f9bb2530d1dab9bf58abb615158a883ce950eca0e16996eebcbcc0",
+   "sha256": "37b8fbf076ee560f68edba506344837c8fdcf80334fefbc93b69787b7d4ad661",
    "size": 5183,
    "system": "A",
    "date": "2026-08-12",
@@ -1531,12 +1531,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 548,
      "flag": "e5"
     },
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 546,
      "flag": "e4"
     }
@@ -1545,7 +1545,7 @@
   },
   {
    "file": "system_a/system_a_2026-08-12_download_stub_deviceform_2.rvms",
-   "sha256": "76c67561a2db917250d0c2e9da11d8e7b8a340abbbde60a68c4db7de506f98c1",
+   "sha256": "b9af623abffcddde179ce38f776609084d4e0d2ded9178a5fc60d1726ee40ece",
    "size": 5183,
    "system": "A",
    "date": "2026-08-12",
@@ -1554,12 +1554,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 548,
      "flag": "e4"
     },
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 546,
      "flag": "e5"
     }
@@ -1568,7 +1568,7 @@
   },
   {
    "file": "system_d/system_d_2026-08-12_download_bare_deviceform_1.rvms",
-   "sha256": "677c9619a7c46bb3e21bd7117b87c84299013ac358c8efe4c01785d53a694dcc",
+   "sha256": "9f648d05255aec4c5fc964888cfdd454b9f7fc8805782461fd2618233ad6ef9c",
    "size": 5055,
    "system": "D",
    "date": "2026-08-12",
@@ -1577,12 +1577,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2240PY7CF",
+     "serial": "HQ0000D0001",
      "length": 484,
      "flag": "f5"
     },
     {
-     "serial": "HQ22407X3WT",
+     "serial": "HQ0000D0002",
      "length": 482,
      "flag": "f4"
     }
@@ -1591,7 +1591,7 @@
   },
   {
    "file": "system_d/system_d_2026-08-12_prepared_ess_deviceform_1.rvms",
-   "sha256": "0bf8031727250f7e13a0a9bbee0a1fdcb58cf39ac494f63afb42ddacb2892b46",
+   "sha256": "5cb74c35418f3821b3cc8b0d9458a72697825b254b0174147174f9ef3cac31ab",
    "size": 7049,
    "system": "D",
    "date": "2026-08-12",
@@ -1600,12 +1600,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2240PY7CF",
+     "serial": "HQ0000D0001",
      "length": 1257,
      "flag": "e5"
     },
     {
-     "serial": "HQ22407X3WT",
+     "serial": "HQ0000D0002",
      "length": 1703,
      "flag": "e4"
     }
@@ -1614,7 +1614,7 @@
   },
   {
    "file": "system_a/system_a_2026-08-12_prepared_ess_deviceform_3.rvms",
-   "sha256": "7afef65069760933ee86baa3331e74584871de813bf260aa43ff0ec09af3ae12",
+   "sha256": "90e4e37be3249d4ff0915ddbdee1345d43b92149f830650d321a193f87a1e4ef",
    "size": 7049,
    "system": "A",
    "date": "2026-08-12",
@@ -1623,12 +1623,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 1705,
      "flag": "e4"
     },
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 1255,
      "flag": "e5"
     }
@@ -1637,7 +1637,7 @@
   },
   {
    "file": "system_a/system_a_2026-08-13_download_ess_deviceform_2.rvms",
-   "sha256": "75cc1e5f4c6e663f0cc0775adf6faae4bd4812ea6b5dddd7bcd80add87b067ab",
+   "sha256": "e6251f907feb78663ffde9e495382f144615830557cae6b4d490915b9dd12636",
    "size": 7049,
    "system": "A",
    "date": "2026-08-13",
@@ -1646,12 +1646,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 1257,
      "flag": "e5"
     },
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 1703,
      "flag": "e4"
     }
@@ -1660,7 +1660,7 @@
   },
   {
    "file": "system_a/system_a_2026-07-21_prepared_ess_uploadform_1.rvms",
-   "sha256": "57199c62a582b3f6b952ce34b177b2db93febedc1c4bd7150baf2eca39709ac0",
+   "sha256": "c98404252435614eedf732bf3a9d32daa4d9315a878a29428d32a406d8ae0a3f",
    "size": 6877,
    "system": "A",
    "date": "2026-07-21",
@@ -1669,12 +1669,12 @@
    "form": "uploadform",
    "blocks": [
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 1177,
      "flag": "e5"
     },
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 1611,
      "flag": "e4"
     }
@@ -1683,7 +1683,7 @@
   },
   {
    "file": "system_a/system_a_2026-08-13_prepared_ess_uploadform_1.rvms",
-   "sha256": "a533233bec98f1731d377ff30118b490f0dd4f5e75cbc8b802a121cf10674008",
+   "sha256": "18b81d8ec4066ad30d6deb47edc21291c57a79fb454790d6f338cf61bab589c7",
    "size": 6877,
    "system": "A",
    "date": "2026-08-13",
@@ -1692,12 +1692,12 @@
    "form": "uploadform",
    "blocks": [
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 1611,
      "flag": "e4"
     },
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 1177,
      "flag": "e5"
     }
@@ -1706,7 +1706,7 @@
   },
   {
    "file": "system_a/system_a_2026-08-13_download_ess_deviceform_3.rvms",
-   "sha256": "28373a016743f241b4b528a8bea280ff4dc3fe0e55eef8720e1c88c60ae05393",
+   "sha256": "a3d146a1fb15a2c8648d40f45853c91da82dfa6ca4683c714ae0d065cf00dd23",
    "size": 7049,
    "system": "A",
    "date": "2026-08-13",
@@ -1715,12 +1715,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 1705,
      "flag": "e4"
     },
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 1255,
      "flag": "e5"
     }
@@ -1729,7 +1729,7 @@
   },
   {
    "file": "system_a/system_a_2026-08-13_prepared_ess_deviceform_1.rvms",
-   "sha256": "d6b5e013267f01f72724a7b207f8d3bfddae89a11c4a17f90c0b75cbd266fe0f",
+   "sha256": "de44ad67d5a9392e314ec6d0025e77c92838638ded41a59eabe85e8943893c00",
    "size": 7049,
    "system": "A",
    "date": "2026-08-13",
@@ -1738,12 +1738,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 1705,
      "flag": "e4"
     },
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 1255,
      "flag": "e5"
     }
@@ -1752,7 +1752,7 @@
   },
   {
    "file": "system_a/system_a_2026-08-13_prepared_ess_deviceform_2.rvms",
-   "sha256": "f530748733fd1ab657191f40bd8f1f734e9feead056c318cb6ba3698ded28a66",
+   "sha256": "acb599e7ea98b2cd23e8de482cb25621121d0f6d622faf21761b1124e73df7a4",
    "size": 7049,
    "system": "A",
    "date": "2026-08-13",
@@ -1761,12 +1761,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 1705,
      "flag": "e4"
     },
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 1255,
      "flag": "e5"
     }
@@ -1775,7 +1775,7 @@
   },
   {
    "file": "system_a/system_a_2026-08-13_download_ess_deviceform_4.rvms",
-   "sha256": "8cdd27d7268c7d04c9752ea1ed5679cffbe6546399e5d6f6355176723dc029e2",
+   "sha256": "97d419e2c968195482e59b1db5feec870eae7d2ac8dfc3958320c7504000f092",
    "size": 7049,
    "system": "A",
    "date": "2026-08-13",
@@ -1784,12 +1784,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 1257,
      "flag": "e5"
     },
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 1703,
      "flag": "e4"
     }
@@ -1798,7 +1798,7 @@
   },
   {
    "file": "system_a/system_a_2026-08-13_download_ess_deviceform_5.rvms",
-   "sha256": "d59a7cc2de48761d1cb6604e3d871e21ebf7d94d8886d142211675e76c0e7a91",
+   "sha256": "d0ef0ffcbeabb28a96306b580f02c4d2911943bf7b0df927b2963bc96523ae7a",
    "size": 7049,
    "system": "A",
    "date": "2026-08-13",
@@ -1807,12 +1807,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 1705,
      "flag": "e4"
     },
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 1255,
      "flag": "e5"
     }
@@ -1821,7 +1821,7 @@
   },
   {
    "file": "system_a/system_a_2026-08-13_download_ess_deviceform_6.rvms",
-   "sha256": "9fd483bd1bba055f69ccb13f76f66c429c4bd96616765e81138fd8d628bfe8df",
+   "sha256": "590cc59a7004a92cd34796c5d3a6ed989a1117bd7bff3bfb6162f5f34dcdaafc",
    "size": 7049,
    "system": "A",
    "date": "2026-08-13",
@@ -1830,12 +1830,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 1705,
      "flag": "e4"
     },
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 1255,
      "flag": "e5"
     }
@@ -1844,7 +1844,7 @@
   },
   {
    "file": "system_a/system_a_2026-08-13_download_ess_deviceform_7.rvms",
-   "sha256": "7ce04c05fa213f1e64245529e18648c4a0048f6c6ff42969ae40d906b97f45e6",
+   "sha256": "390644480a0330159b73438a094ed1c3f05ed8f7a5015c9390999912917afe2b",
    "size": 7049,
    "system": "A",
    "date": "2026-08-13",
@@ -1853,12 +1853,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2414AXENJ",
+     "serial": "HQ0000A0002",
      "length": 1257,
      "flag": "e5"
     },
     {
-     "serial": "HQ2414U6FVN",
+     "serial": "HQ0000A0001",
      "length": 1703,
      "flag": "e4"
     }
@@ -1867,7 +1867,7 @@
   },
   {
    "file": "system_d/system_d_2026-08-13_prepared_ess_deviceform_1.rvms",
-   "sha256": "92e4dd55580638902c908e924eefd12b773756e8fe5fc24da271c87053388b23",
+   "sha256": "c4de761f3fbe6d046d777eb02c0695acea77e92180f3654586eb9a3914afbd4f",
    "size": 7049,
    "system": "D",
    "date": "2026-08-13",
@@ -1876,12 +1876,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ22407X3WT",
+     "serial": "HQ0000D0002",
      "length": 1705,
      "flag": "e4"
     },
     {
-     "serial": "HQ2240PY7CF",
+     "serial": "HQ0000D0001",
      "length": 1255,
      "flag": "e5"
     }
@@ -1890,7 +1890,7 @@
   },
   {
    "file": "system_d/system_d_2026-08-13_download_ess_deviceform_1.rvms",
-   "sha256": "5c6926621d0d2bf653d324266abc8a1ebca1e38a8e5324d37b9e15954400209a",
+   "sha256": "d500a0ab43b4872234c5c1c84f3bc62ceaff8a68de1132f0617c81a7e257d534",
    "size": 7049,
    "system": "D",
    "date": "2026-08-13",
@@ -1899,12 +1899,12 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2240PY7CF",
+     "serial": "HQ0000D0001",
      "length": 1257,
      "flag": "e5"
     },
     {
-     "serial": "HQ22407X3WT",
+     "serial": "HQ0000D0002",
      "length": 1703,
      "flag": "e4"
     }
@@ -1913,7 +1913,7 @@
   },
   {
    "file": "system_b/system_b_2026-08-12_download_ess_deviceform_1.rvms",
-   "sha256": "a7fa185b08df75ec48d88aa7d6a7fd8339d51b34cfb44ba7ce0f5caf106fdb48",
+   "sha256": "6d28344149746407e3e0de22a4f3c2b0e61b75e62bcb301a0075313ef1e208d5",
    "size": 7049,
    "system": "B",
    "date": "2026-08-12",
@@ -1922,17 +1922,18 @@
    "form": "deviceform",
    "blocks": [
     {
-     "serial": "HQ2240FKJDE",
+     "serial": "HQ0000B0002",
      "length": 1705,
      "flag": "e4"
     },
     {
-     "serial": "HQ24149MY9U",
+     "serial": "HQ0000B0001",
      "length": 1255,
      "flag": "e5"
     }
    ],
    "notes": ""
   }
- ]
+ ],
+ "serials_note": "Inverter serials are pseudonyms of the same shape as real ones (HQ0000<system><unit>); every other byte is as downloaded."
 }

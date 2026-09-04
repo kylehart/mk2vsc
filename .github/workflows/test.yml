@@ -16,4 +16,5 @@ jobs:
       - run: pytest -q
       - run: bash tools/leakscan.sh
         if: runner.os != 'Windows'
+      - run: python tools/check_generated.py
       - run: mk2vsc validate fixtures/system_b/system_b_2026-07-20_download_bare_deviceform_1.rvms

@@ -86,8 +86,8 @@ mk2vsc show download.rvms
 ```
 ```
 download.rvms: 5055 bytes, 2 inverter(s), form=device, checksums OK
-  HQ2414AXENJ: firmware 2729560, saved 2026-07-20T18:41:22+00:00, assistant: no assistant
-  HQ2414U6FVN: firmware 2729560, saved 2026-07-20T18:41:28+00:00, assistant: no assistant
+  HQ0000A0002: firmware 2729560, saved 2026-07-20T18:41:22+00:00, assistant: no assistant
+  HQ0000A0001: firmware 2729560, saved 2026-07-20T18:41:28+00:00, assistant: no assistant
   Charger
     absorption_V        Absorption voltage       57.6 V    56 V   <- inverters differ
     float_V             Float voltage            55.2 V    54 V   <- inverters differ
@@ -101,10 +101,10 @@ Change what needs changing. The output is written next to the input; the input i
 mk2vsc edit download.rvms absorption=56.8 float=54.0
 ```
 ```
-  HQ2414AXENJ  absorption_V   57.6 -> 56.8 V
-  HQ2414U6FVN  absorption_V   56.0 -> 56.8 V
-  HQ2414AXENJ  float_V        55.2 -> 54.0 V
-  HQ2414U6FVN  float_V        54.0 -> 54.0 V (unchanged)
+  HQ0000A0002  absorption_V   57.6 -> 56.8 V
+  HQ0000A0001  absorption_V   56.0 -> 56.8 V
+  HQ0000A0002  float_V        55.2 -> 54.0 V
+  HQ0000A0001  float_V        54.0 -> 54.0 V (unchanged)
 
 wrote download.edited.rvms
 verified: only those bytes and their section checksums changed; the input file is untouched.
@@ -134,7 +134,7 @@ From Python, the same loop:
 import mk2vsc
 
 cfg = mk2vsc.load("download.rvms")
-print(cfg["HQ2414U6FVN"]["absorption"])        # 56.0
+print(cfg["HQ0000A0001"]["absorption"])        # 56.0
 cfg.set("absorption", 56.8)                      # every inverter
 cfg.set("float", 54.0)
 path = cfg.save()                                # download.edited.rvms
