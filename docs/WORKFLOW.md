@@ -40,7 +40,7 @@ to the inverters over VE.Bus; while the VE.Bus is re-enumerating after a reset, 
 the window): while a Remote VEConfigure upload or the re-download that followed it was in progress,
 monitoring that reads the GX (a gateway on VRM and MQTT) reported the site disconnected for under a
 minute, and on System A the inverter state field read Passthru during that gap. Both cleared on their
-own when the operation ended; grid draw and load readings were unchanged before and after; no alarm
+own when the operation ended; health readings (state, grid presence, load) were unchanged before and after; no alarm
 was raised and no "Resetting VE.Bus products" dialog appeared. **Inferred:** the GX stops receiving
 inverter data while the MK2 tunnel holds the VE.Bus port, so values read in that window are a gap in
 the GX's view, not fresh inverter readings. **Unknown:** the inverter's own behaviour during the
