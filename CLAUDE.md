@@ -55,7 +55,7 @@ of these rules is docs/PRACTICES.md; this file is the operational checklist.
 `format-unknown` (a byte region we cannot explain) - `field-claim` (naming or promoting a setting) -
 `hypothesis` (a testable idea about device behaviour) - `incident` (something that went wrong on
 hardware) - `fixture-wanted` (a file we do not hold: other firmware, Quattro, three-phase, .rvsc) -
-`experimental` (ESS injection and other unproven work) - `good-first-issue` - `help-wanted` -
+`experimental` (ESS injection and other unproven work) - `good first issue` - `help wanted` -
 `documentation` - `bug` - `enhancement`.
 
 ## 7. Session checklist

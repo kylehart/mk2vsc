@@ -205,11 +205,11 @@ compare with a Remote VEConfigure upload of the same file.
 
 **H2. The upload form itself is the trigger.** The 16-byte blob and compact records might be what tells
 the device to run the install procedure. Tested once (Guava, 08-13): accepted, stored, no start. But
-that system had a dead BMS bus at the time (H3), so the test does not separate H2 from H3. Also, our v2
-was compacted against the installer's Papaya export, so it carried the GUI's tail words (`0a 00`, and
-`00 00 00`), while the no-reference transform in the shipped code keeps the device's (`40 00`,
-`ff 00 00`). We do not know which the device wants; the reference-mode file is the one that was
-accepted. Status: inconclusive. Test: upload-form transform on a healthy-BMS system, both tail
+that system had a dead BMS bus at the time (H3), so the test does not separate H2 from H3. Our v2 was
+compacted against the installer's Papaya export, so it carried the GUI's tail words (`0a 00`, and
+`00 00 00`); the shipped no-reference transform writes the same GUI words, and the test suite checks
+that it reproduces v2 byte-for-byte. Whether the device would also accept the device-form tail words in
+an upload is untested. Status: inconclusive. Test: upload-form transform on a healthy-BMS system, both tail
 variants if the first does not start.
 
 **H3. A loaded ESS assistant gates system start on valid CAN battery data.** After a full live
@@ -229,7 +229,8 @@ discriminator standing, untested. Test: section 5.
 with the 704 record) on every system including the GUI export, so they are not per-inverter identity.
 What remains unexplained is the u16 immediately after the record (`40 00` device, `0a 00` GUI export)
 and the final byte (`ff` device, `00` GUI export), which our upload-form v2 carried in the GUI form and
-our device-form grafts carried in the device form. Neither started. Status: open, low prior. Test: a
+our device-form grafts carried in the device form. Neither started. (`mk2vsc experimental to-upload-form`
+writes the GUI form.) Status: open, low prior. Test: a
 second GUI export from a different system to see whether `0a 00` is constant.
 
 **H5. Something in BareSettingInfo or the record body encodes identity.** BareSettingInfo is
