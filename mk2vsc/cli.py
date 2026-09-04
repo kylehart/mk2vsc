@@ -202,12 +202,10 @@ def _fields_by_tab(alias_of):
     from .fields import BY_ID
     from .ui import by_tab, TAB_LABEL, DERIVED, UNPLACED
     by_eprom = {f.eprom: f for f in FIELDS}
+    rows = {}                       # tab -> group -> [line]
     for tab, groups in by_tab().items():
-        if not groups:
-            continue
-        print(f"{TAB_LABEL[tab]}")
         for group, items in groups.items():
-            print(f"  {group}")
+            seen_labels = {}
             for key, ui in items:
                 if key.startswith("setting "):
                     sid, bit = int(key.split()[1]), int(key.split()[3])
@@ -218,14 +216,24 @@ def _fields_by_tab(alias_of):
                     how = f.name + (f"  alias {alias_of[f.name]}" if f.name in alias_of else "")
                     conf = f.confidence
                 cert = "" if ui.certainty == "confirmed" else f"  [{ui.certainty} placement]"
-                print(f"    {ui.label:60s} {how:44s} {conf}{cert}")
-        for t, g, label, formula in DERIVED:
-            if t == tab:
-                print(f"    {label:60s} computed: {formula}")
-        for t, g, label in UNPLACED:
-            if t == tab:
-                print(f"  {g}\n    {label:60s} no setting known")
-    print("\nPlacement observed on VEConfigure 1.33 (talas9/rvsc-tools, MIT); 'probable' = name match not yet exercised.")
+                label = ui.label
+                if label in seen_labels:            # the same GUI box tied to two bits (Overruled by remote)
+                    label = f"{label} (same box; one of two bits)"
+                seen_labels[ui.label] = True
+                rows.setdefault(tab, {}).setdefault(group, []).append(f"    {label:60s} {how:44s} {conf}{cert}")
+    for tab, group, label, formula in DERIVED:
+        rows.setdefault(tab, {}).setdefault(group, []).append(f"    {label:60s} computed: {formula}")
+    for tab, group, label in UNPLACED:
+        rows.setdefault(tab, {}).setdefault(group, []).append(f"    {label:60s} no setting known")
+    for tab, _ in TAB_LABEL.items():
+        if tab not in rows:
+            continue
+        print(TAB_LABEL[tab])
+        for group, lines in rows[tab].items():
+            print(f"  {group}")
+            print("\n".join(lines))
+    print("\nPlacement observed on VEConfigure 1.33 (talas9/rvsc-tools, MIT) unless marked; 'probable' = name match not yet exercised;"
+          "\nunits are what the GUI shows (see docs/FIELDS.md for the stored quantity).")
     return 0
 
 

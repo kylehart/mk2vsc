@@ -45,7 +45,8 @@ def main():
             where = ui.path + ("" if ui.certainty == "confirmed" else f" ({ui.certainty})")
         elif f.bits:
             placed = [(b, ui_for_bit(f.id, b)) for b in sorted(f.bits)]
-            where = "; ".join(f"bit {b}: {u.path}" + (" (inverted)" if u.inverted else "") for b, u in placed if u)
+            where = "; ".join(f"bit {b}: {u.path}" + (" (inverted)" if u.inverted else "") + ("" if u.certainty == "confirmed" else f" ({u.certainty})")
+                              for b, u in placed if u)
         print(f"| {f.id} | +0x{f.offset:03x} | `{f.name}` | `{f.eprom}` | {esc(f.label)} | {esc(where)} | {typ} | {esc(f.unit)} | {f.confidence} | "
               f"{esc(desc)} | {esc(f.evidence)} | {esc(f.observed)} | {esc(schema_cell(f))} |")
 

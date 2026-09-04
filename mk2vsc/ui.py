@@ -14,7 +14,21 @@ a unit match; ``probable`` = a name match not yet exercised.  Two GUI fields we 
 MK2 protocol document where that table had none are marked ``source="mk2"``.
 
 Kinds: ``number`` (a scaled u16), ``bool`` (one flag bit; ``inverted`` means the box is ticked when the bit
-is clear), ``enum`` (option text in ``ENUMS``), ``readonly`` (computed by the GUI, no setting of its own).
+is clear), ``enum`` (option text in ``ENUMS``).  ``UI.unit`` is what the GUI DISPLAYS, not the stored
+quantity: the Virtual Switch load fields show watts where the file holds 0.01 A (W = A x output voltage),
+the repeated-absorption interval shows days where the file holds minutes, and the temperature-compensation
+slope shows mV/degC where the file holds a /12800 fraction.  ``Field.unit`` and ``Field.description`` are
+the stored quantity.
+
+AC input numbering: VEConfigure's identifiers count AC inputs from 0 (``RemoteOverrulesAC0``, ``AC1``);
+Victron's MK2 document and this project's field names count from 1 (``IMainsLimit`` = AC1 = setting 6,
+``Remote overrules AC1`` = setting 1 bit 14, ``AC2`` = setting 0 bit 15).  So VEConfigure's AC0 is MK2's AC1.
+
+Two sources besides talas9's table: ``source="mk2"`` for the two boxes placed from Victron's MK2 document
+plus xcellsior's toggle-and-diff (the tab and group still come from talas9's layout); ``source="ours"`` for
+the ignore-AC tab, matched to a VEConfigure screenshot of one of our systems (docs/FIELDS.md, the vs2
+section).  talas9's unit was not in ignore-AC mode, so their table places settings 54/55/58/59 under
+"VS options"; ours is the layout that tab shows when the mode is selected.
 """
 from __future__ import annotations
 
@@ -31,7 +45,7 @@ class UI:
     tab: str
     group: str
     label: str
-    kind: str                 # number | bool | enum | readonly
+    kind: str                 # number | bool | enum
     unit: str = ""
     certainty: str = "confirmed"   # confirmed | probable (talas9's vocabulary)
     inverted: bool = False    # bool kind: GUI box ticked when the bit is CLEAR
@@ -43,8 +57,8 @@ class UI:
         return f"{TAB_LABEL.get(self.tab, self.tab)} › {self.group} › {self.label}"
 
 
-def _n(tab, group, label, unit="", cert="confirmed", note=""):
-    return UI(tab, group, label, "number", unit, cert, note=note)
+def _n(tab, group, label, unit="", cert="confirmed", note="", source="rvsc-tools"):
+    return UI(tab, group, label, "number", unit, cert, note=note, source=source)
 
 
 def _e(tab, group, label, cert="confirmed", note=""):
@@ -109,18 +123,26 @@ UI_BY_EPROM: Dict[str, UI] = {
     "EPROM_vstoffUBatRippleAlarm": _n("virtual_switch", "B: Set VS OFF", "Udc ripple pre-alarm (VS OFF delay)", "s", "probable"),
     "EPROM_vsMinimumOnTime": _n("virtual_switch", "VS options", "Do not switch off within N minutes from switch on", "min"),
     "EPROM_vsInverterPeriodTime": _n("virtual_switch", "VS options", "Make period time", "ms"),
-    "EPROM_vs2offUBat": _n("virtual_switch", "VS options", "when Udc higher than", "V", "probable", "vs2 (ignore-AC) group"),
-    "EPROM_vs2toffUBat": _n("virtual_switch", "VS options", "when Udc higher than - duration", "s", "probable", "vs2 (ignore-AC) group"),
-    "EPROM_vs2onUBatLow": _n("virtual_switch", "VS options", "when Udc lower than", "V", "probable", "vs2 (ignore-AC) group"),
-    "EPROM_vs2tonUBatLow": _n("virtual_switch", "VS options", "when Udc lower than - duration", "s", "probable", "vs2 (ignore-AC) group"),
+    # Ignore AC input tab (vs2 settings), matched to a VEConfigure screenshot of one of our systems in that mode.
+    "EPROM_vs2onILoadHigh": _n("virtual_switch", "Ignore AC input", "Do not ignore AC input when load higher than", "W", source="ours"),
+    "EPROM_vs2tonILoadHigh": _n("virtual_switch", "Ignore AC input", "Do not ignore AC input when load higher than - for", "s", source="ours"),
+    "EPROM_vs2onUBatLow": _n("virtual_switch", "Ignore AC input", "Do not ignore AC input when Udc lower than", "V", source="ours",
+                             note="talas9's table (unit not in ignore-AC mode) shows this under VS options"),
+    "EPROM_vs2tonUBatLow": _n("virtual_switch", "Ignore AC input", "Do not ignore AC input when Udc lower than - for", "s", source="ours"),
+    "EPROM_vs2StartOnSOC": _n("virtual_switch", "Ignore AC input", "Do not ignore AC input when state of charge lower than", "%", source="ours"),
+    "EPROM_vs2offILoadLow": _n("virtual_switch", "Ignore AC input", "When accepting AC due to load, ignore AC when load lower than", "W", source="ours"),
+    "EPROM_vs2toffILoadLow": _n("virtual_switch", "Ignore AC input", "When accepting AC due to load, ignore AC when load lower than - for", "min", source="ours"),
+    "EPROM_vs2offUBat": _n("virtual_switch", "Ignore AC input", "When accepting AC due to a battery condition, ignore AC when Udc higher than", "V", source="ours",
+                           note="talas9's table shows this under VS options, unit s for the duration; the tab in ignore-AC mode shows minutes"),
+    "EPROM_vs2toffUBat": _n("virtual_switch", "Ignore AC input", "When accepting AC due to a battery condition, ignore AC when Udc higher than - for", "min", source="ours"),
     "EPROM_UBatDontCharge": _n("advanced", "limit internal charger to prioritize other energy sources", "Sustain voltage", "V"),
 }
 
 # Flag bits, by (setting ID, bit).  Setting 0 = FlagsWord0, 1 = FlagsWord1, 60 = FlagsWord2, 82 = PermanentFlags0.
 UI_BITS: Dict[Tuple[int, int], UI] = {
-    (0, 2): _b("general", "System frequency", "System frequency", note="ticked = 60 Hz"),
+    (0, 2): UI("general", "System frequency", "System frequency", "enum", note="50Hz / 60Hz; set = 60 Hz"),
     (0, 3): _b("grid", "Transfer switch", "UPS function", inverted=True, source="mk2",
-               note="Victron MK2 doc: bit 3 = disable wave check; the GUI box is the inverse"),
+               note="Victron MK2 doc flag 3 = disable wave check; xcellsior FINDINGS 7.1 toggle-and-diff: set = UPS off; tab/group from talas9's layout"),
     (0, 4): _b("charger", "Charger enable", "Stop after excessive bulk", "probable", inverted=True),
     (0, 5): _b("inverter", "PowerAssist", "PowerAssist"),
     (0, 6): _b("charger", "Charger enable", "Enable charger", inverted=True),
@@ -128,7 +150,7 @@ UI_BITS: Dict[Tuple[int, int], UI] = {
     (0, 11): _b("charger", "Storage / Equalization", "Storage mode"),
     (0, 13): _b("inverter", "General", "Ground relay", "probable", inverted=True),
     (0, 14): _b("charger", "Charger enable", "Weak AC input"),
-    (0, 15): _b("general", "Shore limit", "Overruled by remote", "probable", note="AC1; bit 14 of setting 1 is the AC0 twin, which of the two the box drives is ambiguous"),
+    (0, 15): _b("general", "Shore limit", "Overruled by remote", "probable", note="VEConfigure AC1 = MK2 AC2; the box on a single-input unit drives one of this and setting 1 bit 14"),
     (1, 0): _b("virtual_switch", "A: Set VS ON", "set VS on when bulk protection is activated (charger stopped after 10Hr bulk)"),
     (1, 1): _b("virtual_switch", "A: Set VS ON", "Temperature pre-alarm (VS ON condition)"),
     (1, 2): _b("virtual_switch", "A: Set VS ON", "Low-battery pre-alarm (VS ON condition)"),
@@ -141,9 +163,9 @@ UI_BITS: Dict[Tuple[int, int], UI] = {
     (1, 9): _b("virtual_switch", "A: Set VS ON", "set VS on when general system failure occurs"),
     (1, 10): _b("virtual_switch", "Usage", "Invert virtual switch usage"),
     (1, 11): _b("grid", "Transfer switch", "Accept wide input frequency range (45-65 Hz)"),
-    (1, 12): _b("general", "Other", "Dynamic current limiter", source="mk2", note="Victron MK2 doc names flag 28 = setting 1 bit 12"),
+    (1, 12): _b("general", "Other", "Dynamic current limiter", source="mk2", note="Victron MK2 doc flag 28; xcellsior FINDINGS 7.2 bit 12 confirmed; VEConfigure identifier AdjustMainsLimitForMechanicalGeneratorDelay; tab/group from talas9's layout"),
     (1, 13): _b("charger", "Storage / Equalization", "Use equalization (tubular plate traction battery curve)"),
-    (1, 14): _b("general", "Shore limit", "Overruled by remote", "probable", note="AC0 twin of setting 0 bit 15"),
+    (1, 14): _b("general", "Shore limit", "Overruled by remote", "probable", note="VEConfigure AC0 = MK2 AC1; twin of setting 0 bit 15"),
     (60, 2): _b("virtual_switch", "VS options", "Change inverter period time when virtual switch is on"),
     (60, 3): _b("virtual_switch", "VS options", "Change inverter period time on Udc"),
     (60, 4): _b("charger", "Charger enable", "Lithium batteries"),
@@ -161,14 +183,14 @@ EBIT_NAMES: Dict[Tuple[int, int], str] = {
     (60, 9): "PreferRenewableEnergy", (82, 0): "ShortCircuitIsFatal",
 }
 
-# GUI fields the GUI computes from two settings (no setting of their own); formula in VE.Bus setting IDs.
+# GUI fields the GUI computes from other settings (no setting of their own); formula in VE.Bus setting IDs.
 DERIVED: List[Tuple[str, str, str, str]] = [
     ("grid", "Transfer switch", "AC low connect", "setting 44 + setting 45"),
     ("grid", "Transfer switch", "AC high connect", "setting 46 - setting 47"),
     ("inverter", "General", "DC input low restart", "setting 11 + setting 12"),
     ("inverter", "General", "DC input low pre-alarm", "setting 11 + setting 12 + setting 63"),
     ("inverter", "enable AES", "Stop AES when load ... higher than start level", "setting 50 + setting 51"),
-    ("charger", "Temperature / Lithium", "Max absorption voltage (computed)", "computed by the GUI"),
+    ("charger", "Temperature / Lithium", "Max absorption voltage (computed)", "no formula recorded"),
     ("virtual_switch", "VS options", "Frequency (computed)", "2500000 / setting 62"),
 ]
 

@@ -34,6 +34,25 @@ written; the input file is never overwritten. None of that replaces verification
 documented loop is edit, upload through Victron's own VRM Remote VEConfigure, download again, and
 verify. Read docs/SAFETY.md before uploading anything.
 
+## Third-party material
+
+Two tables in this project are taken from [talas9/rvsc-tools](https://github.com/talas9/rvsc-tools),
+Copyright (c) 2026 Mohammed Talas, MIT License: VEConfigure's internal setting identifiers
+(`mk2vsc.fields.EPROM_NAMES`) and the VEConfigure tab/group/label placement and option text
+(`mk2vsc.ui`). The MIT permission notice applies to that material:
+
+> Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+> associated documentation files (the "Software"), to deal in the Software without restriction,
+> including without limitation the rights to use, copy, modify, merge, publish, distribute,
+> sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+> furnished to do so, subject to the following conditions: The above copyright notice and this
+> permission notice shall be included in all copies or substantial portions of the Software. THE
+> SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
+
+Setting IDs, scales and flag-bit names are cited from Victron's public MK2 Protocol document and from
+[xcellsior/ve-bus-programming](https://github.com/xcellsior/ve-bus-programming) (FINDINGS.md) as
+references; no text from either is reproduced beyond identifiers.
+
 ## No warranty, and a safety warning
 
 This software is provided "as is", without warranty of any kind; see LICENSE (MIT). Battery inverter

@@ -2,7 +2,7 @@
 
 ## 0.9.0 (2026-09-04)
 
-* VEConfigure placement for every setting and flag bit the GUI shows (`mk2vsc/ui.py`): tab, group and field label, from the layout talas9/rvsc-tools observed on VEConfigure 1.33 (MIT, credited), keyed by identifier. `Field.ui`, `mk2vsc fields --by-tab`, and an "In VEConfigure" column in docs/FIELDS.md. 57 settings and 32 bits placed; 7 GUI fields are computed from two settings; 6 have no known setting. Two boxes placed from Victron's MK2 document: UPS function (setting 0 bit 3, inverted) and Dynamic current limiter (setting 1 bit 12).
+* VEConfigure placement for every setting and flag bit the GUI shows (`mk2vsc/ui.py`): tab, group and field label, from the layout talas9/rvsc-tools observed on VEConfigure 1.33 (MIT, credited), keyed by identifier. `Field.ui`, `mk2vsc fields --by-tab`, and an "In VEConfigure" column in docs/FIELDS.md. 62 settings and 32 bits placed; 7 GUI fields are computed by the GUI from other settings; 6 have no known setting. The Ignore AC input tab (settings 52 to 59, 70) is placed from our own screenshot; UPS function (setting 0 bit 3, inverted) and Dynamic current limiter (setting 1 bit 12) from Victron's MK2 document and xcellsior's toggle-and-diff. NOTICE.md gains a third-party section with the MIT notice.
 * Flag bits 3 to 9 of setting 60 named from VEConfigure's identifiers; VEConfigure option text for the grid-code list (0 to 22) recorded in `mk2vsc.ui.ENUMS`.
 
 ## 0.8.0 (2026-09-04)
