@@ -124,3 +124,19 @@ def test_field_table_is_consistent():
 def test_word_0x0180_precedes_the_settings_array(good_files):
     for name, u in _units(good_files):
         assert u.u16(u.settings_offset - 2) == 0x0180, name
+
+
+def test_virtual_switch_load_thresholds_are_current_in_centiamps(good_files):
+    """The VEConfigure tab showed 1000 W / 750 W on a 120 V inverter; the same-period download holds 833 / 625,
+    i.e. 8.33 A / 6.25 A.  Every block's values decode to a plausible AC current."""
+    june = [u for name, u in _units(good_files) if name.startswith("system_b/system_b_2026-06-0")]
+    assert len(june) >= 2, "the two early-June downloads (same period as the screenshot) must be in the corpus"
+    for u in june:
+        assert (u.setting(52), u.setting(56)) == (833, 625)
+        assert round(u.setting(52) / 100 * 120) == 1000 and round(u.setting(56) / 100 * 120) == 750
+    for name, u in _units(good_files):
+        if u.setting(2) == 0:
+            continue
+        assert 3 <= u.setting(52) / 100 <= 30, (name, u.setting(52))
+        assert 3 <= u.setting(56) / 100 <= 30, (name, u.setting(56))
+        assert u.setting(51) == 40 and u.setting(50) == 60, name       # 20.0 % and 30.0 % at the x0.5 scale
