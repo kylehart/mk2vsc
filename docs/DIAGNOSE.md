@@ -44,7 +44,7 @@ report's `questions` array names every such question and the findings it affects
 ## The rules (Phase 0)
 
 Every rule names the corpus fixture that triggers it, and `tests/test_diagnose.py` counts its hits over the
-whole device-form corpus (82 files, 164 blocks at 0.11.0); the counts below are those tests' numbers.
+whole device-form corpus (82 files, 164 blocks); the counts below are those tests' numbers and are regenerated with the corpus.
 
 | id | Finding | Signature | Severity | Evidence class | Corpus hits | Fix |
 |---|---|---|---|---|---|---|
