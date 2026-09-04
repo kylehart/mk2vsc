@@ -221,8 +221,8 @@ grid-coded block, `ff ff ff ff` on every never-coded block, and partial residues
 a rollback. The "marker" and "subtype" were settings; the record is `len | body`. The independent review
 of that change then corrected the first reading of the words: on the GUI-authored installs 128 equals 191 on
 each inverter and a pair can carry different values (System C: 1 on one inverter, 0x0101 on the other) or
-the same (System B both 1, System A both 0x0101), while our own never-started grafts are the only files with
-128 and 191 disagreeing. So the value is set per inverter by the grid-code step; whether it encodes the
+the same (System B both 1, System A both 0x0101), while, among blocks with a grid code set, our own
+never-started grafts are the only files with 128 and 191 disagreeing. So the value is set per inverter by the grid-code step; whether it encodes the
 loss-of-mains mode as it does on xcellsior's single bench unit is not established from our files, and
 issue #24 was mis-stated rather than answered. The lesson repeats the one from the settings array
 itself: name a byte by its VE.Bus setting ID before giving it a meaning, and a value that fits two

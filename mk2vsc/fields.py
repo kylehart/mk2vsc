@@ -97,7 +97,7 @@ SCH = "device schema (BareSettingInfo = CommandGetSettingInfo records)"
 FLAGS0_BITS = {0: "MultiPhaseSystem", 1: "MultiPhaseLeader", 2: "60 Hz", 3: "Disable wave check (UPS function off)",
                4: "DoNotStopAfter10HrBulk", 5: "AssistEnabled (PowerAssist)", 6: "DisableCharge",
                7: "inverse of bit 3", 8: "DisableAES", 9: "not promoted", 10: "not promoted",
-               11: "EnableReducedFloat (storage mode; xcellsior reads it as adaptive charge, but 3 corpus blocks have it set with a fixed curve)", 12: "not promoted", 13: "Disable ground relay", 14: "Weak AC input",
+               11: "EnableReducedFloat (storage mode, per the Victron doc; xcellsior reads the bit as adaptive charge. On every GUI- or device-authored block here bit 11 is set exactly when charge_characteristic = 3, so the corpus cannot separate the two readings)", 12: "not promoted", 13: "Disable ground relay", 14: "Weak AC input",
                15: "Remote overrules AC2"}
 FLAGS1_BITS = {0: "vsonBulkProtection", 1: "vsonTemperaturePreAlarm", 2: "vsonLowBatteryPreAlarm",
                3: "vsonOverloadPreAlarm", 4: "vsonUBatRipplePreAlarm", 5: "vsoffTemperaturePreAlarm",

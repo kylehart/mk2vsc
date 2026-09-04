@@ -64,16 +64,24 @@ def test_never_coded_blocks_read_ffff_in_all_three_words(good_files):
                 assert (w["w128"], w["w190"], w["w191"]) == (0xFFFF, 0xFFFF, 0xFFFF) and u.setting(81) == 0
 
 
-def test_flags0_bit11_is_not_the_charge_curve_selector(good_files):
-    """xcellsior reads setting 0 bit 11 as adaptive(set)/fixed(clear). Here every block with bit 11 clear has a
-    fixed curve (setting 10 = 1), but three blocks have bit 11 set with a fixed curve, so the bit is independent
-    of the curve: consistent with Victron's EnableReducedFloat (storage mode)."""
+OUR_BIT11_GRAFTS = {   # bit 11 set with a fixed curve: authored by our graft tooling, stored by the device; not GUI evidence
+    "system_a/system_a_2026-08-12_prepared_ess_deviceform_3.rvms",
+    "system_a/system_a_2026-08-13_download_ess_deviceform_2.rvms",
+    "system_a/system_a_2026-08-13_download_ess_deviceform_3.rvms",
+}
+
+
+def test_flags0_bit11_tracks_the_charge_curve_on_every_authored_block(good_files):
+    """Victron names setting 0 bit 11 EnableReducedFloat (storage mode); xcellsior reads it as adaptive charge.
+    On every GUI- or device-authored block bit 11 is set exactly when charge_characteristic = 3, so the corpus
+    cannot separate the two readings. The only exceptions are three blocks our own grafts produced."""
     both = collections.Counter()
     for name, data in good_files.items():
+        if name in OUR_BIT11_GRAFTS:
+            continue
         for u in unit_blocks(RvmsFile.parse(data)):
             both[((u.setting(0) >> 11) & 1, u.setting(10))] += 1
-    assert both[(0, 3)] == 0
-    assert both[(1, 1)] >= 1
+    assert set(both) == {(1, 3), (0, 1)}, both
 
 
 def test_setting_17_is_the_relay_mode_default_on_every_block(good_files):
