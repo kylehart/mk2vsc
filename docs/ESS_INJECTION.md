@@ -35,7 +35,7 @@ thresholds, so not every line below is ESS). `mk2vsc diff` output, verbatim:
 $ mk2vsc diff fixtures/system_c/system_c_2026-06-23_download_bare_deviceform_1.rvms \
               fixtures/system_c/system_c_2026-07-24_download_ess_deviceform_1.rvms
 lengths 5055 -> 7049; prologue same; verdict: CONTENT CHANGED
-  HQ24142MJUA: len 482->1703 form device->device bookkeeping=9B header=1B assistant=1229B  [block length differs (assistant area changed)]
+  HQ0000C0001: len 482->1703 form device->device bookkeeping=9B header=1B assistant=1229B  [block length differs (assistant area changed)]
       setting   0 flags0                       35316 -> 33268  [HIGH]
       setting   2 absorption_V                 48.0 -> 56.8  [CONFIRMED]
       setting   3 float_V                      48.0 -> 54.0  [CONFIRMED]
@@ -47,7 +47,7 @@ lengths 5055 -> 7049; prologue same; verdict: CONTENT CHANGED
       setting  81 grid_code_active             0 -> 1  [HIGH]
       setting 128 lom_config_a                 65535 -> 1  [LOW]
       header +0x036: f4 -> e4
-  HQ2414N7NAJ: len 482->1255 form device->device bookkeeping=9B header=1B assistant=781B  [block length differs (assistant area changed)]
+  HQ0000C0002: len 482->1255 form device->device bookkeeping=9B header=1B assistant=781B  [block length differs (assistant area changed)]
       setting   0 flags0                       35252 -> 33268  [HIGH]
       setting   2 absorption_V                 57.6 -> 56.8  [CONFIRMED]
       setting   3 float_V                      55.2 -> 54.0  [CONFIRMED]
@@ -77,7 +77,7 @@ lengths 5055 -> 7049; prologue same; verdict: CONTENT CHANGED
       header +0x036: f5 -> e5
 ```
 
-(The HQ24142MJUA block shows fewer changes because that inverter had already received a half-install
+(The HQ0000C0001 block shows fewer changes because that inverter had already received a half-install
 of ESS on 2026-07-13, so its bare file already carried most of the install state. That is the "half
 loaded" defect described in docs/HISTORY.md.)
 

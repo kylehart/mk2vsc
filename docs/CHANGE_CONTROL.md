@@ -54,7 +54,7 @@ or on the desktop.
 ```markdown
 # <system> - <one-line description of the change>
 
-Date: 2026-07-20    System: System A    Inverters: HQ2414U6FVN, HQ2414AXENJ
+Date: 2026-07-20    System: System A    Inverters: HQ0000A0001, HQ0000A0002
 Tenant/occupancy impact: none (unit vacant)    Rollback: 00_baseline/<file>
 
 ## Why
@@ -64,9 +64,9 @@ One paragraph. What is wrong, what the target value is, where the target comes f
 ## Exact edits (per inverter)
 | serial       | field         | old  | new  |
 |--------------|---------------|------|------|
-| HQ2414U6FVN  | absorption_V  | 56.0 | 56.8 |
-| HQ2414AXENJ  | absorption_V  | 57.6 | 56.8 |
-| HQ2414AXENJ  | float_V       | 55.2 | 54.0 |
+| HQ0000A0001  | absorption_V  | 56.0 | 56.8 |
+| HQ0000A0002  | absorption_V  | 57.6 | 56.8 |
+| HQ0000A0002  | float_V       | 55.2 | 54.0 |
 
 Intent file: intent.json (copied into this folder)
 
@@ -151,7 +151,7 @@ file under test. `examples/intent.example.json`:
 ```json
 {
   "system": "house-1",
-  "serials": ["HQ2414U6FVN", "HQ2414AXENJ"],
+  "serials": ["HQ0000A0001", "HQ0000A0002"],
   "settings": {
     "absorption_V": 56.8,
     "float_V": 54.0,

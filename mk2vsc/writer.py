@@ -68,6 +68,12 @@ def set_settings(data: bytes, changes: Iterable[Tuple[Optional[str], object, obj
                            "system from a fresh bare download before editing settings")
 
     schema = schema_of(f)
+    from .align import check as align_check
+    for u in by_serial.values():
+        al = align_check(u, schema)
+        if not al.ok:
+            raise WriteRefused(f"{u.serial}: settings array does not sit where the layout model expects "
+                               f"({al.summary}); this file's layout is not one this writer knows, refusing")
     payloads = [s.payload for s in f.sections]
     edits: List[Edit] = []
     touched_sections = set()

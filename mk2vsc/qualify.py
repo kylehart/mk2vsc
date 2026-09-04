@@ -10,7 +10,7 @@ An intent file is JSON (or a dict)::
 
     {
       "system": "house-2",
-      "serials": ["HQ2414U6FVN", "HQ2414AXENJ"],         # optional: fail if the file is for another system
+      "serials": ["HQ0000A0001", "HQ0000A0002"],         # optional: fail if the file is for another system
       "settings": {"absorption_V": 56.8, "float_V": 54.0, "vs_accept_battery_above_V": 52.5},
       "require_agreement": true,                           # inverters must agree on CONFIRMED fields (HIGH -> warning)
       "agreement_fields": ["absorption_V", "float_V"]      # optional: fields that must agree (adds FAIL for these)
