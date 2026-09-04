@@ -16,8 +16,7 @@ The area starts right after setting 191 (+0x1d9 device form, +0x1e3 upload form)
   signature of a failed by-file assistant install.
 
 The four bytes before the length (``ff ff ff ff`` bare, ``f5 ff 01 01`` on ESS blocks) are VE.Bus settings
-190 and 191, the grid-code / loss-of-mains words; see ``grid_code_words`` and docs/FIELDS.md.  Earlier
-tool builds read them as an assistant "marker" and "subtype".
+190 and 191, the grid-code / loss-of-mains words; see ``grid_code_words`` and docs/FIELDS.md.
 
 We do NOT understand the record body.  It looks like a compiled program (entropy ~6.2 bits/byte,
 recurring 2-3 byte opcodes, embedded parameter values such as 48.00 V and 10 %).  This module reports

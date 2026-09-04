@@ -16,7 +16,7 @@ System C's own device download taken after that upload succeeded (device form). 
     BLOB12 + u32 export_timestamp         16 bytes; BLOB12 is identical in every GUI export we hold
     4 zero bytes
     u32 save_timestamp                    a few seconds before the export timestamp in the real export
-    raw[0x53:assistant_area]              4 zeros, 0x0180, the 190 settings (unchanged, now at +0x63)
+    raw[0x53:assistant_area]              4 zeros, 0x0180, the 192 settings (unchanged, now at +0x63)
     compact assistant area                the device pads records with 0xff runs; the GUI does not
 
 and blocks are emitted with the e4-slot block first, because the file's unit walk depends on order

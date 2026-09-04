@@ -102,7 +102,7 @@ value   = (raw + offset) / |scale|   when scale < 0      (divisor: -100 for cent
 value   = (raw + offset) * scale     when scale > 0      (unit: 15-minute, 60-minute, 360-minute steps)
 ```
 
-Setting 2 (absorption) reads scale -100, default 5760, min 4800, max 6400. 189 of 190 settings in the
+Setting 2 (absorption) reads scale -100, default 5760, min 4800, max 6400. 189 of the 190 bounded settings (0 to 189) in the
 corpus lie inside their own range; the flags register's "max" is a settable-bits mask. `mk2vsc.schema`
 parses it; docs/FIELDS.md shows each setting's default and range.
 

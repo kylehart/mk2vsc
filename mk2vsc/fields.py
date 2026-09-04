@@ -288,13 +288,12 @@ FIELDS: List[Field] = [
        f"{RT}; xcellsior FINDINGS 7.4 (wire reads 1 / 257 / residual 512); observed transition.", "65535, 1, 257, 65281, 0", "rtti + xcellsior + ours"),
     _f(190, "general_grid_settings_int", "GeneralGridSettingsInt", 1, "", MEDIUM,
        "Grid-code / LOM word B, firmware-managed (wire writes are silently dropped). 0xffff = never set; 0xfff5 once a grid code has "
-       "been applied, and it stays 0xfff5 after the grid code is reverted (residual). Its two bytes are the 'f5 ff' that earlier "
-       "tool builds read as an assistant-record marker.",
+       "been applied, and it stays 0xfff5 after the grid code is reverted (residual).",
        f"{RT}; xcellsior FINDINGS 7.4/9 (0xfff5 / 0xfff6, residual); corpus: 0xffff on never-coded blocks, 0xfff5 on every GUI ESS block and on post-rollback bare blocks.",
        "65535, 65525", "rtti + xcellsior + ours"),
     _f(191, "grid_settings_valid_checker_b", "GridSettingsValidCheckerB", 1, "", MEDIUM,
        "Grid-code / LOM word C. 0xffff = not applicable; 1 = LOM type B; 0x0101 = no LOM detection; 0 / 0xff00 seen on bare blocks after "
-       "a grid code was removed (residual). Its two bytes are the 'subtype' earlier tool builds attached to the assistant record.",
+       "a grid code was removed (residual).",
        f"{RT}; xcellsior FINDINGS 7.4 (1 / 257 / residual 512); corpus: 0x0001 and 0x0101 on GUI ESS blocks, moving with setting 128.",
        "65535, 1, 257, 0, 65280", "rtti + xcellsior + ours"),
 ]
