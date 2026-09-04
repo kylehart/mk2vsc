@@ -98,9 +98,9 @@ outside the file, and fails any file whose two inverters disagree on a confirmed
 ### Rule 2: build only on a fresh download
 
 An archived file carries the settings and grid-code words the device had when it was downloaded, not
-the ones it has now: uploading it re-applies every value it holds (Rule 1) and, if its grid-code words
-differ from the device's, it is refused with `mk2vsc-36` (docs/ERRORS.md). A fresh download has neither
-problem. Download, edit that file, upload that file. The save timestamp at +0x4f is not what the device
+the ones it has now: uploading it re-applies every value it holds (Rule 1), and every archived file we
+have seen refused with `mk2vsc-36` carried grid-code words that differed from the device's (docs/ERRORS.md,
+where the mechanism is stated as a hypothesis). A fresh download has neither problem. Download, edit that file, upload that file. The save timestamp at +0x4f is not what the device
 checks (an older-stamped file with current content is accepted), so a fresh download is about currency of
 content, not of clock.
 

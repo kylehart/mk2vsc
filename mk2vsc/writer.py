@@ -12,7 +12,7 @@ checksum recomputed.  ``set_settings`` does exactly that and nothing else:
 * it never uploads.  You upload through VRM's Remote VEConfigure, then re-download and ``diff``.
 
 Uploading a file **replaces the whole configuration of every inverter** in the system.  Build every
-edit on a *fresh* download (the device rejects stale save-timestamps with ``mk2vsc-36``) and expect
+edit on a *fresh* download (archived files have been refused with ``mk2vsc-36``; docs/ERRORS.md) and expect
 that any field you edited earlier is only as current as the file you start from.  See docs/CHANGE_CONTROL.md.
 """
 from __future__ import annotations

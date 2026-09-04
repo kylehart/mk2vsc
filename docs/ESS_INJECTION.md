@@ -286,7 +286,7 @@ list the ESS assistant on both; `SwitchoverInfo/Connecting`, `VebusMainState`; `
 | Stable Off, Connecting = 1, no error, assistants listed | H3 falsified; the blocker is in the file or the transport; try the upload-form variant next, then H1 |
 | Off/Fault cycling every ~15 s | the install state is incomplete for this firmware or battery; diff your file against a GUI install of the same model |
 | Stub in the re-download | the device discarded the records; report the file, this is outcome B on a configuration we have not seen |
-| mk2vsc-36 without the "Resetting" dialog | stale timestamp; download fresh and rebuild |
+| mk2vsc-36 without the "Resetting" dialog | archived file; download fresh and rebuild (docs/ERRORS.md) |
 
 Whatever happens, upload the fresh bare download back afterwards and confirm with `mk2vsc diff` that the
 system is byte-for-byte its pre-experiment self except bookkeeping.
@@ -317,7 +317,7 @@ Do not:
 
 - upload any file from `mk2vsc experimental` to a system that people depend on, or without someone at
   the switches;
-- upload an archived file; the device rejects stale timestamps and old files carry old settings;
+- upload an archived file; archived files have been refused with mk2vsc-36 and old files carry old settings;
 - treat "Success" or "Resetting VE.Bus products" as a good sign: outcomes B, C and D all began that way;
 - try to remove an assistant by truncating the block (outcome E);
 - stamp `INSTALL_STATE` without `--capacity-ah`; it writes the template system's battery capacity;

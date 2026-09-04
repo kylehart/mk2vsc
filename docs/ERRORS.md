@@ -11,8 +11,8 @@ download. "Documented" means the meaning comes from Victron documentation or com
 have not seen it ourselves.
 
 The single most useful rule in this file: **if an upload is rejected and you are not sure why, download
-a fresh copy from the device, then upload that (edited or not).** Most rejections we hit were the device
-refusing an archived file whose grid-code words differed from its own (the mechanism we first read as a timestamp check; see mk2vsc-36).
+a fresh copy from the device, then upload that (edited or not).** Most rejections we hit were mk2vsc-36 on
+archived files; a fresh download of the same system was accepted every time (see mk2vsc-36).
 
 ## Remote VEConfigure upload errors (from the device's VE.Bus layer)
 
@@ -21,25 +21,34 @@ inverter side, not from the VEConfigure program. They are verdicts on the bytes.
 
 ### mk2vsc-36  "Incorrect grid code password or old configuration file"
 
-The device rejects the file before writing anything. What it objects to is not fully known.
+On a settings-only upload the file is refused and the settings are not applied. What the device objects to
+is not fully established; the record below is what we hold.
 
-**Observed rejections.** System A 2026-08-12: an archived bare baseline (grid code 0, words 128/190/191 at
-0xffff) was rejected repeatedly across two GX reboots right after a hand-built file carrying assistant
-records and grid-code words had been uploaded; a fresh download compared byte-for-byte to that baseline
-showed the device had written nothing and was not corrupt, and uploading the fresh download unmodified
-was accepted at once. System C 2026-07-20 and System A 2026-08-12: the same error after the "Resetting
-VE.Bus products" dialog of a hand-built assistant install; on System C the VE.Bus was left half-configured
-(error 10), on System A nothing had been written.
+**Observed rejections of archived files.** System A 2026-08-12: right after a hand-built file carrying
+assistant records and grid-code words had been accepted into the install dialog and refused at commit, the
+archived bare baseline (`system_a_2026-08-12_download_bare_deviceform_1`, settings 190/191 = 0xffff) was
+refused repeatedly across two GX reboots; the fresh downloads taken then (`..._2`, `..._3`) carry settings
+190/191 = 0xfff5/0xff00 on both inverters, so the device had written its grid-code words during the
+attempt, and uploading that fresh download unmodified was accepted at once. System C 2026-07-20: after the
+half-applied install (VE.Bus error 10), every pre-incident file was refused; the post-incident download
+(`system_c_2026-07-20_download_half-ess_deviceform_5`) carries 190/191 = 0xfff5/0x0000 where the refused
+files carry 0xffff/0xffff.
+
+**Observed rejections at the grid-code step.** System C 2026-07-20 and System A 2026-08-12, after the
+"Resetting VE.Bus products" dialog of a hand-built assistant install (System A v4 carried grid-code words
+that differed from the device's and was refused at commit, not up front).
 
 **What it is not.** It is not a timestamp check. The u32 at block offset +0x4f (+0x59 in upload form) is
-stamped when the file is generated (each download of unchanged content carries a new value), and on
-2026-09-04 System B accepted a download three hours older than a newer one, and then the newest content
-with those stamps set to an hour before the file it had just accepted. Neither was refused.
+stamped when the file is generated (`system_b_2026-09-04_download_ess_deviceform_1/2/3`: unchanged content,
+three increasing stamps), and on 2026-09-04 System B accepted the three-hour-old `_1` after `_2` had been
+taken, and then `system_b_2026-09-04_prepared_ess_deviceform_1` (the `_2` content stamped 16:00, before a
+file it had just accepted). Neither was refused.
 
-**Working hypothesis.** The first half of the message is literal: a device-form file whose grid-code words
+**Hypothesis.** The first half of the message is literal: a device-form file whose grid-code words
 (settings 81, 128, 190, 191) disagree with what the device holds is refused without the dealer password.
-That fits every rejection above and every acceptance (files that carried the device's current words, or
-upload-form files, which run the install procedure). Untested as a controlled experiment.
+Every refused archived file above carried words that differed from the device's; every accepted file
+carried the device's current words or was in upload form (the install procedure). Not yet tested as a
+controlled experiment (a current file with only those words changed).
 
 What to do: download fresh, rebuild your edit on that file, upload; a fresh download carries the device's
 current grid-code words. Do not edit settings 81, 128, 190 or 191 in a device-form file. If the system is

@@ -119,8 +119,8 @@ gate, we did not look for one, and this toolkit will not include one. What we ob
   identical bytes apart from timestamps.
 - mk2vsc-36 reads "Incorrect grid code password or old configuration file". We hit it in two situations:
   once when a real install reached the grid-code step (mode C), and repeatedly when uploading archived
-  files whose save timestamp was older than the device's. The second is the common case and the fix is
-  a fresh download. See docs/ERRORS.md.
+  files whose grid-code words differed from the device's current ones. The second is the common case and
+  the fix is a fresh download. See docs/ERRORS.md.
 
 If you need a grid code set, that is a job for whoever holds the password, in VEConfigure. Everything
 else in the file, including every charge and Virtual Switch setting, can be edited without it.
