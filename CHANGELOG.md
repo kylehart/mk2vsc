@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.0 (2026-09-04)
+
+Redesigned for first use. No backward compatibility with 0.1.x command names.
+
+* CLI is now `show`, `edit`, `verify`, `check` (the loop), plus `diff`, `history`, `validate`, `fields`,
+  `census`, `experimental`. `edit` writes `<file>.edited.rvms` next to the input and never overwrites it;
+  `check --expect field=value` needs no intent file; `verify` is the one-command post-upload proof.
+* Field aliases: `absorption`, `float`, `charge_current`, `ac_limit`, `low_shutdown`, `restart_offset`,
+  `vs_entry`, `vs_return`, `capacity`, `soc_bulk_end`, `grid_code`; numeric setting IDs accepted.
+* Python facade: `mk2vsc.load()`, `Config.set/set_many/save/check/diff/summary`, `Unit[...]`, `mk2vsc.verify()`.
+* `show` groups settings by function, hides low-confidence entries unless `--all`, flags inverter disagreement.
+* Removed: `info`, `decode`, `set`, `qualify`, `fix` (use the library for checksum repair).
+
 ## 0.1.1 (2026-09-04)
 
 * Packaging only: release workflow renamed to `release.yml` to match the PyPI trusted publisher; first PyPI publish. No code changes.

@@ -23,7 +23,7 @@ single-unit layout matches. The file magic string is the same lineage for both
 2. Choose Download. Save the file to disk. Do not choose to open it in VEConfigure from the browser;
    you want the untouched bytes.
 3. File it immediately into the change folder (`00_baseline/`, see docs/CHANGE_CONTROL.md) and run
-   `mk2vsc info` to confirm the serials and the save timestamp.
+   `mk2vsc show` to confirm the serials and the save timestamp.
 
 A download does not change the device. It does require the GX device to have a working connection
 to the inverters over VE.Bus; while the VE.Bus is re-enumerating after a reset, downloads fail with
@@ -45,7 +45,7 @@ to the inverters over VE.Bus; while the VE.Bus is re-enumerating after a reset, 
    - `mk2vsc-36`, `mk2vsc-47`, `mk2vsc-49`: the device rejected the file before writing anything.
      See docs/ERRORS.md. The most common one, mk2vsc-36, almost always means your file is older than
      the one on the device: download fresh and rebuild.
-3. A settings-only upload (what `mk2vsc set` produces) does not reset the VE.Bus and does not
+3. A settings-only upload (what `mk2vsc edit` produces) does not reset the VE.Bus and does not
    interrupt the inverters. We have applied such uploads to occupied buildings without any
    observable effect on loads. Assistant changes do reset the VE.Bus, and the inverters go off for
    the duration.
@@ -112,7 +112,7 @@ If the job is a settings edit, none of this is needed; that is the point of the 
 
 - Re-download into `02_downloaded/`.
 - `mk2vsc diff 01_prepared/<file> 02_downloaded/<file>` reports ONLY BOOKKEEPING.
-- `mk2vsc qualify 02_downloaded/<file> --intent intent.json` exits 0.
+- `mk2vsc check 02_downloaded/<file> --intent intent.json` exits 0.
 - The VRM device page for the inverter/charger shows the new values (charge voltages appear under
   the device's settings; VS thresholds do not appear in VRM, the file is the only place to read them).
 - No new VE.Bus errors on the device page or in alarms.

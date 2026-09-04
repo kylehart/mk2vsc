@@ -198,12 +198,6 @@ The SoC threshold's true location is not known.
 
 ## What remains open
 
-- The ESS record body (704 and 1152 bytes) is a program we cannot read.
-- The 72-byte tail after the records on device-form ESS blocks is unparsed.
-- The BareSettingInfo section (4001 bytes, identical in every file) is presumably a schema; we have not
-  decoded it.
-- Whether a device-form to upload-form transform produces an install that starts on a system with a
-  healthy BMS.
-- Where the Virtual Switch SoC and load-watt thresholds live (candidates: settings 50 to 59).
-- Files from other firmware, other VEConfigure versions, single-unit `.rvsc`, and three-phase systems.
-  We hold none.
+The open questions are tracked as GitHub issues, in priority order, at
+https://github.com/kylehart/mk2vsc/issues (pinned roadmap issue at the top). Everything unresolved in this
+document has an issue there; nothing is tracked only here.

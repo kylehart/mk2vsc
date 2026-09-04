@@ -18,7 +18,7 @@ the section checksum. The area is a sequence of records:
     record := marker(2) subtype(2) length(2) body[length]
     marker  ff ff   empty slot or container
             f5 ff   assistant record
-    tail   := 0xff padding | ff | u16 free-space counter   (bare, legacy and stub blocks)
+    tail   := 0xff padding | ff | u16 free-space counter   (bare, container and stub blocks)
 
 | Block state | Area bytes (device form) | Meaning |
 |---|---|---|
@@ -28,7 +28,7 @@ the section checksum. The area is a sequence of records:
 | residue | `f5 ff 00 ff 00 00 ff 00 0b` or `f5 ff 00 00 00 00 ff 00 0b` | an assistant-record header with length 0 where `ff ff` is expected; seen on downloads after a rejected or rolled-back assistant upload. Functionally bare. |
 | ESS (GUI installed) | `f5 ff 01 01 c0 02` + 704 bytes, or `f5 ff 01 00 80 04` + 1152 bytes, then 72 bytes | one record per inverter of the pair; see below |
 
-The free-space counter is 2816 (0x0b00) minus the container length on every bare, legacy and stub block
+The free-space counter is 2816 (0x0b00) minus the container length on every bare, container and stub block
 in the corpus. On ESS blocks the last three bytes read `ff 00 00` and the relation does not hold; the
 72-byte ESS tail (mostly 0xff, then `0e 00 8e 01 15 00 76 c4 e8 db ff 00 00`) is **not understood**.
 

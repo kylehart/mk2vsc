@@ -82,8 +82,7 @@ FIELDS: List[Field] = [
                     14: "Weak AC input enabled"}),
     Field(1, "flags1", "Secondary flags register", 1, "bitmask", HIGH,
           "Second bit register. bit 11 SET = accept wide input frequency range; bit 12 SET = dynamic current limiter.",
-          "Reference bit table; value 0x4dfe on every device-form block. Earlier tooling mistook the bytes 'fe 4d' here for a "
-          "'device descriptor marker'.",
+          "Reference bit table; value 0x4dfe on every device-form block.",
           "0x4dfe (device form), 0x6a5f/0x6a55/0x6a7e in a few grafted files",
           XC, bits={11: "Accept wide frequency range", 12: "Dynamic current limiter"}),
     Field(2, "absorption_V", "Absorption voltage", 100, "V", CONFIRMED,
@@ -120,10 +119,10 @@ FIELDS: List[Field] = [
           "Battery voltage at which the inverter shuts down (low-battery cutoff).",
           "Reference ID/scale. Our differential decode saw this move 37.20 -> 48.50 V on two systems during the "
           "installer's 'properly configure' pass and it reads 48.50 on all current blocks; 48.5 V is a sane LFP "
-          "floor. Labelled '?vs_restart_or_sustain_V' in earlier notes.", "4850, 3720, 4800", "ours + " + XC, lo=36.0, hi=56.0),
+          "floor.", "4850, 3720, 4800", "ours + " + XC, lo=36.0, hi=56.0),
     Field(12, "dc_low_restart_offset_V", "DC input low restart offset", 100, "V", HIGH,
           "Voltage above the shut-down level at which the inverter restarts.",
-          "Reference; 2.00 V fleet-wide (was '?field_71' in earlier notes).", "200, 640", XC, lo=0.0, hi=12.0),
+          "Reference; 2.00 V fleet-wide.", "200, 640", XC, lo=0.0, hi=12.0),
     Field(13, "unknown_13", "", 1, "", UNKNOWN, "", "", "0"),
     Field(14, "unknown_14", "", 1, "", UNKNOWN, "", "", "0"),
     Field(15, "unknown_toggle_15", "Unknown toggle", 1, "", LOW,
@@ -154,8 +153,8 @@ FIELDS: List[Field] = [
           "parameter block). 60 and 40 look like time constants in seconds (1 min / 40 s).", "", "60"),
     Field(51, "vs_param51", "Virtual Switch parameter", 1, "", LOW, "", "", "40"),
     Field(52, "vs_param52", "Virtual Switch parameter", 1, "", LOW,
-          "Moves with the VS thresholds across the installer's config pass (833/2125 -> 1750). Earlier notes "
-          "read it as 17.5 V; watts or a different scale are as plausible.", "", "1750, 2125, 833"),
+          "Moves with the VS thresholds across the installer's configuration pass (833/2125 -> 1750); "
+          "scale unknown (volts x100, watts, or something else).", "", "1750, 2125, 833"),
     Field(53, "vs_param53", "Virtual Switch parameter", 1, "", LOW, "", "", "4, 0, 6"),
     Field(54, "vs_ignore_ac_below_V", "VS: do not ignore AC input when Udc lower than", 100, "V", CONFIRMED,
           "Virtual Switch 'Ignore AC input' battery condition: leave battery operation and accept the grid when "
@@ -164,7 +163,7 @@ FIELDS: List[Field] = [
           "note of lowering it to 51.0 at all sites; later GUI changes landed here. Written by us (rollback files).",
           "5100 (current), 4700 (old)", "ours", lo=40.0, hi=60.0),
     Field(55, "vs_param55", "Virtual Switch parameter", 1, "", LOW, "Time-like (20 s?).", "", "21, 6, 0"),
-    Field(56, "vs_param56", "Virtual Switch parameter", 1, "", LOW, "Earlier notes read 15.00 V; unverified.",
+    Field(56, "vs_param56", "Virtual Switch parameter", 1, "", LOW, "Scale unknown.",
           "", "1500, 531, 625"),
     Field(57, "vs_param57", "Virtual Switch parameter", 1, "", LOW, "", "", "2, 0"),
     Field(58, "vs_accept_battery_above_V", "VS: ignore AC input again when Udc higher than", 100, "V", CONFIRMED,
@@ -185,8 +184,7 @@ FIELDS: List[Field] = [
           "200, 300, 0", XC, lo=0, hi=10000),
     Field(65, "soc_at_bulk_end_pct", "SoC when bulk finished", 2, "%", HIGH,
           "State of charge the built-in monitor assumes at the end of bulk (x0.5 %).",
-          "Reference: '190 = 95 % for LiFePO4'; we see 190 and 196 (98 %) -- the one-byte difference between "
-          "systems that puzzled us for a week ('+0xdb be vs c4').", "190, 196, 170", XC, lo=0, hi=100),
+          "Reference: '190 = 95 % for LiFePO4'; we see 190 and 196 (98 %).", "190, 196, 170", XC, lo=0, hi=100),
     Field(66, "param66_V", "", 100, "V?", LOW, "57.72 V -- voltage-like; possibly a second (lead-acid default) "
           "charge profile paired with 68.", "", "5772"),
     Field(67, "param67", "", 1, "", LOW, "Changed 04 -> 02 by the GUI ESS install on one inverter.", "", "3, 2, 4"),
@@ -210,9 +208,8 @@ FIELDS: List[Field] = [
     Field(87, "param87", "", 1, "", UNKNOWN, "", "", "829"),
     Field(88, "solar_wind_priority_V", "Solar & wind priority (sustain) voltage", 100, "V", MEDIUM,
           "Reference: sustain voltage for solar & wind priority.",
-          "Reference; 52.00 V everywhere. NOTE: earlier notes decoded a 'VS SOC threshold = 20 %' at +0x10a. "
-          "That byte is the high byte of this value (5200 = 0x1450). The Virtual Switch SoC threshold is "
-          "NOT located; treat the old 'vs_soc_pct' field as a decode error.", "5200", XC),
+          "Reference; 52.00 V everywhere. The byte at +0x10a (which reads 20) is the high byte of this value "
+          "(5200 = 0x1450), not a SoC threshold; the Virtual Switch SoC threshold is not located.", "5200", XC),
     Field(128, "lom_config_a", "LOM configuration A", 1, "", LOW,
           "Loss-of-mains configuration (grid code related). 0xffff on bare blocks; the GUI ESS install writes 1 / 0x0101.",
           "Reference name; observed transition.", "65535, 1, 257, 65281, 0", XC),
@@ -224,20 +221,34 @@ BY_NAME: Dict[str, Field] = {f.name: f for f in FIELDS}
 # Fields the guarded writer will edit without an override.
 EDITABLE = {f.name for f in FIELDS if f.confidence in (CONFIRMED, HIGH) and f.bits is None and f.id not in (0, 1)}
 
-# Legacy names used by the first-generation tools (kept so old change records still read).
-LEGACY_NAMES = {
-    "vs_entry_V": "vs_ignore_ac_below_V",
-    "vs_return_V": "vs_accept_battery_above_V",
-    "vs_soc_pct": None,   # retracted: was the high byte of setting 88
+# Short aliases accepted everywhere a field name is (CLI, API).  Full names remain valid.
+ALIASES = {
+    "absorption": "absorption_V",
+    "float": "float_V",
+    "charge_current": "charge_current_A",
+    "output_voltage": "inverter_output_V",
+    "ac_limit": "ac1_input_limit_A",
+    "ac2_limit": "ac2_input_limit_A",
+    "low_shutdown": "dc_low_shutdown_V",
+    "restart_offset": "dc_low_restart_offset_V",
+    "vs_entry": "vs_ignore_ac_below_V",
+    "vs_return": "vs_accept_battery_above_V",
+    "capacity": "battery_capacity_Ah",
+    "soc_bulk_end": "soc_at_bulk_end_pct",
+    "grid_code": "grid_code_active",
 }
 
 
 def lookup(name_or_id) -> Field:
+    """Resolve a field by full name, alias, or VE.Bus setting ID (int or digit string)."""
+    if isinstance(name_or_id, Field):
+        return name_or_id
     if isinstance(name_or_id, int):
         return BY_ID[name_or_id]
-    if name_or_id in LEGACY_NAMES:
-        new = LEGACY_NAMES[name_or_id]
-        if new is None:
-            raise KeyError(f"{name_or_id!r} was retracted: see fields.py setting 88")
-        return BY_NAME[new]
-    return BY_NAME[name_or_id]
+    key = str(name_or_id).strip()
+    if key.isdigit():
+        return BY_ID[int(key)]
+    key = ALIASES.get(key, key)
+    if key in BY_NAME:
+        return BY_NAME[key]
+    raise KeyError(f"unknown field {name_or_id!r}; run `mk2vsc fields` for the list (aliases: {', '.join(sorted(ALIASES))})")

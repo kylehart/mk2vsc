@@ -1,64 +1,175 @@
 """
-Command-line interface.
+mk2vsc: Victron VEConfigure .rvms files without VEConfigure.
 
-    mk2vsc info      FILE...                 one-screen summary (structure, inverters, confirmed settings)
-    mk2vsc validate  FILE...                 checksum + structure check; exit 1 on any failure
-    mk2vsc decode    FILE [--json] [--all]   every setting with label/confidence
-    mk2vsc diff      A B [--json]            by-serial comparison; says whether only bookkeeping changed
-    mk2vsc set       IN OUT [--serial S] FIELD=VALUE ...      guarded edit (never uploads)
-    mk2vsc qualify   FILE... --intent intent.json             check against intended values
-    mk2vsc fix       IN OUT                  recompute every checksum (forensic use only)
-    mk2vsc fields                            print the settings table
-    mk2vsc census    FILE...                 one line per file (block lengths, flags, form, assistant kind)
-    mk2vsc history   FILE...                 dated change log mined from a library of downloads (by system, by serial)
-    mk2vsc experimental graft BASELINE TEMPLATE OUT [--install-state] [--capacity-ah N] --i-accept-the-risk
-    mk2vsc experimental to-upload-form DEVICE OUT [--reference GUI_EXPORT] --i-accept-the-risk
-                                            assistant-injection experiments; never produced a running system
+Start here (one file downloaded from VRM > Device list > Remote VEConfigure):
+
+    mk2vsc show     download.rvms                        what is in it, per inverter, in plain labels
+    mk2vsc edit     download.rvms absorption=56.8 float=54.0
+                                                         writes download.edited.rvms; upload THAT through VRM
+    mk2vsc verify   download.edited.rvms redownload.rvms  after the upload: did the device take exactly your change?
+    mk2vsc check    redownload.rvms --expect absorption=56.8 float=54.0
+                                                         values as intended, and equal on both inverters
+
+More:
+
+    mk2vsc diff      A B                 what differs between any two files, by inverter serial
+    mk2vsc history   FILE...             dated change log mined from a folder of old downloads
+    mk2vsc validate  FILE...             structure and checksums only
+    mk2vsc fields                        the settings table with confidence levels and aliases
+    mk2vsc experimental ...              assistant (ESS) injection experiments; read docs/ESS_INJECTION.md first
+
+Nothing here uploads to a device. Field names accept aliases (absorption, float, charge_current, ac_limit,
+low_shutdown, vs_entry, vs_return, capacity ...), full names, or VE.Bus setting IDs.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 
 from . import __version__
 from .sections import RvmsFile, RvmsParseError
 from .units import unit_blocks
-from .decode import decode_file, brief
+from .fields import FIELDS, ALIASES, lookup, CONFIRMED, HIGH
+from .writer import WriteRefused
 from .diff import diff_files, render as render_diff
-from .writer import set_settings_file, WriteRefused
 from .qualify import Intent, qualify_file, render as render_qual
-from .fields import FIELDS
 from .assistants import parse_assistant_area
 from .history import load_snapshots, changes as history_changes, render as render_history
+from . import api
 
 
-def _load(path):
-    try:
-        return RvmsFile.load(path)
-    except (RvmsParseError, OSError) as e:
-        print(f"{path}: {e}", file=sys.stderr)
-        return None
-
-
-def cmd_info(a):
-    rc = 0
-    for p in a.files:
-        try:
-            print(f"== {p}")
-            print(brief(decode_file(p)))
-        except Exception as e:  # noqa: BLE001
-            rc = 1
-            print(f"  ERROR {e}")
+def _fail(msg: str, rc: int = 1) -> int:
+    print(msg, file=sys.stderr)
     return rc
 
 
+def _parse_value(field_name: str, text: str):
+    t = text.strip()
+    try:
+        if t.lower().startswith("0x"):
+            return int(t, 16)
+        if t.lstrip("-").isdigit():
+            return int(t)
+        return float(t)
+    except ValueError:
+        raise ValueError(f"{field_name}: {text!r} is not a number")
+
+
+def _assignments(items):
+    out = {}
+    for kv in items:
+        if "=" not in kv:
+            raise ValueError(f"expected FIELD=VALUE, got {kv!r}")
+        k, v = kv.split("=", 1)
+        fld = lookup(k)               # KeyError with a helpful message on unknown names
+        out[fld.name] = _parse_value(fld.name, v)
+    return out
+
+
+# ----------------------------------------------------------------------------- first-use verbs
+def cmd_show(a):
+    rc = 0
+    for p in a.files:
+        try:
+            cfg = api.load(p)
+        except (RvmsParseError, OSError) as e:
+            rc = 1
+            print(f"{p}: {e}", file=sys.stderr)
+            continue
+        if a.json:
+            from .decode import decode_bytes
+            print(json.dumps(decode_bytes(cfg.data, include_unknown=a.all), indent=1, default=str))
+        else:
+            print(cfg.summary(include_unknown=a.all))
+            if len(a.files) > 1:
+                print()
+    return rc
+
+
+def cmd_edit(a):
+    try:
+        changes = _assignments(a.assignments)
+    except (KeyError, ValueError) as e:
+        return _fail(f"error: {e}", 2)
+    try:
+        cfg = api.load(a.file)
+    except (RvmsParseError, OSError) as e:
+        return _fail(f"{a.file}: {e}")
+    try:
+        edits = cfg.set_many(changes, serial=a.serial, allow_unverified=a.allow_unverified,
+                             allow_out_of_range=a.allow_out_of_range)
+        out = cfg.save(a.output, overwrite=a.overwrite)
+    except (WriteRefused, KeyError, ValueError) as e:
+        return _fail(f"REFUSED: {e}")
+    for e in edits:
+        d = e.as_dict()
+        same = " (unchanged)" if d["old"] == d["new"] else ""
+        print(f"  {d['serial']}  {d['field']:28s} {d['old']} -> {d['new']} {d['unit']}{same}")
+    print(f"\nwrote {out}")
+    print("verified: only those bytes and their section checksums changed; the input file is untouched.\n")
+    print("Next:")
+    print(f"  1. VRM > Device list > Remote VEConfigure > Upload: {os.path.basename(out)}")
+    print("  2. Download again from the same page.")
+    print(f"  3. mk2vsc verify {out} <the new download>")
+    return 0
+
+
+def cmd_verify(a):
+    try:
+        ok, text = api.verify(a.prepared, a.redownload)
+    except (RvmsParseError, OSError, ValueError) as e:
+        return _fail(f"cannot verify: {e}")
+    print(text)
+    return 0 if ok else 2
+
+
+def cmd_check(a):
+    try:
+        expect = _assignments(a.expect or [])
+    except (KeyError, ValueError) as e:
+        return _fail(f"error: {e}", 2)
+    if a.intent:
+        try:
+            intent = Intent.load(a.intent)
+        except (OSError, ValueError) as e:
+            return _fail(f"cannot load intent {a.intent}: {e}", 2)
+        intent.settings.update(expect)
+    else:
+        intent = Intent(settings=expect, require_agreement=not a.no_agreement)
+    if not intent.settings:
+        print("note: no expected values given; checking structure and inverter agreement only "
+              "(add --expect field=value ... or --intent file.json)")
+    rc = 0
+    for p in a.files:
+        try:
+            ok, res = qualify_file(p, intent)
+        except KeyError as e:
+            return _fail(f"{p}: {e}", 2)
+        print(render_qual(ok, res, p))
+        rc |= 0 if ok else 1
+    return rc
+
+
+def cmd_diff(a):
+    try:
+        d = diff_files(a.a, a.b)
+    except (RvmsParseError, OSError, ValueError) as e:
+        return _fail(f"cannot diff: {e}")
+    print(json.dumps(d.as_dict(), indent=1) if a.json else render_diff(d))
+    return 0 if (d.identical or d.only_bookkeeping) else 2
+
+
+# ----------------------------------------------------------------------------- tools
 def cmd_validate(a):
     rc = 0
     for p in a.files:
-        f = _load(p)
-        if f is None:
+        try:
+            f = RvmsFile.load(p)
+        except (RvmsParseError, OSError) as e:
             rc = 1
+            print(f"BAD {p}: {e}")
             continue
         for name, start, stored, computed, ok in f.checksum_report():
             if not ok or a.verbose:
@@ -70,112 +181,15 @@ def cmd_validate(a):
     return rc
 
 
-def cmd_decode(a):
-    try:
-        d = decode_file(a.file, include_unknown=a.all)
-    except (RvmsParseError, OSError) as e:
-        print(f"{a.file}: {e}", file=sys.stderr)
-        return 1
-    if a.json:
-        print(json.dumps(d, indent=1, default=str))
-    else:
-        print(brief(d))
-        for u in d["units"]:
-            print(f"\n{u['serial']}: all named settings")
-            for s in u["settings"]:
-                if s.get("name") or a.all:
-                    v = s.get("value", s["raw"])
-                    print(f"  {s['id']:3d} {s['offset']} {s.get('name') or '-':30s} raw={s['raw']:6d} value={v!s:>9} "
-                          f"{s.get('unit','')} [{s['confidence']}]")
-    return 0
-
-
-def cmd_diff(a):
-    try:
-        d = diff_files(a.a, a.b)
-    except (RvmsParseError, OSError, ValueError) as e:
-        print(f"cannot diff: {e}", file=sys.stderr)
-        return 1
-    print(json.dumps(d.as_dict(), indent=1) if a.json else render_diff(d))
-    return 0 if (d.identical or d.only_bookkeeping) else 2
-
-
-def cmd_set(a):
-    changes = []
-    for kv in a.assignments:
-        if "=" not in kv:
-            print(f"bad assignment {kv!r}; expected FIELD=VALUE", file=sys.stderr)
-            return 2
-        k, v = kv.split("=", 1)
-        try:
-            val = int(v, 0) if v.strip().lstrip("-").isdigit() or v.startswith("0x") else float(v)
-        except ValueError:
-            print(f"bad value {v!r} for {k}; expected a number", file=sys.stderr)
-            return 2
-        changes.append((a.serial, k, val))
-    try:
-        edits = set_settings_file(a.inp, a.out, changes, allow_unverified=a.i_know_this_is_unverified,
-                                  allow_out_of_range=a.allow_out_of_range)
-    except KeyError as e:
-        print(f"REFUSED: unknown field {e}; see `mk2vsc fields`", file=sys.stderr)
-        return 1
-    except (WriteRefused, ValueError, RvmsParseError, OSError) as e:
-        print(f"REFUSED: {e}", file=sys.stderr)
-        return 1
-    for e in edits:
-        d = e.as_dict()
-        print(f"{d['serial']}  {d['field']}  {d['old']} -> {d['new']} {d['unit']}  ({d['block_offset']} / file {d['file_offset']})")
-    print(f"wrote {a.out}; verified: only the listed bytes and their section checksums changed")
-    return 0
-
-
-def cmd_qualify(a):
-    try:
-        intent = Intent.load(a.intent) if a.intent else Intent(settings={})
-    except (OSError, ValueError) as e:
-        print(f"cannot load intent {a.intent}: {e}", file=sys.stderr)
-        return 2
-    rc = 0
-    for p in a.files:
-        try:
-            ok, res = qualify_file(p, intent)
-        except KeyError as e:
-            print(f"{p}: intent names an unknown field {e}; see `mk2vsc fields`", file=sys.stderr)
-            return 2
-        print(render_qual(ok, res, p))
-        rc |= 0 if ok else 1
-    return rc
-
-
-def cmd_fix(a):
-    f = _load(a.inp)
-    if f is None:
-        return 1
-    out = f.fixed().to_bytes()
-    with open(a.out, "wb") as fh:
-        fh.write(out)
-    changed = sum(1 for s in f.sections if not s.checksum_ok)
-    print(f"wrote {a.out}: {changed} checksum(s) recomputed")
-    return 0
-
-
 def cmd_fields(a):
-    print(f"{'id':>3} {'offset':>7} {'name':30s} {'scale':>5} {'unit':6s} {'conf':9s} label")
+    alias_of = {v: k for k, v in ALIASES.items()}
+    print(f"{'id':>3} {'offset':>7} {'name':28s} {'alias':16s} {'unit':6s} {'conf':9s} label")
     for f in FIELDS:
-        print(f"{f.id:3d} +0x{f.offset:03x} {f.name:30s} {f.scale:>5g} {f.unit:6s} {f.confidence:9s} {f.label}")
-    return 0
-
-
-def cmd_census(a):
-    for p in a.files:
-        f = _load(p)
-        if f is None:
+        if f.confidence not in (CONFIRMED, HIGH) and not a.all:
             continue
-        cells = []
-        for u in unit_blocks(f):
-            asst = parse_assistant_area(u)
-            cells.append(f"{u.serial}:{u.length:#x}:{u.assistant_flag:02x}:{'U' if u.is_upload_form else 'd'}:{asst['kind']}")
-        print(f"{f.length:6d} {'ok ' if f.all_checksums_ok else 'BAD'} | {' '.join(cells)} | {p}")
+        print(f"{f.id:3d} +0x{f.offset:03x} {f.name:28s} {alias_of.get(f.name, ''):16s} {f.unit:6s} {f.confidence:9s} {f.label}")
+    if not a.all:
+        print("(CONFIRMED and HIGH fields only; --all lists every named setting)")
     return 0
 
 
@@ -191,11 +205,25 @@ def cmd_history(a):
     return 0
 
 
+def cmd_census(a):
+    for p in a.files:
+        try:
+            f = RvmsFile.load(p)
+        except (RvmsParseError, OSError) as e:
+            print(f"   BAD {p}: {e}")
+            continue
+        cells = []
+        for u in unit_blocks(f):
+            asst = parse_assistant_area(u)
+            cells.append(f"{u.serial}:{len(u.raw)}:{u.assistant_flag:02x}:{'U' if u.is_upload_form else 'd'}:{asst['kind']}")
+        print(f"{f.length:6d} {'ok ' if f.all_checksums_ok else 'BAD'} | {' '.join(cells)} | {p}")
+    return 0
+
+
 def cmd_experimental(a):
     if not a.i_accept_the_risk:
-        print("experimental commands have never produced a running ESS system and have disrupted live systems; "
-              "read docs/ESS_INJECTION.md, then pass --i-accept-the-risk", file=sys.stderr)
-        return 2
+        return _fail("experimental commands have never produced a running ESS system and have disrupted live systems; "
+                     "read docs/ESS_INJECTION.md, then pass --i-accept-the-risk", 2)
     from .experimental import graft, to_upload_form, GraftRefused, TransformRefused
     try:
         if a.what == "graft":
@@ -211,37 +239,79 @@ def cmd_experimental(a):
         print(f"wrote {a.out} ({len(out)} bytes). EXPERIMENTAL: see docs/ESS_INJECTION.md before uploading.")
         return 0
     except (GraftRefused, TransformRefused, RvmsParseError, OSError) as e:
-        print(f"REFUSED: {e}", file=sys.stderr)
-        return 1
+        return _fail(f"REFUSED: {e}")
 
 
-def main(argv=None):
+# ----------------------------------------------------------------------------- parser
+def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(prog="mk2vsc", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--version", action="version", version=__version__)
-    sub = ap.add_subparsers(dest="cmd", required=True)
+    sub = ap.add_subparsers(dest="cmd", metavar="COMMAND")
 
-    s = sub.add_parser("info"); s.add_argument("files", nargs="+"); s.set_defaults(fn=cmd_info)
-    s = sub.add_parser("validate"); s.add_argument("files", nargs="+"); s.add_argument("-v", "--verbose", action="store_true"); s.set_defaults(fn=cmd_validate)
-    s = sub.add_parser("decode"); s.add_argument("file"); s.add_argument("--json", action="store_true"); s.add_argument("--all", action="store_true", help="include unknown settings"); s.set_defaults(fn=cmd_decode)
-    s = sub.add_parser("diff"); s.add_argument("a"); s.add_argument("b"); s.add_argument("--json", action="store_true"); s.set_defaults(fn=cmd_diff)
-    s = sub.add_parser("set"); s.add_argument("inp"); s.add_argument("out"); s.add_argument("--serial", default=None, help="edit one inverter only (default: all)")
-    s.add_argument("--i-know-this-is-unverified", action="store_true", help="allow MEDIUM/LOW/UNKNOWN fields")
-    s.add_argument("--allow-out-of-range", action="store_true", help="skip the plausibility range and float<=absorption checks")
-    s.add_argument("assignments", nargs="+", metavar="FIELD=VALUE"); s.set_defaults(fn=cmd_set)
-    s = sub.add_parser("qualify"); s.add_argument("files", nargs="+"); s.add_argument("--intent", help="intent JSON"); s.set_defaults(fn=cmd_qualify)
-    s = sub.add_parser("fix"); s.add_argument("inp"); s.add_argument("out"); s.set_defaults(fn=cmd_fix)
-    s = sub.add_parser("fields"); s.set_defaults(fn=cmd_fields)
-    s = sub.add_parser("census"); s.add_argument("files", nargs="+"); s.set_defaults(fn=cmd_census)
-    s = sub.add_parser("history"); s.add_argument("files", nargs="+"); s.add_argument("--json", action="store_true"); s.set_defaults(fn=cmd_history)
-    x = sub.add_parser("experimental", help="assistant-injection experiments (read docs/ESS_INJECTION.md)")
+    s = sub.add_parser("show", help="what is in a file, per inverter, in plain labels")
+    s.add_argument("files", nargs="+", metavar="FILE")
+    s.add_argument("--all", action="store_true", help="include low-confidence and unknown settings")
+    s.add_argument("--json", action="store_true", help="machine-readable output")
+    s.set_defaults(fn=cmd_show)
+
+    s = sub.add_parser("edit", help="change settings; writes FILE.edited.rvms (never overwrites the input)")
+    s.add_argument("file", metavar="FILE")
+    s.add_argument("assignments", nargs="+", metavar="FIELD=VALUE")
+    s.add_argument("-o", "--output", help="output path (default: <FILE>.edited.rvms)")
+    s.add_argument("--serial", help="edit one inverter only (default: all, as a shared battery needs)")
+    s.add_argument("--overwrite", action="store_true", help="allow replacing an existing output file")
+    s.add_argument("--allow-unverified", action="store_true", help="edit MEDIUM/LOW/UNKNOWN fields (you are the first to try)")
+    s.add_argument("--allow-out-of-range", action="store_true", help="skip the plausibility and float<=absorption checks")
+    s.set_defaults(fn=cmd_edit)
+
+    s = sub.add_parser("verify", help="after uploading: does the re-download carry exactly your change?")
+    s.add_argument("prepared", metavar="PREPARED")
+    s.add_argument("redownload", metavar="REDOWNLOAD")
+    s.set_defaults(fn=cmd_verify)
+
+    s = sub.add_parser("check", help="values as intended and equal on every inverter; exit 1 if not")
+    s.add_argument("files", nargs="+", metavar="FILE")
+    s.add_argument("--expect", nargs="+", metavar="FIELD=VALUE", help="expected values")
+    s.add_argument("--intent", help="JSON intent file (advanced; see docs/CHANGE_CONTROL.md)")
+    s.add_argument("--no-agreement", action="store_true", help="do not require the inverters to agree")
+    s.set_defaults(fn=cmd_check)
+
+    s = sub.add_parser("diff", help="what differs between two files, compared by inverter serial")
+    s.add_argument("a"); s.add_argument("b"); s.add_argument("--json", action="store_true")
+    s.set_defaults(fn=cmd_diff)
+
+    s = sub.add_parser("history", help="dated change log from a folder of old downloads")
+    s.add_argument("files", nargs="+", metavar="FILE"); s.add_argument("--json", action="store_true")
+    s.set_defaults(fn=cmd_history)
+
+    s = sub.add_parser("validate", help="structure and checksums only")
+    s.add_argument("files", nargs="+", metavar="FILE"); s.add_argument("-v", "--verbose", action="store_true")
+    s.set_defaults(fn=cmd_validate)
+
+    s = sub.add_parser("fields", help="the settings table: names, aliases, confidence")
+    s.add_argument("--all", action="store_true", help="include MEDIUM/LOW/UNKNOWN entries")
+    s.set_defaults(fn=cmd_fields)
+
+    s = sub.add_parser("census", help="one line per file: blocks, flags, form, assistant (for corpora)")
+    s.add_argument("files", nargs="+", metavar="FILE")
+    s.set_defaults(fn=cmd_census)
+
+    x = sub.add_parser("experimental", help="assistant-injection experiments (docs/ESS_INJECTION.md)")
     xs = x.add_subparsers(dest="what", required=True)
     g = xs.add_parser("graft"); g.add_argument("baseline"); g.add_argument("template"); g.add_argument("out")
     g.add_argument("--install-state", action="store_true"); g.add_argument("--capacity-ah", type=int, default=None)
     g.add_argument("--i-accept-the-risk", action="store_true"); g.set_defaults(fn=cmd_experimental)
     t = xs.add_parser("to-upload-form"); t.add_argument("device"); t.add_argument("out"); t.add_argument("--reference")
     t.add_argument("--i-accept-the-risk", action="store_true"); t.set_defaults(fn=cmd_experimental)
+    return ap
 
+
+def main(argv=None):
+    ap = build_parser()
     a = ap.parse_args(argv)
+    if not getattr(a, "fn", None):
+        ap.print_help()
+        return 0
     return a.fn(a)
 
 

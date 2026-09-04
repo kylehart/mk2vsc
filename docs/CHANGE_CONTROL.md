@@ -5,6 +5,23 @@ upload it. It does not tell you what changed, whether the device stored what you
 the file you are about to upload still carries a correction you made last month. Every rule below
 exists because we broke something without it.
 
+## The simple loop (start here)
+
+For one system and one change you do not need folders or an intent file:
+
+```
+mk2vsc show   download.rvms                          # read it; note the save timestamp is today's
+mk2vsc edit   download.rvms absorption=56.8 float=54.0   # writes download.edited.rvms next to it
+# VRM > Remote VEConfigure > Upload download.edited.rvms; then Download again
+mk2vsc verify download.edited.rvms redownload.rvms   # "VERIFIED": the device took exactly your change
+mk2vsc check  redownload.rvms --expect absorption=56.8 float=54.0
+```
+
+`edit` never overwrites the download, so the download is your rollback. `verify` fails loudly if the
+device changed anything beyond pointers, timestamps and checksums. `check` fails if a value is not what
+you expect or if the two inverters disagree. The rest of this page is the discipline we use when several
+systems, several people and months of history are involved.
+
 ## The folder pattern
 
 One folder per change:
@@ -49,13 +66,13 @@ One paragraph. What is wrong, what the target value is, where the target comes f
 Intent file: intent.json (copied into this folder)
 
 ## Checklist
-- [ ] 00_baseline/ holds a download taken today (save timestamp checked with `mk2vsc info`)
-- [ ] 01_prepared/ built from 00_baseline/ with `mk2vsc set`; `mk2vsc diff` shows only the intended settings
-- [ ] `mk2vsc qualify 01_prepared/<file> --intent intent.json` exits 0
+- [ ] 00_baseline/ holds a download taken today (save timestamp checked with `mk2vsc show`)
+- [ ] 01_prepared/ built from 00_baseline/ with `mk2vsc edit -o 01_prepared/<file>`; `mk2vsc diff` shows only the intended settings
+- [ ] `mk2vsc check 01_prepared/<file> --intent intent.json` exits 0
 - [ ] uploaded 01_prepared/<file> via VRM Remote VEConfigure; dialog result recorded here
 - [ ] re-downloaded into 02_downloaded/
 - [ ] `mk2vsc diff 01_prepared/<file> 02_downloaded/<file>` says ONLY BOOKKEEPING
-- [ ] `mk2vsc qualify 02_downloaded/<file> --intent intent.json` exits 0
+- [ ] `mk2vsc check 02_downloaded/<file> --intent intent.json` exits 0
 - [ ] live system checked (VRM device page shows the new value; no VE.Bus errors)
 - [ ] recorded in the change log / monitoring
 
@@ -68,34 +85,25 @@ What happened, including anything unexpected.
 ### Rule 1: a full-config upload silently reverts every prior field edit
 
 An `.rvms` upload replaces the entire configuration of every inverter in the system. There is no
-merge and there is no warning. On 2026-07-20 we corrected Guava's mismatched charge profile by file
-(one inverter had been charging at 57.6 V absorption / 55.2 V float, above the battery
-specification) and verified the correction on the re-download. In August we uploaded several
-full configurations to the same system for other reasons, each built from an older archived
-baseline that still carried the pre-correction values. On 2026-08-19 a routine decode showed the
-old values back in place. The battery had been charging above specification on one inverter for
-roughly a month. Our monitoring had logged the reversion the day it happened. Nobody looked.
-Detection without a review step is not protection. The qualifier (`mk2vsc qualify`) exists because
-of this: it checks a file against intended values that are kept outside the file, and it fails any
-file whose two inverters disagree on a confirmed setting.
+merge and there is no warning, so a file built from an old baseline re-applies every value that baseline
+carried, including ones you corrected since (it cost us a month of out-of-specification charging on one
+inverter; docs/HISTORY.md). `mk2vsc check` exists for this: it compares a file with intended values kept
+outside the file, and fails any file whose two inverters disagree on a confirmed setting.
 
 ### Rule 2: build only on a fresh download
 
 The device rejects a file whose save timestamp is older than the one it holds. The error is
 `mk2vsc-36 "Incorrect grid code password or old configuration file"`, and the second half of that
-message is the common meaning. On 2026-08-12 an archived, known-good bare configuration for Guava
-was rejected with mk2vsc-36 on every attempt, across two reboots, while we chased grid-code
-theories. A fresh download, uploaded unmodified, was accepted on the first try. Download, edit
+message is the common meaning: an archived known-good file is refused, and the same configuration
+freshly downloaded and uploaded unmodified is accepted (docs/ERRORS.md). Download, edit
 that file, upload that file. If any new download happens after you prepared a file, prepare it
 again from the newest download.
 
 ### Rule 3: never leave prepared files loose
 
-Every prepared file goes in `01_prepared/` of its own change folder and nowhere else. During the
-August work a copy of a prepared file left in `~/Downloads` was nearly uploaded twice after a newer
-version had been built. Loose copies at the root of the changes directory and in download folders
-are stale duplicates waiting to be uploaded by mistake. The naming convention in `fixtures/`
-(system, date, origin, state, form) is the same idea applied to the archive.
+Every prepared file goes in `01_prepared/` of its own change folder and nowhere else. A stray copy in a
+downloads folder is a stale file waiting to be uploaded by mistake; the change folder is the only place
+an upload comes from.
 
 ### Rule 4: verify the re-download, not the upload dialog
 
@@ -104,7 +112,7 @@ the settings are right, and it does not mean the settings landed on every invert
 a GUI session on Sugar Apple wrote seven settings to one inverter and none to the other, leaving
 the two legs of a shared battery 0.3 V apart. The only proof of a change is the re-download:
 `mk2vsc diff` against the prepared file must report only bookkeeping bytes (pointer, save timestamp,
-checksum), and `mk2vsc qualify` must pass on the re-download with the same intent file that passed
+checksum), and `mk2vsc check` must pass on the re-download with the same intent file that passed
 on the prepared file.
 
 ## The CLI sequence for one change
@@ -112,22 +120,22 @@ on the prepared file.
 ```sh
 # 0. fresh download from VRM -> changes/<change>/00_baseline/system.rvms
 mk2vsc validate 00_baseline/system.rvms                 # checksums OK on your firmware
-mk2vsc info     00_baseline/system.rvms                 # confirm serials and today's save timestamp
+mk2vsc show     00_baseline/system.rvms                 # confirm serials and today's save timestamp
 
 # 1. prepare (edits every inverter unless --serial is given)
-mk2vsc set 00_baseline/system.rvms 01_prepared/system_charge-profile.rvms absorption_V=56.8 float_V=54.0
+mk2vsc edit 00_baseline/system.rvms absorption=56.8 float=54.0 -o 01_prepared/system_charge-profile.rvms
 mk2vsc diff 00_baseline/system.rvms 01_prepared/system_charge-profile.rvms   # only the intended settings
-mk2vsc qualify 01_prepared/system_charge-profile.rvms --intent intent.json    # exit 0
+mk2vsc check 01_prepared/system_charge-profile.rvms --intent intent.json    # exit 0
 
 # 2. upload 01_prepared/system_charge-profile.rvms via VRM -> Remote VEConfigure -> Upload
 
 # 3. re-download from VRM -> 02_downloaded/system.rvms
 mk2vsc diff 01_prepared/system_charge-profile.rvms 02_downloaded/system.rvms  # expect: ONLY BOOKKEEPING
-mk2vsc qualify 02_downloaded/system.rvms --intent intent.json                 # exit 0
+mk2vsc check 02_downloaded/system.rvms --intent intent.json                 # exit 0
 ```
 
 `mk2vsc diff` exits 0 when the two files are identical or differ only in bookkeeping, and 2 when
-content differs. `mk2vsc qualify` exits 0 for QUALIFIED and 1 for NOT QUALIFIED. Both are usable in
+content differs. `mk2vsc check` exits 0 for QUALIFIED and 1 for NOT QUALIFIED. Both are usable in
 scripts.
 
 ## Intent files

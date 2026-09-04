@@ -16,7 +16,7 @@ what it changed.
 What we have done repeatedly on live systems without incident:
 
 - Length-preserving edits to u16 values in the settings array, on a device-form download taken
-  minutes earlier, with every section checksum recomputed. This is exactly and only what `mk2vsc set`
+  minutes earlier, with every section checksum recomputed. This is exactly and only what `mk2vsc edit`
   does.
 - Fields at CONFIRMED or HIGH confidence (docs/FIELDS.md). CONFIRMED fields (absorption, float, the
   two Virtual Switch DC thresholds) have been written by this toolchain, uploaded, and read back.
@@ -34,14 +34,14 @@ outcomes for us, none of them a working install:
 1. Clean rejection before write (mk2vsc-47, mk2vsc-49). Harmless.
 2. Accepted, then the device wrote a 64-byte empty stub and discarded our payload.
 3. Accepted, began installing, failed at the grid-code step; the VE.Bus was left half-configured
-   (VE.Bus error 10) for about 17 minutes, and an earlier removal attempt left a corrupt assistant
+   (VE.Bus error 10) for about 17 minutes, and a removal attempt left a corrupt assistant
    program (VE.Bus error 6). Both were recovered by re-uploading the baseline and rebooting the GX.
 4. Accepted and stored byte-perfectly, and the inverters never started.
 
 docs/ASSISTANTS.md has the evidence table. The writer refuses to change block length, and the
 qualifier fails any file that carries the stub. Do not work around either on a system that matters.
 
-Fields below HIGH confidence. `mk2vsc set` refuses them unless you pass
+Fields below HIGH confidence. `mk2vsc edit` refuses them unless you pass
 `--i-know-this-is-unverified`. If you do, you are the first person to test that offset on hardware:
 do it on a system you can watch, one field at a time, with the baseline ready.
 
@@ -89,7 +89,7 @@ In the order we have found to work:
 
 ## First-use protocol
 
-1. Run `mk2vsc validate` and `mk2vsc decode` on your own downloads for a while, read-only. Compare
+1. Run `mk2vsc validate` and `mk2vsc show` on your own downloads for a while, read-only. Compare
    absorption, float and the AC input limit with what VEConfigure or VRM shows.
 2. Download twice a minute apart and run `mk2vsc diff`. Expect "ONLY BOOKKEEPING". If you see
    anything else, stop and open an issue with both files.

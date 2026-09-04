@@ -68,23 +68,11 @@ the high side. This validates on all 107 files we have held (84 unique) and ever
 the three deliberately broken files in `fixtures/` as negative controls. `mk2vsc.sections.sum32_le` is the
 whole implementation.
 
-History, because earlier write-ups describe the same thing differently. Our first solved formula was
+Checking aid: read from its length prefix, the first word of a `BareSettingData` section is `0f 00 42 61`
+(little-endian 0x6142000F). A sum that starts at the `B` instead must add that word to agree.
 
-```
-field = ( sum32( block[0x02 : field] ) + 0x6142000F ) mod 2**32
-```
-
-where `block` began at the `B` of `BareSettingData` and `0x6142000F` was presented as a magic
-initialisation constant. It is not a constant. It is the first word of the section read from its length
-prefix: `0f 00 42 61` is `0x6142000F` little-endian. Likewise the "`0f 00` framing" that seemed to end
-every block except the last is the *next* section's name-length prefix (15 = len("BareSettingData")).
-The clean statement is the one in the grammar above, and it applies to `Mk2vscInfo` and
-`BareSettingInfo` as well, which the earlier tooling never checked.
-
-The checksum is linear. That is why a delta patch worked once by luck in June 2026, and why an exhaustive
-13-million-trial CRC-16 search found nothing: it is not a CRC. The decisive evidence was two downloads of
-an unchanged system: the only body bytes that moved were the save timestamp, and the checksum moved by
-exactly those byte deltas, in position.
+The checksum is linear and is not a CRC: between two downloads of an unchanged system, the only body bytes
+that move are the save timestamp, and the checksum moves by exactly those byte deltas, in position.
 
 ### 1.2 What the checksum is not
 
@@ -214,13 +202,13 @@ Every block in the corpus fits one of these shapes:
 
 | Shape | Bytes | Where seen |
 |---|---|---|
-| bare | `ff ff ff ff 00 00` + `ff 00 0b` | every well-formed block without an assistant (89 blocks; a few show the residue or legacy shapes below) |
+| bare | `ff ff ff ff 00 00` + `ff 00 0b` | every well-formed block without an assistant (89 blocks; a few show the residue or container shapes below) |
 | residue | `f5 ff 00 ff 00 00` + `ff 00 0b` (also `ff ff 00 00 00 00`, `f5 ff 00 00 00 00`) | downloads taken after a rejected or rolled-back assistant upload; functionally bare |
-| legacy container | `ff ff ff ff 06 00` + `a7 fe 00 00 57 01` + `ff fa 0a` | the two June 2026 files written by an older tool build |
+| 6-byte container | `ff ff ff ff 06 00` + `a7 fe 00 00 57 01` + `ff fa 0a` | two files written by an older tool build (see docs/FIXTURES.md) |
 | stub | `ff ff ff ff 40 00` + `a7 fe 00 00 57 01` + 56 × `ff` + `c0 0a`, then `ff 40 0a` | what VEConfigure wrote on both inverters after accepting a transplanted assistant and discarding it |
 | GUI-installed ESS | `f5 ff 01 01 c0 02` + 704-byte body, or `f5 ff 01 00 80 04` + 1152-byte body, then a 72-byte tail | every working ESS install (one record per inverter; the pair holds one of each) |
 
-**Observed.** On bare, residue, legacy and stub blocks the tail is `ff` + u16, and that u16 plus the bytes
+**Observed.** On bare, residue, container and stub blocks the tail is `ff` + u16, and that u16 plus the bytes
 used by the records is always 2822 (= 2816 + the 6-byte empty header). **Inferred.** The u16 is a
 remaining-space counter over a 2816-byte assistant budget.
 
@@ -269,5 +257,5 @@ it does not author them, and `docs/ASSISTANTS.md` explains why we stopped trying
 * three-phase or 3+ unit files: we have none
 * any other firmware version or format version: we have none
 
-If you hold a file outside our envelope, `mk2vsc validate` and `mk2vsc info` on it are the most useful
+If you hold a file outside our envelope, `mk2vsc validate` and `mk2vsc show` on it are the most useful
 contributions you can make; see `CONTRIBUTING.md`.

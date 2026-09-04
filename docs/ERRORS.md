@@ -50,7 +50,7 @@ the bus. *Observed* twice with different causes:
   enumeration and the same construction was accepted (Mango 2026-07-24, v3 then v4).
 
 Device state: nothing written. What to do: check the device list in VRM for an "Unknown" serial first;
-reboot the GX if so. Then check the file with `mk2vsc validate` and `mk2vsc info` (form must be "device").
+reboot the GX if so. Then check the file with `mk2vsc validate` and `mk2vsc show` (form must be "device").
 Confidence: observed.
 
 ### mk2vsc-49  "Number of units in file does not match number of units discovered"
@@ -149,8 +149,8 @@ Confidence: observed.
 ### "Success. The system has been configured."
 
 The upload was accepted. It is not proof the settings are right: download fresh and run `mk2vsc diff`
-against what you uploaded, and `mk2vsc qualify` against your intent file. On 2026-08-14 a file with this
-dialog reintroduced an out-of-spec charge voltage that went unnoticed for a month.
+against what you uploaded, and `mk2vsc check` against your intent file. On 2026-08-14 a file with this
+dialog reintroduced an out-of-spec charge voltage (docs/HISTORY.md).
 
 ## Quick table
 

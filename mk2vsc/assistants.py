@@ -63,7 +63,7 @@ def parse_assistant_area(u: UnitBlock) -> Dict:
                 f5 ff  -> assistant record.  GUI-installed ESS: one 704-byte and one 1152-byte record per
                           system (one on each inverter), subtype 0101 / 0001.
         tail   := padding(0xff)* | ff | u16 free
-                  On bare, legacy and stub blocks free == 2816 - bytes used; see docs/FORMAT.md for ESS.
+                  On bare, container and stub blocks free == 2816 - bytes used; see docs/FORMAT.md for ESS.
 
     A ``f5 ff`` header with len 0 where ``ff ff`` is expected is residue seen on downloads taken after a
     rejected or rolled-back assistant upload; functionally bare.

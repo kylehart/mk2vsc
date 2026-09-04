@@ -4,7 +4,7 @@ by grafting the assistant records from a known-good device download (the *templa
 own bare download (the *baseline*).
 
 STATUS (2026-09-03): every file this produced was ACCEPTED by the device and STORED byte-perfect, and
-the resulting system NEVER STARTED (it sits Off, "connecting", no error).  One earlier variant was
+the resulting system NEVER STARTED (it sits Off, "connecting", no error).  One variant was
 accepted and then replaced by an empty 64-byte stub.  Read docs/ESS_INJECTION.md before using this on
 hardware.  It is published so that someone can pick up where we left off, not because it works.
 

@@ -25,6 +25,10 @@ of these rules is docs/PRACTICES.md; this file is the operational checklist.
   field requires a new fixture pair or a screenshot, referenced in the commit.
 - Counts in docs (files, blocks, tests) are regenerated, not hand-edited. If a number is typed by hand,
   it is wrong within a week.
+- Reference docs describe the current state only. No "earlier tooling", "previously", "retracted",
+  "used to", old names kept "so they raise an error". Narrative with dates and mistakes belongs in
+  docs/HISTORY.md and docs/ESS_INJECTION.md, where the learning is the deliverable, and in CHANGELOG.md
+  as terse entries. No backward-compatibility shims: remove, do not deprecate.
 
 ## 3. Safety of readers comes before completeness
 
