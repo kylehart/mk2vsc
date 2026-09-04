@@ -87,3 +87,25 @@ def schema_of(f: RvmsFile) -> List[SettingInfo]:
 
 def firmware_of_schema(info_payload: bytes) -> int:
     return struct.unpack_from("<I", info_payload, 4)[0]
+
+
+NOMINALS = (12, 24, 48)
+ABSORPTION_ID = 2
+
+
+def nominal_voltage(schema: List[SettingInfo]) -> int:
+    """The system's nominal battery voltage, read from the file's own schema.
+
+    The absorption record's minimum is the nominal voltage on every Victron model we know of (48.00 V
+    on the 48 V MultiPlus in the corpus; 24.00 V on talas9's 24 V unit).  Returns 12, 24 or 48, or raises
+    ``ValueError`` when the minimum is not within 10 % of one of those, so a caller never scales a bound
+    by a guess.  Observed on the corpus: 48 on every file.  Inferred: 24 and 12 from the schema convention.
+    """
+    r = schema[ABSORPTION_ID]
+    if r.scale == 0:
+        raise ValueError("schema record 2 (absorption) is unused; cannot infer the nominal voltage")
+    v = r.decode(r.min)
+    for nom in NOMINALS:
+        if abs(v - nom) <= nom * 0.10:
+            return nom
+    raise ValueError(f"absorption minimum {v:g} V is not near a Victron nominal (12/24/48 V); cannot infer the nominal voltage")

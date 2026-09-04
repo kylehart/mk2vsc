@@ -49,7 +49,8 @@ class Field:
     observed: str = ""           # values seen in the corpus
     source: str = ""             # 'xcellsior' (public MK2 protocol reference) / 'ours' / both
     bits: Optional[Dict[int, str]] = None   # for flag registers: bit -> meaning when SET
-    lo: Optional[float] = None   # plausibility range in engineering units (48 V systems); writer refuses outside
+    lo: Optional[float] = None   # plausibility range in engineering units, written for a 48 V system; the writer
+                                 # scales voltage bounds by nominal/48 (mk2vsc.schema.nominal_voltage) and refuses outside
     hi: Optional[float] = None
     raw_offset: int = 0          # added to the raw value before scaling (the device schema's offset word)
     period: bool = False         # value = scale / raw (a period stored where a frequency is shown)

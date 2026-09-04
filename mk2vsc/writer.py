@@ -24,7 +24,7 @@ from .sections import RvmsFile
 from .units import units_by_serial, unit_blocks
 from .fields import lookup, CONFIRMED, HIGH, Field, BY_NAME
 from .assistants import parse_assistant_area
-from .schema import schema_of
+from .schema import schema_of, nominal_voltage
 
 
 class WriteRefused(RuntimeError):
@@ -68,6 +68,11 @@ def set_settings(data: bytes, changes: Iterable[Tuple[Optional[str], object, obj
                            "system from a fresh bare download before editing settings")
 
     schema = schema_of(f)
+    try:
+        nominal = nominal_voltage(schema)
+    except ValueError as e:
+        raise WriteRefused(f"{e}; refusing to apply plausibility bounds to an unrecognised system")
+    volt_scale = nominal / 48.0          # Field.lo/hi are written for a 48 V system; voltage bounds scale with nominal
     from .align import check as align_check
     for u in by_serial.values():
         al = align_check(u, schema)
@@ -93,9 +98,12 @@ def set_settings(data: bytes, changes: Iterable[Tuple[Optional[str], object, obj
         if not allow_out_of_range and not info.unused and not info.in_range(new_raw):
             raise WriteRefused(f"{fld.name}: raw {new_raw} is outside the device's own range {info.min}..{info.max} "
                                f"({fld.decode(info.min)}..{fld.decode(info.max)} {fld.unit}) from BareSettingInfo")
-        if not allow_out_of_range and fld.lo is not None and not (fld.lo <= fld.decode(new_raw) <= fld.hi):
-            raise WriteRefused(f"{fld.name}={fld.decode(new_raw)} {fld.unit} is outside the plausible range "
-                               f"{fld.lo}..{fld.hi} for a 48 V system; pass allow_out_of_range=True if you mean it")
+        if not allow_out_of_range and fld.lo is not None:
+            k = volt_scale if fld.unit == "V" else 1.0
+            lo, hi = fld.lo * k, fld.hi * k
+            if not (lo <= fld.decode(new_raw) <= hi):
+                raise WriteRefused(f"{fld.name}={fld.decode(new_raw)} {fld.unit} is outside the plausible range "
+                                   f"{lo:g}..{hi:g} for a {nominal} V system; pass allow_out_of_range=True if you mean it")
         targets = list(by_serial.values()) if serial is None else [by_serial[serial]] if serial in by_serial else None
         if targets is None:
             raise WriteRefused(f"serial {serial} not in file (have {sorted(by_serial)})")

@@ -115,3 +115,48 @@ def test_refuses_stub_downloads(good_files):
 def test_refuses_fractional_value_for_integer_field(good_files):
     with pytest.raises(WriteRefused):
         set_settings(good_files[BARE], [(None, "charge_current_A", 35.7)])
+
+
+# ---------------------------------------------------------------- plausibility bounds scale with nominal voltage
+VOLT_IDS = (2, 3, 11, 12, 17, 18, 54, 58, 68, 88)   # every /100 V setting the writer or rules read
+
+
+def make_24v_twin(data: bytes) -> bytes:
+    """A synthetic 24 V file: halve the schema range and the stored value of every /100 V setting, keep
+    everything else, recompute checksums.  Alignment still passes because value and range move together."""
+    import struct
+    from mk2vsc.schema import HEADER_LEN, RECORD_LEN
+    from mk2vsc.sections import SECTION_INFO, SECTION_DATA
+    f = RvmsFile.parse(data)
+    payloads = []
+    for s in f.sections:
+        pl = bytearray(s.payload)
+        if s.name == SECTION_INFO:
+            for sid in VOLT_IDS:
+                o = HEADER_LEN + RECORD_LEN * sid
+                sc, off, d, mn, mx = struct.unpack_from("<hhHHH", pl, o)
+                struct.pack_into("<hhHHH", pl, o, sc, off, d // 2, mn // 2, mx // 2)
+        elif s.name == SECTION_DATA:
+            u = [x for x in units_by_serial(f).values() if x.section is s][0]
+            for sid in VOLT_IDS:
+                o = u.setting_offset(sid) - (len(s.name) + 4)
+                v = struct.unpack_from("<H", pl, o)[0]
+                struct.pack_into("<H", pl, o, v // 2)
+        payloads.append(bytes(pl))
+    return f.rebuild(payloads).to_bytes()
+
+
+def test_24v_twin_accepts_24v_absorption_and_refuses_48v_values(good_files):
+    twin = make_24v_twin(good_files[BARE])
+    out, edits = set_settings(twin, [(None, "absorption_V", 28.4), (None, "float_V", 27.0)])
+    assert {e.new_raw for e in edits} == {2840, 2700}
+    with pytest.raises(WriteRefused) as ei:
+        set_settings(twin, [(None, "absorption_V", 57.6)])
+    # the schema range (24.00 to 32.00 V on the twin) refuses first; the scaled plausibility bound is the backstop
+    assert "24.0..32.0 V" in str(ei.value) or "24 V system" in str(ei.value)
+
+
+def test_48v_file_still_refuses_a_24v_absorption(good_files):
+    with pytest.raises(WriteRefused) as ei:
+        set_settings(good_files[BARE], [(None, "absorption_V", 28.4)], allow_out_of_range=False)
+    assert "48 V system" in str(ei.value) or "outside the device's own range" in str(ei.value)
