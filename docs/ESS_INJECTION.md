@@ -16,19 +16,19 @@ send us the bytes: the file you uploaded, the re-download, and what the GX showe
 `mk2vsc/experimental/`, gated behind `--i-accept-the-risk`; `tests/test_experimental.py` reproduces every
 file we uploaded in August 2026 from its baseline so you can see exactly what was tried.
 
-Vocabulary: systems are Guava, Mango, Papaya, Sugar Apple; inverters by serial; "the installer" is the
+Vocabulary: systems are System A, System B, System C, System D; inverters by serial; "the installer" is the
 company that holds the grid-code password and performed the GUI installs. Block offsets are relative to
 the `B` of `BareSettingData` (docs/FORMAT.md); settings are by VE.Bus ID (docs/FIELDS.md).
 
 ## 1. What a GUI install changes in the file
 
-We hold a clean same-system pair: Papaya's bare download of 2026-06-23 and its device download of
+We hold a clean same-system pair: System C's bare download of 2026-06-23 and its device download of
 2026-07-24 after the installer's GUI session (which also corrected the charge profile and Virtual Switch
 thresholds, so not every line below is ESS). `mk2vsc diff` output, verbatim:
 
 ```
-$ mk2vsc diff fixtures/papaya/papaya_2026-06-23_download_bare_deviceform_1.rvms \
-              fixtures/papaya/papaya_2026-07-24_download_ess_deviceform_1.rvms
+$ mk2vsc diff fixtures/system_c/system_c_2026-06-23_download_bare_deviceform_1.rvms \
+              fixtures/system_c/system_c_2026-07-24_download_ess_deviceform_1.rvms
 lengths 5055 -> 7049; prologue same; verdict: CONTENT CHANGED
   HQ24142MJUA: len 482->1703 form device->device bookkeeping=9B header=1B assistant=1229B  [block length differs (assistant area changed)]
       setting   0 flags0                       35316 -> 33268  [HIGH]
@@ -86,11 +86,11 @@ slot-(86,01) block. The low nibble is the slot; the high nibble drops from f to 
 | Slot | Flag | Record | Subtype | Device-form length | Upload-form length |
 |---|---|---|---|---|---|
 | (00,00) | e4 | first record | 0001 | 1152 | 1102 |
-| (86,01) | e5 | second record | 0101 (0001 on Mango) | 704 | 670 |
+| (86,01) | e5 | second record | 0101 (0001 on System B) | 704 | 670 |
 
-The 1152-byte body is byte-identical on Papaya, Mango, Guava and Sugar Apple. The 704-byte body is
+The 1152-byte body is byte-identical on System C, System B, System A and System D. The 704-byte body is
 byte-identical too; the one byte that differs between systems is the subtype word in the record
-header (0101 on three systems, 0001 on Mango). So the assistant payload is a template chosen by role,
+header (0101 on three systems, 0001 on System B). So the assistant payload is a template chosen by role,
 not compiled per inverter. We cannot read the body: entropy about 6.2 bits per byte, recurring two and
 three byte sequences, and recognisable parameter values inside it (48.00 V as `c0 12`, 10 % as
 `0a 00`). VE.Bus error 6 is "DDC program error", and truncating this region produced exactly that error,
@@ -109,9 +109,9 @@ Every GUI-installed ESS block we hold has:
 | 15 | 0 | unknown toggle | |
 | 60 | 48 | solar & wind priority flags | bare blocks read 16 or 0 |
 | 62 (low byte) | 0xc3 | unknown (41667) | bare reads 41666 |
-| 64 | as typed in the wizard | battery capacity, Ah | 300 on the template system. We stamped 300 onto Guava (200 Ah) on v7 and onto Sugar Apple; an error we did not understand at the time |
+| 64 | as typed in the wizard | battery capacity, Ah | 300 on the template system. We stamped 300 onto System A (200 Ah) on v7 and onto System D; an error we did not understand at the time |
 | 81 | 1 | grid code active | 0 on every bare block |
-| 128 | 1 (0x0101 on one Papaya block) | LOM configuration A | 0xffff on bare blocks |
+| 128 | 1 (0x0101 on one System C block) | LOM configuration A | 0xffff on bare blocks |
 
 `mk2vsc.experimental.ess_graft.INSTALL_STATE` is that list. It is applied only with `install_state=True`,
 and `capacity_ah` lets you supply the right capacity.
@@ -136,37 +136,37 @@ All dates 2026. "Written" says what the device held afterwards, proven by a fres
 
 | Date | System | Recipe | File shape | Device response | Written | Recovery | Taught |
 |---|---|---|---|---|---|---|---|
-| 07-20 | Papaya | remove: truncate the ESS block to bare, v1, v2 | wrong next-pointer; then a block two bytes short | mk2vsc-49 | nothing | none needed | pointer = absolute offset of next section; the first block's canonical length |
-| 07-20 | Papaya | remove, v3 | correct shape, 5055 B | accepted | assistant still present in the file; running assistant corrupt: VE.Bus error 6, ESS dropped, inverter off | baseline re-upload + GX reboot | file validity is necessary, not sufficient; the assistant is a program |
-| 07-20 | Papaya | load-both v1, v2 | transplanted record, bad framing | mk2vsc-49 | nothing | | |
-| 07-20 | Papaya | load-both v3 | second inverter given a transplanted record | accepted, "Resetting VE.Bus products", then mk2vsc-36 | half-applied: VE.Bus error 10 for about 17 min | two GX reboots; pre-incident files also rejected until re-enumeration | an accepted structure-changing file is riskier than a rejected one |
-| 07-24 | Mango | v2: blocks copied from the GUI export | upload-form block in a device-form file (+10 shift) | mk2vsc-47 | nothing | | the two forms; do not mix them |
-| 07-24 | Mango | v3: slot-matched tail from Papaya's device download | 7049 B, 14 self-checks | mk2vsc-47 again | nothing | GX reboot | the GX showed one serial as "Unknown"; mk2vsc-47 was enumeration, not the file |
-| 07-24 | Mango | v4: same, rebuilt on the post-reboot download | 7049 B | accepted | a 64-byte empty stub on each inverter, flags e4/e5, records gone | baseline re-upload; blocks swapped order in the re-download | accept-then-stub; compare by serial |
-| 08-12 | Guava | v3: same recipe, template = Papaya device download | 7049 B, records byte-identical to template | accepted; Error 1303 mid-write | stub on both inverters, VE.Bus reset (battery full) | baseline re-upload, verified bare | third independent stub |
-| 08-12 | Guava | v4: v3 + seven "grid-code fingerprint" bytes | fingerprint from a cross-unit diff | "Resetting VE.Bus products", then mk2vsc-36 at commit | nothing (fresh download byte-identical to baseline) | see next row | the fingerprint was wrong in 4 of 7 bytes: it included two capacity bytes (setting 64) and missed setting 10 and the flags0 bit |
-| 08-12 | Guava | re-upload of the archived bare baseline, after two clean GX reboots | archived file | mk2vsc-36 | nothing | upload the fresh download instead: accepted first try | mk2vsc-36 "old configuration file" is literal: stale save timestamp |
-| 08-13 | Guava | v5: v3 + corrected six-byte grid-code set (10, 15, 60, 62, 81, 128), on a fresh baseline | 7049 B | accepted | stored byte-perfect, records present, no stub | | first by-file ESS that the device kept |
-| 08-13 | Guava | (observation) | | inverter cycles Off -> Fault every ~15 s | | | config internally inconsistent |
-| 08-13 | Guava | v6: v5 + flags0 bit 11 cleared on one block | two bytes changed | superseded before upload | | | |
-| 08-13 | Guava | v7: v5 + full install state (flags0 bit 11, 7, 8, 64 on the second block; 128 high byte) | 7049 B, matches every working install at 12 offsets | accepted | stored; cycling stopped; system stable Off, "connecting", zero errors | | internal consistency matters; consistency is not start |
-| 08-13 | Guava | OUTPUT rotary 2 -> 1 for two minutes; MQTT mode toggle; "Restart VE.Bus system" x3; GX reboot x3; fresh re-upload | | no change | | | the OUTPUT switch does not gate the inverter |
-| 08-13 | Guava | full rocker cold boot, both inverters | | same state after boot; download identical except timestamp and checksums | | | refusal lives in stored config or a device-side check, not runtime |
-| 08-13 | Guava | upload-form v1: device -> GUI form transform, download order | compact records, blob, July timestamps | mk2vsc-49 | nothing | | block order: e4-slot first; the two-byte prefix after the first block belongs to the next section |
-| 08-13 | Guava | upload-form v2: e4 first, fresh unix timestamps | reproduces the installer's export format | accepted | stored; still Off | | timestamps are unix time; the upload form is not by itself the trigger |
-| 08-13 | Sugar Apple | one-shot: v3 + full install state from a clean bare download | 7049 B | accepted; Error 1303 at the end | stored; Off; telemetry dark 6 h; building found without power, put on bypass | GUI session by the installer later | same outcome on a second system with all "good" bytes |
+| 07-20 | System C | remove: truncate the ESS block to bare, v1, v2 | wrong next-pointer; then a block two bytes short | mk2vsc-49 | nothing | none needed | pointer = absolute offset of next section; the first block's canonical length |
+| 07-20 | System C | remove, v3 | correct shape, 5055 B | accepted | assistant still present in the file; running assistant corrupt: VE.Bus error 6, ESS dropped, inverter off | baseline re-upload + GX reboot | file validity is necessary, not sufficient; the assistant is a program |
+| 07-20 | System C | load-both v1, v2 | transplanted record, bad framing | mk2vsc-49 | nothing | | |
+| 07-20 | System C | load-both v3 | second inverter given a transplanted record | accepted, "Resetting VE.Bus products", then mk2vsc-36 | half-applied: VE.Bus error 10 for about 17 min | two GX reboots; pre-incident files also rejected until re-enumeration | an accepted structure-changing file is riskier than a rejected one |
+| 07-24 | System B | v2: blocks copied from the GUI export | upload-form block in a device-form file (+10 shift) | mk2vsc-47 | nothing | | the two forms; do not mix them |
+| 07-24 | System B | v3: slot-matched tail from System C's device download | 7049 B, 14 self-checks | mk2vsc-47 again | nothing | GX reboot | the GX showed one serial as "Unknown"; mk2vsc-47 was enumeration, not the file |
+| 07-24 | System B | v4: same, rebuilt on the post-reboot download | 7049 B | accepted | a 64-byte empty stub on each inverter, flags e4/e5, records gone | baseline re-upload; blocks swapped order in the re-download | accept-then-stub; compare by serial |
+| 08-12 | System A | v3: same recipe, template = System C device download | 7049 B, records byte-identical to template | accepted; Error 1303 mid-write | stub on both inverters, VE.Bus reset (battery full) | baseline re-upload, verified bare | third independent stub |
+| 08-12 | System A | v4: v3 + seven "grid-code fingerprint" bytes | fingerprint from a cross-unit diff | "Resetting VE.Bus products", then mk2vsc-36 at commit | nothing (fresh download byte-identical to baseline) | see next row | the fingerprint was wrong in 4 of 7 bytes: it included two capacity bytes (setting 64) and missed setting 10 and the flags0 bit |
+| 08-12 | System A | re-upload of the archived bare baseline, after two clean GX reboots | archived file | mk2vsc-36 | nothing | upload the fresh download instead: accepted first try | mk2vsc-36 "old configuration file" is literal: stale save timestamp |
+| 08-13 | System A | v5: v3 + corrected six-byte grid-code set (10, 15, 60, 62, 81, 128), on a fresh baseline | 7049 B | accepted | stored byte-perfect, records present, no stub | | first by-file ESS that the device kept |
+| 08-13 | System A | (observation) | | inverter cycles Off -> Fault every ~15 s | | | config internally inconsistent |
+| 08-13 | System A | v6: v5 + flags0 bit 11 cleared on one block | two bytes changed | superseded before upload | | | |
+| 08-13 | System A | v7: v5 + full install state (flags0 bit 11, 7, 8, 64 on the second block; 128 high byte) | 7049 B, matches every working install at 12 offsets | accepted | stored; cycling stopped; system stable Off, "connecting", zero errors | | internal consistency matters; consistency is not start |
+| 08-13 | System A | OUTPUT rotary 2 -> 1 for two minutes; MQTT mode toggle; "Restart VE.Bus system" x3; GX reboot x3; fresh re-upload | | no change | | | the OUTPUT switch does not gate the inverter |
+| 08-13 | System A | full rocker cold boot, both inverters | | same state after boot; download identical except timestamp and checksums | | | refusal lives in stored config or a device-side check, not runtime |
+| 08-13 | System A | upload-form v1: device -> GUI form transform, download order | compact records, blob, July timestamps | mk2vsc-49 | nothing | | block order: e4-slot first; the two-byte prefix after the first block belongs to the next section |
+| 08-13 | System A | upload-form v2: e4 first, fresh unix timestamps | reproduces the installer's export format | accepted | stored; still Off | | timestamps are unix time; the upload form is not by itself the trigger |
+| 08-13 | System D | one-shot: v3 + full install state from a clean bare download | 7049 B | accepted; Error 1303 at the end | stored; Off; telemetry dark 6 h; building found without power, put on bypass | GUI session by the installer later | same outcome on a second system with all "good" bytes |
 | 08-13 | both | GX ESS setting RunWithoutGridMeter 0 -> 1 (both non-starters read "external meter required"; runners read "inverter/charger") | | still Off after a fresh re-upload | | | a real commissioning defect, not the blocker |
-| 08-14 | Guava | CAN bus diagnosis: 0 RX packets, transmitter error-passive | | | | | the BMS bus had been physically dead since 07-20 |
-| 09-02 | Guava | the installer's GUI session, after the CAN bus was repaired and a third battery module installed | GUI export | accepted | ESS running on both inverters, charge profile corrected in the same session | | consistent with H3 below; does not test it |
+| 08-14 | System A | CAN bus diagnosis: 0 RX packets, transmitter error-passive | | | | | the BMS bus had been physically dead since 07-20 |
+| 09-02 | System A | the installer's GUI session, after the CAN bus was repaired and a third battery module installed | GUI export | accepted | ESS running on both inverters, charge profile corrected in the same session | | consistent with H3 below; does not test it |
 
 Two things in that table deserve a closer look.
 
-**The three-unit truth table (v7).** Diffing Guava's v5 result against both working installs, and then
+**The three-unit truth table (v7).** Diffing System A's v5 result against both working installs, and then
 checking the bare blocks of all three systems, showed why the earlier "fingerprint" diffs kept missing
 bytes: an intersection over two diffs drops any byte that only one system needed to change, and a diff
 against one system misses bytes that system already had right. Every working ESS block ends up at the
 same values (the install-state table above) but each system starts from a different bare shape, so the
-set of bytes the wizard actually writes differs per system. v7 applied the five that Guava still lacked
+set of bytes the wizard actually writes differs per system. v7 applied the five that System A still lacked
 and the 15-second Off/Fault loop stopped at the moment of the write. That is strong evidence the
 device validates the settings against the assistant at startup, and that our v5 file was internally
 inconsistent. It is not evidence about why a consistent file still does not start.
@@ -175,7 +175,7 @@ inconsistent. It is not evidence about why a consistent file still does not star
 the device demanding a password. On 08-12 a fresh download proved the device had written nothing and
 was not corrupt; the archived baseline was being refused for its old save timestamp, and the freshly
 downloaded file uploaded first time. Every later attempt was built on a same-day download for that
-reason. The one time the message followed the "Resetting VE.Bus products" dialog (v4, and Papaya
+reason. The one time the message followed the "Resetting VE.Bus products" dialog (v4, and System C
 07-20) it came at the commit of a real install and may well be the grid-code meaning; we cannot tell
 the two apart from the message alone. docs/ERRORS.md has the decision rule.
 
@@ -184,10 +184,10 @@ the two apart from the message alone. docs/ERRORS.md has the decision rule.
 | Outcome | File shape that produced it | Written to the device |
 |---|---|---|
 | A. Clean reject (mk2vsc-47, mk2vsc-49) | wrong pointer, wrong block length, wrong block order, mixed forms, or a healthy file while the GX had a serial as "Unknown" | nothing |
-| B. Accept, then stub | device-form graft with correct records but bare install state (Mango v4, Guava v3) | 64-byte empty container per inverter, flags flipped, our records discarded |
-| C. Accept, half apply | a transplanted record with the grid-code state partly set (Papaya v3, Guava v4) | "Resetting VE.Bus products", then mk2vsc-36; VE.Bus error 10 on Papaya, nothing on Guava |
-| D. Accept, store, never start | records + full install state, device form (Guava v7, Sugar Apple) or upload form (Guava upload-form v2) | everything, byte-perfect and stable across cold boot; system Off, connecting, no error |
-| E. Removal accepted, running program corrupt | the ESS block truncated back to bare with correct framing (Papaya 07-20) | file unchanged; VE.Bus error 6 until baseline re-upload and reboot |
+| B. Accept, then stub | device-form graft with correct records but bare install state (System B v4, System A v3) | 64-byte empty container per inverter, flags flipped, our records discarded |
+| C. Accept, half apply | a transplanted record with the grid-code state partly set (System C v3, System A v4) | "Resetting VE.Bus products", then mk2vsc-36; VE.Bus error 10 on System C, nothing on System A |
+| D. Accept, store, never start | records + full install state, device form (System A v7, System D) or upload form (System A upload-form v2) | everything, byte-perfect and stable across cold boot; system Off, connecting, no error |
+| E. Removal accepted, running program corrupt | the ESS block truncated back to bare with correct framing (System C 07-20) | file unchanged; VE.Bus error 6 until baseline re-upload and reboot |
 
 The progression B -> C -> D tracks how much of the install state the file carried. A file with the
 records but none of the settings the wizard writes is stubbed; a file with some of them reaches the
@@ -197,16 +197,16 @@ install dialog and fails at commit; a file with all of them is stored and does n
 
 **H1. The install needs an out-of-file trigger.** The GUI's upload path may issue MK2 commands (a
 "reset products, load program, commit" sequence) that plain file storage does not. Evidence for: the
-Mango stub shows the device actively processes the assistant section on upload and authors its own
+System B stub shows the device actively processes the assistant section on upload and authors its own
 container. Evidence against: upload-form v2 (the GUI's exact file format) was accepted and did not
 start either, and VRM's Remote VEConfigure upload is a file transfer with no interactive session.
 Status: weakened, open. Test: capture the MK2 traffic of a real GUI install over an MK3 cable and
 compare with a Remote VEConfigure upload of the same file.
 
 **H2. The upload form itself is the trigger.** The 16-byte blob and compact records might be what tells
-the device to run the install procedure. Tested once (Guava, 08-13): accepted, stored, no start. But
+the device to run the install procedure. Tested once (System A, 08-13): accepted, stored, no start. But
 that system had a dead BMS bus at the time (H3), so the test does not separate H2 from H3. Our v2 was
-compacted against the installer's Papaya export, so it carried the GUI's tail words (`0a 00`, and
+compacted against the installer's System C export, so it carried the GUI's tail words (`0a 00`, and
 `00 00 00`); the shipped no-reference transform writes the same GUI words, and the test suite checks
 that it reproduces v2 byte-for-byte. Whether the device would also accept the device-form tail words in
 an upload is untested. Status: inconclusive. Test: upload-form transform on a healthy-BMS system, both tail
@@ -214,13 +214,13 @@ variants if the first does not start.
 
 **H3. A loaded ESS assistant gates system start on valid CAN battery data.** After a full live
 runtime-state diff between a running system and a non-starter, the only discriminator we could not
-falsify was battery data on the CAN bus. Both runners (Papaya, Mango) had a live BMS. Guava's CAN bus
+falsify was battery data on the CAN bus. Both runners (System C, System B) had a live BMS. System A's CAN bus
 had been physically broken since 07-20 (0 RX packets, error-passive transmitter, no 120 ohm
-termination fixed until later) and Sugar Apple has no BMS connected. Both non-starters sat at
+termination fixed until later) and System D has no BMS connected. Both non-starters sat at
 `SwitchoverInfo/Connecting = 1`, `VebusMainState = 2`, zero errors, on grid, with the assistant
 advertised. Falsified as the cause: the file bytes (stable across cold boot), RunWithoutGridMeter
-(fixed, no change), DVCC on or off (Sugar Apple runs DVCC off and still would not start), every restart
-lever. Guava now runs ESS after the installer's GUI session on a repaired bus and with a third module;
+(fixed, no change), DVCC on or off (System D runs DVCC off and still would not start), every restart
+lever. System A now runs ESS after the installer's GUI session on a repaired bus and with a third module;
 that is consistent with H3 and does not test it, because the file was GUI-authored. Status: the last
 discriminator standing, untested. Test: section 5.
 
@@ -254,7 +254,7 @@ Preconditions, all required:
 4. A fresh bare download taken minutes before the upload; `mk2vsc validate` OK; `mk2vsc check` with the
    system's intent file OK; keep it as the rollback file.
 5. A template: a device download of a GUI-installed ESS system with the same inverter model and firmware
-   (ours: `fixtures/papaya/papaya_2026-07-24_download_ess_deviceform_1.rvms`, firmware 2729560).
+   (ours: `fixtures/system_c/system_c_2026-07-24_download_ess_deviceform_1.rvms`, firmware 2729560).
 
 Steps:
 
@@ -294,7 +294,7 @@ None of this touches hardware.
   parameters (48.00 V is `c0 12`, 10 % is `0a 00`, 25 % would be `19 00`) and check whether they track
   the ESS settings shown on the GX of the same system at the time of the download. If they do, the body
   carries the wizard's answers and a by-file install must set them per system.
-- **The record header.** Why Mango's 704 record is subtype 0001 and the others 0101. Mango is the only
+- **The record header.** Why System B's 704 record is subtype 0001 and the others 0101. System B is the only
   mixed-hardware-generation pair in our corpus (one 2022 and one 2024 inverter).
 - **The tail.** `0e 00 8e 01 15 00` and the two per-slot words; the `40 00` / `0a 00` and `ff` / `00`
   differences between device and GUI form.
@@ -326,7 +326,7 @@ Do not:
 Recovery, in order:
 
 1. Download a fresh copy from the device and upload that file back, unmodified. Never an archived copy.
-   This restored Guava from every stored-but-Off state (outcome D) and from the stub (outcome B).
+   This restored System A from every stored-but-Off state (outcome D) and from the stub (outcome B).
 2. If the upload is refused or the device list shows an inverter as "Unknown": reboot the GX (Cerbo),
    wait for the VE.Bus to re-enumerate, retry step 1.
 3. If the VE.Bus is in error 10 after an interrupted install: reboot the GX, wait, download fresh, upload.

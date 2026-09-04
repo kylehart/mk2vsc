@@ -60,7 +60,8 @@ Fixtures live under `fixtures/<system>/` and are named
 <system>_<YYYY-MM-DD>_<origin>_<state>_<form>_<n>.rvms
 ```
 
-* `system`: a short name for the installation, not a VRM portal identifier.
+* `system`: a short public alias for the installation (ours are `system_a` to `system_d`), not the
+  property's name and not a VRM portal identifier.
 * `date`: the newest save timestamp inside the file (block offset +0x4f, unix time), not the day
   you copied it.
 * `origin`: `download` (a VRM Remote VEConfigure download), `gui-export` (a file VEConfigure or
@@ -78,7 +79,7 @@ Then add an entry to `fixtures/manifest.json`:
 |---|---|
 | `file` | path relative to `fixtures/` |
 | `sha256`, `size` | of the file as committed |
-| `site`, `date`, `origin`, `state`, `form` | as in the name |
+| `system`, `date`, `origin`, `state`, `form` | as in the name (`system` is the alias letter, `A`) |
 | `blocks` | one entry per inverter: `serial`, `length` (block length in the name-start-to-next-name convention), `flag` (the byte at +0x36) |
 | `notes` | free text: what the file is and why it matters |
 
@@ -100,7 +101,8 @@ Wi-Fi settings or personal data. Even so:
 
 * Only commit files from systems you own or are explicitly permitted to share.
 * Strip identifying material from the file name (we dropped the VRM portal ID from ours).
-* Do not include VRM portal IDs, site IDs, addresses or people's names in manifest notes or docs.
+* Do not include VRM portal IDs, site IDs, addresses, property or building names, or people's names in
+  manifest notes or docs. Refer to installations by a public alias (System A, System B, ...).
 * Never commit anything containing a password. The grid-code password is a dealer credential and
   has no place in this repository in any form.
 

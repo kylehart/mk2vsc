@@ -5,10 +5,10 @@ from mk2vsc.history import load_snapshots, changes
 from tests.conftest import FIXTURES
 
 
-def test_history_finds_the_documented_guava_changes():
-    """Guava device downloads: the 2026-07-20 charge correction (absorption 56.0/57.6 -> 56.8 both,
+def test_history_finds_the_documented_system_a_changes():
+    """System A device downloads: the 2026-07-20 charge correction (absorption 56.0/57.6 -> 56.8 both,
     float 55.2 -> 54.0) and the 2026-09-02 post-service state (56.8 on both, ESS records present)."""
-    paths = sorted(glob.glob(os.path.join(FIXTURES, "guava", "*_download_*.rvms")))
+    paths = sorted(glob.glob(os.path.join(FIXTURES, "system_a", "*_download_*.rvms")))
     snaps, skipped = load_snapshots(paths)
     assert not skipped
     chs = changes(snaps)

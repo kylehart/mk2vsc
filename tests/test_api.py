@@ -7,8 +7,8 @@ import mk2vsc
 from mk2vsc import WriteRefused
 from tests.conftest import FIXTURES
 
-BARE = os.path.join(FIXTURES, "guava", "guava_2026-07-20_download_bare_deviceform_1.rvms")
-REDL = os.path.join(FIXTURES, "guava", "guava_2026-07-20_download_bare_deviceform_2.rvms")
+BARE = os.path.join(FIXTURES, "system_a", "system_a_2026-07-20_download_bare_deviceform_1.rvms")
+REDL = os.path.join(FIXTURES, "system_a", "system_a_2026-07-20_download_bare_deviceform_2.rvms")
 
 
 def test_load_read_aliases_and_ids():

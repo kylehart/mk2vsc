@@ -7,10 +7,10 @@ import pytest
 from mk2vsc.cli import main
 from tests.conftest import FIXTURES
 
-BARE = os.path.join(FIXTURES, "guava", "guava_2026-07-20_download_bare_deviceform_1.rvms")   # 56.0/57.6 mismatch
-BAD = os.path.join(FIXTURES, "guava", "guava_2026-06-18_experiment_bare_deviceform_1.rvms")
-A = os.path.join(FIXTURES, "mango", "mango_2026-07-24_download_bare_deviceform_1.rvms")
-B = os.path.join(FIXTURES, "mango", "mango_2026-07-24_download_bare_deviceform_2.rvms")
+BARE = os.path.join(FIXTURES, "system_a", "system_a_2026-07-20_download_bare_deviceform_1.rvms")   # 56.0/57.6 mismatch
+BAD = os.path.join(FIXTURES, "system_a", "system_a_2026-06-18_experiment_bare_deviceform_1.rvms")
+A = os.path.join(FIXTURES, "system_b", "system_b_2026-07-24_download_bare_deviceform_1.rvms")
+B = os.path.join(FIXTURES, "system_b", "system_b_2026-07-24_download_bare_deviceform_2.rvms")
 
 
 def test_no_args_prints_help(capsys):
@@ -81,9 +81,9 @@ def test_verify_and_check_loop(tmp_path, capsys):
 
 
 def test_verify_on_the_real_post_upload_pair(capsys):
-    """The 2026-07-20 Guava change: prepared file vs the device's re-download."""
-    prepared = os.path.join(FIXTURES, "guava", "guava_2026-07-20_prepared_bare_deviceform_1.rvms")
-    redl = os.path.join(FIXTURES, "guava", "guava_2026-07-20_download_bare_deviceform_2.rvms")
+    """The 2026-07-20 System A change: prepared file vs the device's re-download."""
+    prepared = os.path.join(FIXTURES, "system_a", "system_a_2026-07-20_prepared_bare_deviceform_1.rvms")
+    redl = os.path.join(FIXTURES, "system_a", "system_a_2026-07-20_download_bare_deviceform_2.rvms")
     rc = main(["verify", prepared, redl])
     out = capsys.readouterr().out
     assert rc == 0 and "VERIFIED" in out, out

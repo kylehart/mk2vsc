@@ -7,9 +7,9 @@ from mk2vsc.units import units_by_serial
 from mk2vsc.writer import set_settings, WriteRefused
 from mk2vsc.diff import diff_bytes
 
-BARE = "guava/guava_2026-07-20_download_bare_deviceform_1.rvms"
-ESS = "guava/guava_2026-08-13_download_ess_deviceform_1.rvms"
-UPLOAD = "papaya/papaya_2026-07-21_gui-export_ess_uploadform_1.rvms"
+BARE = "system_a/system_a_2026-07-20_download_bare_deviceform_1.rvms"
+ESS = "system_a/system_a_2026-08-13_download_ess_deviceform_1.rvms"
+UPLOAD = "system_c/system_c_2026-07-21_gui-export_ess_uploadform_1.rvms"
 
 
 def test_edit_then_revert_reproduces_original_byte_for_byte(good_files):
@@ -83,9 +83,9 @@ def test_reproduces_the_archived_prepared_files(good_files, manifest):
     prepared file must be reproducible from the baseline with this writer (same edit, same bytes)."""
     # baseline -> prepared pairs known from the change records (2026-07-20 charge-profile corrections)
     pairs = [
-        ("guava/guava_2026-07-20_download_bare_deviceform_1.rvms", "guava/guava_2026-07-20_prepared_bare_deviceform_1.rvms",
+        ("system_a/system_a_2026-07-20_download_bare_deviceform_1.rvms", "system_a/system_a_2026-07-20_prepared_bare_deviceform_1.rvms",
          [(None, "absorption_V", 56.8), (None, "float_V", 54.0)]),
-        ("mango/mango_2026-07-20_download_bare_deviceform_1.rvms", "mango/mango_2026-07-20_prepared_bare_deviceform_1.rvms",
+        ("system_b/system_b_2026-07-20_download_bare_deviceform_1.rvms", "system_b/system_b_2026-07-20_prepared_bare_deviceform_1.rvms",
          [(None, "absorption_V", 56.8), (None, "float_V", 54.0)]),
     ]
     for base, prepared, changes in pairs:
@@ -107,7 +107,7 @@ def test_refuses_implausible_voltages_and_float_above_absorption(good_files):
 
 
 def test_refuses_stub_downloads(good_files):
-    stub = "guava/guava_2026-08-12_download_stub_deviceform_1.rvms"
+    stub = "system_a/system_a_2026-08-12_download_stub_deviceform_1.rvms"
     with pytest.raises(WriteRefused):
         set_settings(good_files[stub], [(None, "float_V", 54.0)])
 

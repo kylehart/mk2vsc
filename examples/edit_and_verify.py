@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 The whole loop from Python, on a fixture: read, edit, save next to the input, check, and verify against
-the device's real re-download of that same change (2026-07-20, Guava).
+the device's real re-download of that same change (2026-07-20, System A).
 
     python examples/edit_and_verify.py
 """
@@ -12,9 +12,9 @@ import tempfile
 import mk2vsc
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-FIX = os.path.join(HERE, "..", "fixtures", "guava")
-DOWNLOAD = os.path.join(FIX, "guava_2026-07-20_download_bare_deviceform_1.rvms")
-REDOWNLOAD = os.path.join(FIX, "guava_2026-07-20_download_bare_deviceform_2.rvms")
+FIX = os.path.join(HERE, "..", "fixtures", "system_a")
+DOWNLOAD = os.path.join(FIX, "system_a_2026-07-20_download_bare_deviceform_1.rvms")
+REDOWNLOAD = os.path.join(FIX, "system_a_2026-07-20_download_bare_deviceform_2.rvms")
 
 with tempfile.TemporaryDirectory() as td:
     src = os.path.join(td, "download.rvms")

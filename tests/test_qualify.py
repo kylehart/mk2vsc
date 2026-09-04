@@ -1,9 +1,9 @@
 from mk2vsc.qualify import Intent, qualify_bytes
 from mk2vsc.writer import set_settings
 
-MISMATCHED = "guava/guava_2026-07-20_download_bare_deviceform_1.rvms"   # 56.0/54.0 vs 57.6/55.2 on the pair
-FIXED = "guava/guava_2026-07-20_prepared_bare_deviceform_1.rvms"
-STUB = "guava/guava_2026-08-12_download_stub_deviceform_1.rvms"
+MISMATCHED = "system_a/system_a_2026-07-20_download_bare_deviceform_1.rvms"   # 56.0/54.0 vs 57.6/55.2 on the pair
+FIXED = "system_a/system_a_2026-07-20_prepared_bare_deviceform_1.rvms"
+STUB = "system_a/system_a_2026-08-12_download_stub_deviceform_1.rvms"
 
 
 def test_inverter_disagreement_fails_even_without_intended_values(good_files):

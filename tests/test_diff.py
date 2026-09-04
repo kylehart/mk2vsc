@@ -1,10 +1,10 @@
 from mk2vsc.diff import diff_bytes, render
 
-# Two consecutive downloads of the same system with no configuration change (Mango, 2026-07-24).
+# Two consecutive downloads of the same system with no configuration change (System B, 2026-07-24).
 # (The swapped-order pair is found programmatically in the test below.)
-A = "mango/mango_2026-07-24_download_bare_deviceform_1.rvms"
-B = "mango/mango_2026-07-24_download_bare_deviceform_2.rvms"
-STUB = "mango/mango_2026-07-24_download_stub_deviceform_1.rvms"
+A = "system_b/system_b_2026-07-24_download_bare_deviceform_1.rvms"
+B = "system_b/system_b_2026-07-24_download_bare_deviceform_2.rvms"
+STUB = "system_b/system_b_2026-07-24_download_stub_deviceform_1.rvms"
 
 
 def test_consecutive_downloads_differ_only_in_bookkeeping(good_files):
@@ -18,11 +18,11 @@ def test_consecutive_downloads_differ_only_in_bookkeeping(good_files):
 
 
 def test_block_order_swap_is_invisible_when_comparing_by_serial(good_files):
-    """Among the Mango bare downloads there is a pair whose two blocks swapped file position."""
+    """Among the System B bare downloads there is a pair whose two blocks swapped file position."""
     from mk2vsc.sections import RvmsFile
     from mk2vsc.units import unit_blocks
-    mango = {k: v for k, v in good_files.items() if k.startswith("mango/") and "download_bare" in k}
-    orders = {k: [u.serial for u in unit_blocks(RvmsFile.parse(v))] for k, v in mango.items()}
+    system_b = {k: v for k, v in good_files.items() if k.startswith("system_b/") and "download_bare" in k}
+    orders = {k: [u.serial for u in unit_blocks(RvmsFile.parse(v))] for k, v in system_b.items()}
     swapped = [(a, b) for a in orders for b in orders if a < b and orders[a] == orders[b][::-1]]
     assert swapped, "corpus should contain a swapped-order pair"
     hits = 0
@@ -51,8 +51,8 @@ def test_identical(good_files):
 
 
 def test_cross_form_diff_compares_settings_by_id(good_files):
-    dev = "papaya/papaya_2026-07-24_download_ess_deviceform_1.rvms"   # device download after the installer's GUI install
-    up = "papaya/papaya_2026-07-21_gui-export_ess_uploadform_1.rvms"    # the GUI export that was uploaded
+    dev = "system_c/system_c_2026-07-24_download_ess_deviceform_1.rvms"   # device download after the installer's GUI install
+    up = "system_c/system_c_2026-07-21_gui-export_ess_uploadform_1.rvms"    # the GUI export that was uploaded
     d = diff_bytes(good_files[up], good_files[dev])
     assert len(d.units) == 2
     for u in d.units:

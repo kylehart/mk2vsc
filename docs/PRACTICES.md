@@ -40,7 +40,8 @@ Everything that matters is on GitHub, in the open:
 
 The fixture corpus consists of real device files and therefore carries inverter serial numbers and save
 timestamps. It carries nothing else that identifies anyone: no VRM identifiers, no credentials, no
-names. `tools/leakscan.sh` runs before every push. Contributor files are published only with the
+names. Installations are referred to by public aliases (System A to System D), never by the name of
+the property or building they serve. `tools/leakscan.sh` runs before every push. Contributor files are published only with the
 contributor's explicit permission, which the fixture issue template asks for.
 
 ## AI assistance, disclosed

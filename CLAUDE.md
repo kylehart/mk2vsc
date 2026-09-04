@@ -42,7 +42,9 @@ of these rules is docs/PRACTICES.md; this file is the operational checklist.
 ## 4. What never ships
 
 - VRM portal IDs, VRM site IDs, tokens, passwords, the grid-code password, email addresses, names of
-  companies or people other than the maintainer. Run `tools/leakscan.sh` before every push.
+  companies or people other than the maintainer, and the names of the properties or buildings the
+  systems serve. Systems are System A, B, C, D (fixtures `system_a` ... `system_d`); the mapping to
+  real names lives outside this repository. Run `tools/leakscan.sh` before every push.
 - Files from systems we are not entitled to publish. Contributor files need the contributor's explicit
   statement that they may be published (the issue template asks).
 - Dependencies. The package stays zero-dependency; test tooling is the only dev dependency.

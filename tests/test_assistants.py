@@ -76,6 +76,6 @@ def test_stub_signature_detected(good_files, manifest):
 
 def test_record_length_beyond_area_is_reported_as_malformed(good_files):
     """A hand-built 2026-07-20 file carries an f5ff header whose length exceeds the area."""
-    name = "papaya/papaya_2026-07-20_prepared_half-ess_deviceform_4.rvms"
+    name = "system_c/system_c_2026-07-20_prepared_half-ess_deviceform_4.rvms"
     kinds = [parse_assistant_area(u)["kind"] for u in unit_blocks(RvmsFile.parse(good_files[name]))]
     assert "malformed" in kinds, kinds

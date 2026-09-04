@@ -28,7 +28,7 @@ One folder per change:
 
 ```
 changes/
-  2026-07-20_guava_charge-profile/
+  2026-07-20_system_a_charge-profile/
     00_baseline/     <- a FRESH download from VRM, taken minutes before you prepare the edit
     01_prepared/     <- the tool's output; the ONLY file you ever upload
     02_downloaded/   <- the re-download taken after the upload
@@ -49,7 +49,7 @@ or on the desktop.
 ```markdown
 # <system> - <one-line description of the change>
 
-Date: 2026-07-20    System: Guava    Inverters: HQ2414U6FVN, HQ2414AXENJ
+Date: 2026-07-20    System: System A    Inverters: HQ2414U6FVN, HQ2414AXENJ
 Tenant/occupancy impact: none (unit vacant)    Rollback: 00_baseline/<file>
 
 ## Why
@@ -109,7 +109,7 @@ an upload comes from.
 
 "Success. The system has been configured" means the device accepted the bytes. It does not mean
 the settings are right, and it does not mean the settings landed on every inverter. On 2026-08-21
-a GUI session on Sugar Apple wrote seven settings to one inverter and none to the other, leaving
+a GUI session on System D wrote seven settings to one inverter and none to the other, leaving
 the two legs of a shared battery 0.3 V apart. The only proof of a change is the re-download:
 `mk2vsc diff` against the prepared file must report only bookkeeping bytes (pointer, save timestamp,
 checksum), and `mk2vsc check` must pass on the re-download with the same intent file that passed
