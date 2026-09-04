@@ -40,6 +40,8 @@ class FileContext:
     schema: Optional[List[SettingInfo]] = None
     nominal: Optional[int] = None
     chemistry: str = "unknown"            # lithium | lead-acid | unknown
+    shared_battery: Optional[bool] = None   # stated with --assume shared_battery=yes|no; None = unknown
+    ess_intended: Optional[bool] = None     # stated with --assume ess_intended=yes|no; None = unknown
     chemistry_source: str = "unknown"     # stated | flag:<serial> | unknown
     assume: Dict[str, str] = field(default_factory=dict)
     editable: bool = False
@@ -144,6 +146,12 @@ def build_context(data: bytes, name: str = "<bytes>", assume: Optional[Dict[str,
         flagged = [s for s in ctx.serials if ctx.lithium_flag(s)]
         if flagged:
             ctx.chemistry, ctx.chemistry_source = "lithium", f"flag:{','.join(flagged)}"
+    for key in ("shared_battery", "ess_intended"):
+        v = str(ctx.assume.get(key, "")).lower()
+        if v in ("yes", "true", "1"):
+            setattr(ctx, key, True)
+        elif v in ("no", "false", "0"):
+            setattr(ctx, key, False)
     # would the writer take this file?  Same guards, same words, on the state already parsed above.
     try:
         preflight(ctx.units, ctx.schema)

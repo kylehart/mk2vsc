@@ -36,6 +36,10 @@ from typing import Callable, Dict, List, Optional
 CONFIRMED, HIGH, MEDIUM, LOW, UNKNOWN = "CONFIRMED", "HIGH", "MEDIUM", "LOW", "UNKNOWN"
 CONFIDENCE_ORDER = (CONFIRMED, HIGH, MEDIUM, LOW, UNKNOWN)
 
+# Settings whose volts are battery (DC) volts, so their plausibility bounds scale with the nominal voltage.
+# AC settings (inverter output, mains) keep their fixed bounds on every nominal.
+DC_VOLT_IDS = frozenset({2, 3, 11, 12, 17, 18, 54, 58, 68, 88})
+
 
 def format_value(v, unit: str = "") -> str:
     """An engineering value for humans: ``56.8 V``, ``35 A``, ``3``; floats print with ``:g``."""

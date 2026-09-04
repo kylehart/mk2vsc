@@ -166,7 +166,7 @@ def cmd_diff(a):
 def cmd_diagnose(a):
     """Findings from the settings themselves; optionally a corrected file (through the writer's guards) and the
     manual change sheet for typing the same change into VEConfigure."""
-    from .diagnose import diagnose_files, render, apply_fixes, plan_edits, sheet_rows, render_sheet, FixRefused
+    from .diagnose import diagnose_files, render, apply_fixes, dry_run, intent_for_check, sheet_rows, render_sheet, FixRefused
     try:
         assume = dict(kv.split("=", 1) for kv in (a.assume or []))
         values = _assignments(a.set or [])
@@ -189,23 +189,24 @@ def cmd_diagnose(a):
             if a.fix:
                 out, intent = apply_fixes(data, fr, accept=a.accept, values=values, copy_from=a.copy_from)
             else:
-                edits, bits = plan_edits(fr, a.accept, values, a.copy_from)
-                intent = {"edits": edits, "bit_edits": bits}
+                intent = dry_run(data, fr, a.accept, values, a.copy_from)   # same guards as --fix; the sheet never asks for a refused value
         except FixRefused as e:
             return _fail(f"REFUSED: {e}", 1)
         rep.intent = intent
         if a.fix:
             root, ext = os.path.splitext(a.files[0])
             out_path = a.output or f"{root}.corrected{ext or '.rvms'}"
-            if os.path.abspath(out_path) == os.path.abspath(a.files[0]):
-                return _fail("refusing to overwrite the input file; keep the download as your rollback", 1)
+            same = os.path.abspath(out_path) == os.path.abspath(a.files[0]) or (
+                os.path.exists(out_path) and os.path.samefile(out_path, a.files[0]))
+            if same:
+                return _fail("refusing to overwrite the input file (same file, or a link to it); keep the download as your rollback", 1)
             try:
                 with open(out_path, "wb" if a.overwrite else "xb") as fh:
                     fh.write(out)
             except FileExistsError:
                 return _fail(f"{out_path} exists; pass --overwrite or -o", 1)
             with open(out_path + ".intent.json", "w") as fh:
-                json.dump(intent, fh, indent=1)
+                json.dump(intent_for_check(intent, fr.serials), fh, indent=1)
     if a.json:
         print(json.dumps(rep.as_dict(), indent=1, default=str))
     else:
@@ -213,11 +214,12 @@ def cmd_diagnose(a):
         if wants_edit:
             print("\nManual change sheet (the same change, typed into VEConfigure):")
             print(render_sheet(sheet_rows(rep.files[0], rep.intent)))
-    if a.fix:
+    if a.fix and not a.json:                 # under --json stdout is exactly one report document
         print(f"\nwrote {out_path} and {out_path}.intent.json")
         print("verified: only the intended words and their section checksums changed; the input file is untouched.")
         print("Next: upload through VRM > Remote VEConfigure, download again, then")
         print(f"  mk2vsc verify {out_path} <the new download>")
+        print(f"  mk2vsc check  <the new download> --intent {out_path}.intent.json")
     return 0 if all(fr.status == "ok" for fr in rep.files) else 1
 
 
@@ -441,7 +443,7 @@ def build_parser() -> argparse.ArgumentParser:
     s = sub.add_parser("diagnose", help="what is wrong in the settings: findings with evidence, a fix to take or leave, the change sheet")
     s.add_argument("files", nargs="+", metavar="FILE")
     s.add_argument("--json", action="store_true", help="report_version 1 JSON (docs/DIAGNOSE.md)")
-    s.add_argument("--assume", nargs="+", metavar="KEY=VALUE", help="answer a question the file cannot: chemistry=lithium|lead-acid")
+    s.add_argument("--assume", nargs="+", metavar="KEY=VALUE", help="answer a question the file cannot: chemistry=lithium|lead-acid, shared_battery=yes|no, ess_intended=yes|no; a conditional fix is refused until its question is answered")
     s.add_argument("--accept", nargs="+", metavar="ID", help="finding ids whose fixes to take (nothing is applied silently)")
     s.add_argument("--set", nargs="+", metavar="FIELD=VALUE", help="values for fixes that need one (no generic template is offered)")
     s.add_argument("--copy-from", metavar="SERIAL", help="source inverter for a copy fix when the rule cannot choose")

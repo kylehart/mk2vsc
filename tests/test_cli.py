@@ -146,6 +146,28 @@ def test_diagnose_fix_requires_accept_then_writes_corrected_file_and_sheet(tmp_p
     assert "D1" not in capsys.readouterr().out.split("Questions")[0].replace("Phase 0 rules (D1", "")
     assert main(["diagnose", str(src), "--fix", "--accept", "D1:HQ0000A0002"]) == 1      # exists, no --overwrite
     assert "exists" in capsys.readouterr().err
+    # the intent sidecar is what `check --intent` reads
+    assert main(["check", str(corrected), "--intent", str(corrected) + ".intent.json"]) == 0
+    out = capsys.readouterr().out
+    assert "QUALIFIED" in out and "absorption_V = 56.0" in out
+
+
+def test_diagnose_json_with_fix_is_one_json_document(tmp_path, capsys):
+    src = tmp_path / "download.rvms"
+    shutil.copyfile(BARE, src)
+    assert main(["diagnose", str(src), "--json", "--fix", "--accept", "D1:HQ0000A0002"]) == 0
+    d = json.loads(capsys.readouterr().out)          # no trailing prose
+    assert d["report_version"] == 1 and d["intent"]["edits"] and (tmp_path / "download.corrected.rvms").exists()
+
+
+def test_diagnose_refuses_an_output_that_aliases_the_input(tmp_path, capsys):
+    src = tmp_path / "download.rvms"
+    shutil.copyfile(BARE, src)
+    link = tmp_path / "alias.rvms"
+    link.symlink_to(src)
+    before = src.read_bytes()
+    assert main(["diagnose", str(src), "--fix", "--accept", "D1:HQ0000A0002", "-o", str(link), "--overwrite"]) == 1
+    assert "refusing to overwrite the input" in capsys.readouterr().err and src.read_bytes() == before
 
 
 def test_diagnose_values_fix_and_sheet_only(tmp_path, capsys):
@@ -158,6 +180,10 @@ def test_diagnose_values_fix_and_sheet_only(tmp_path, capsys):
     out = capsys.readouterr().out
     assert "Manual change sheet" in out and "56.8 V" in out and "ticked" in out
     assert not (tmp_path / "c.corrected.rvms").exists()
+    # the sheet goes through the writer's guards: a value the writer refuses is never printed for a human to type
+    assert main(["diagnose", str(src), "--sheet", "--accept", "D1:HQ0000C0001", "--assume", "chemistry=lithium",
+                 "--set", "absorption=56.8", "float=54.0", "low_shutdown=5"]) == 1
+    assert "REFUSED" in capsys.readouterr().err
 
 
 def test_diagnose_upload_form_and_junk(tmp_path, capsys):

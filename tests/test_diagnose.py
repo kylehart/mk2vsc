@@ -14,7 +14,8 @@ from tests.conftest import FIXTURES
 A_0720 = "system_a/system_a_2026-07-20_download_bare_deviceform_1.rvms"      # A0002 lead-acid profile, A0001 lithium; 56.0 vs 57.6
 A_0813 = "system_a/system_a_2026-08-13_download_ess_deviceform_1.rvms"       # A0002 lithium flag set, voltages still 57.6/55.2
 A_STUB = "system_a/system_a_2026-08-12_download_stub_deviceform_1.rvms"      # both blocks carry the failed-install stub
-C_0618 = "system_c/system_c_2026-06-18_download_bare_deviceform_1.rvms"      # both lead-acid; C0001 absorption = float = 48.0
+C_0618 = "system_c/system_c_2026-06-18_download_bare_deviceform_1.rvms"      # both lead-acid; C0001 absorption = float = 48.0; VS in relay mode
+C_0623 = "system_c/system_c_2026-06-23_download_bare_deviceform_1.rvms"      # C0001 in ignore-AC mode with return 53.0 V above absorption 48.0 V
 C_HALF = "system_c/system_c_2026-07-20_download_half-ess_deviceform_1.rvms"  # assistant on one inverter only
 C_MIS = "system_c/system_c_2026-07-20_download_half-ess_deviceform_6.rvms"   # absorption = float = 48.00 V (limits test file)
 C_UPLOAD = "system_c/system_c_2026-07-21_gui-export_ess_uploadform_1.rvms"
@@ -111,11 +112,14 @@ def test_v1_low_shutdown_at_schema_default_needs_a_lithium_chemistry(good_files)
     assert by_rule(run(good_files, B_CLEAN, chemistry="lithium"), "V1") == []
 
 
-def test_v2_vs_return_at_the_unreachable_default(good_files):
-    rep = run(good_files, C_0618)
+def test_v2_vs_return_unreachable_only_in_an_ignore_ac_mode(good_files):
+    rep = run(good_files, C_0623)
     v2 = by_rule(rep, "V2")
-    assert len(v2) == 2 and all(f.severity == "FRAGILE" and f.evidence_class == "inferred" for f in v2)
-    assert all(e["value"] == 64.0 for f in v2 for e in f.evidence if e["field"] == "vs_accept_battery_above_V")
+    assert [f.serials for f in v2] == [["HQ0000C0001"]] and v2[0].severity == "FRAGILE" and v2[0].evidence_class == "inferred"
+    ev = {e["field"]: e["value"] for e in v2[0].evidence}
+    assert ev["vs_accept_battery_above_V"] == 53.0 and ev["absorption_V"] == 48.0, "return above absorption: never reached"
+    # the factory blocks carry the 64.0 V default but sit in relay mode (vs_usage 1), where the ignore-AC thresholds are inert
+    assert by_rule(run(good_files, C_0618), "V2") == []
     assert by_rule(run(good_files, A_0720), "V2") == [], "52.5 V return below absorption is reachable"
 
 
@@ -207,20 +211,105 @@ def test_apply_values_fix_needs_the_values(good_files):
     assert (u.setting(60) >> 4) & 1 == 1
 
 
-def test_apply_refuses_a_d2_copy_without_a_source(good_files):
+def test_apply_refuses_a_d2_copy_without_a_source_or_the_shared_battery_answer(good_files):
     from mk2vsc.diagnose import diagnose_bytes, apply_fixes, FixRefused
     data = good_files[C_0618]
     rep = diagnose_bytes(data, name="c.rvms")
     d2 = by_rule(rep, "D2")[0]
-    with pytest.raises(FixRefused):
+    with pytest.raises(FixRefused) as ei:
+        apply_fixes(data, rep, accept=[d2.id], copy_from="HQ0000C0002")
+    assert "shared_battery" in str(ei.value)
+    rep = diagnose_bytes(data, name="c.rvms", assume={"shared_battery": "yes"})
+    d2 = by_rule(rep, "D2")[0]
+    with pytest.raises(FixRefused) as ei:
         apply_fixes(data, rep, accept=[d2.id])
+    assert "--copy-from" in str(ei.value)
     out, intent = apply_fixes(data, rep, accept=[d2.id], copy_from="HQ0000C0002")
     u = units_by_serial(RvmsFile.parse(out))
     assert u["HQ0000C0001"].setting(2) == u["HQ0000C0002"].setting(2)
 
 
+# ------------------------------------------------------------------------------------ review fixes (2026-09-04)
+def test_conditional_fixes_are_refused_until_their_question_is_answered(good_files):
+    from mk2vsc.diagnose import diagnose_bytes, apply_fixes, FixRefused
+    data = good_files[C_0618]
+    rep = diagnose_bytes(data, name="c.rvms")
+    d1 = [f for f in by_rule(rep, "D1") if f.serials == ["HQ0000C0001"]][0]
+    assert d1.conditional == ["chemistry"]
+    with pytest.raises(FixRefused) as ei:
+        apply_fixes(data, rep, accept=[d1.id], values={"absorption_V": 56.8, "float_V": 54.0, "dc_low_shutdown_V": 48.0})
+    assert "chemistry" in str(ei.value) and "--assume" in str(ei.value)
+    rep = diagnose_bytes(data, name="c.rvms", assume={"chemistry": "lithium"})
+    assert rep.assumptions == {"chemistry": "lithium"}
+    d1 = [f for f in by_rule(rep, "D1") if f.serials == ["HQ0000C0001"]][0]
+    apply_fixes(data, rep, accept=[d1.id], values={"absorption_V": 56.8, "float_V": 54.0, "dc_low_shutdown_V": 48.0})
+
+
+def test_a_one_vote_peer_is_never_the_automatic_copy_source(good_files):
+    """A lithium-flagged block with absorption at the schema minimum passes D1 (one vote) but must not be copied."""
+    from mk2vsc.diagnose import diagnose_bytes
+    from mk2vsc.writer import set_settings
+    data, _ = set_settings(good_files[A_0720], [("HQ0000A0001", "absorption_V", 48.0)], allow_out_of_range=True)   # one vote: absorption at the minimum
+    rep = diagnose_bytes(data, name="a.rvms")
+    d1 = {f.serials[0]: f for f in by_rule(rep, "D1")}
+    assert "HQ0000A0001" not in d1, "one vote (at minimum) stays below the D1 threshold"
+    assert d1["HQ0000A0002"].fix["kind"] == "values", "no clean peer: enter the values, do not copy 48.0 V"
+    assert by_rule(rep, "D2")[0].fix["source"] is None
+
+
+def test_d2_offers_no_source_under_stated_lead_acid(good_files):
+    rep = run(good_files, A_0720, chemistry="lead-acid")
+    assert by_rule(rep, "D1") == []
+    d2 = by_rule(rep, "D2")[0]
+    assert d2.fix["source"] is None and d2.fix["bit_edits"] == [] and "Lead-acid stated" in d2.message
+
+
+def test_conflicting_values_for_one_field_are_refused(good_files):
+    """D1 copy wants the source's low-voltage shutdown; V1 --set wants another: refuse rather than let --accept order decide."""
+    from mk2vsc.diagnose import diagnose_bytes, apply_fixes, FixRefused
+    from mk2vsc.writer import set_settings
+    data, _ = set_settings(good_files[A_0720], [("HQ0000A0002", "dc_low_shutdown_V", 37.2)])
+    rep = diagnose_bytes(data, name="a.rvms")
+    d1 = [f for f in by_rule(rep, "D1") if f.serials == ["HQ0000A0002"]][0]
+    v1 = [f for f in by_rule(rep, "V1") if f.serials == ["HQ0000A0002"]][0]
+    assert "dc_low_shutdown_V" in d1.fix["fields"]
+    with pytest.raises(FixRefused) as ei:
+        apply_fixes(data, rep, accept=[d1.id, v1.id], values={"dc_low_shutdown_V": 46.0})
+    assert "different values" in str(ei.value)
+    for order in ([d1.id, v1.id], [v1.id, d1.id]):
+        out, intent = apply_fixes(data, rep, accept=order, values={"dc_low_shutdown_V": 48.5})
+        assert units_by_serial(RvmsFile.parse(out))["HQ0000A0002"].setting(11) == 4850
+
+
+def test_copy_from_a_lead_acid_flagged_source_clears_the_lithium_bit(good_files):
+    from mk2vsc.diagnose import diagnose_bytes, apply_fixes
+    data = good_files[A_0720]
+    rep = diagnose_bytes(data, name="a.rvms", assume={"shared_battery": "yes"})
+    d2 = by_rule(rep, "D2")[0]
+    assert d2.fix["source"] == "HQ0000A0001"
+    out, intent = apply_fixes(data, rep, accept=[d2.id], copy_from="HQ0000A0002")   # explicit choice overrides the rule
+    u = units_by_serial(RvmsFile.parse(out))
+    assert u["HQ0000A0001"].setting(2) == u["HQ0000A0002"].setting(2) == 5760
+    assert (u["HQ0000A0001"].setting(60) >> 4) & 1 == 0 and intent["bit_edits"] == [{"serial": "HQ0000A0001", "field": "flags2", "bit": 4, "set": False}]
+
+
+def test_intent_for_check_is_what_check_intent_reads(good_files, tmp_path):
+    from mk2vsc.diagnose import diagnose_bytes, apply_fixes, intent_for_check
+    from mk2vsc.qualify import Intent, qualify_bytes
+    data = good_files[A_0720]
+    rep = diagnose_bytes(data, name="a.rvms")
+    d1 = by_rule(rep, "D1")[0]
+    out, intent = apply_fixes(data, rep, accept=[d1.id])
+    chk = intent_for_check(intent, rep.serials)
+    assert chk["settings"] == {"absorption_V": 56.0, "float_V": 54.0, "charge_characteristic": 1} and chk["serials"] == rep.serials
+    p = tmp_path / "i.json"
+    p.write_text(json.dumps(chk))
+    ok, res = qualify_bytes(out, Intent.load(str(p)))
+    assert ok and any(l == "PASS" and "absorption_V = 56.0" in m for l, m in res)
+
+
 # ------------------------------------------------------------------------------------ corpus precision
-EXPECTED_HITS = {"D1": 48, "D2": 44, "C1": 14, "V1": 18, "V2": 11, "E1": 6, "E2": 10}   # 82 device-form files, 164 blocks
+EXPECTED_HITS = {"D1": 48, "D2": 44, "C1": 14, "V1": 18, "V2": 1, "E1": 6, "E2": 10}   # 82 device-form files, 164 blocks
 
 
 def test_corpus_precision_counts_and_quiet_systems(good_files):

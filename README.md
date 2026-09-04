@@ -34,7 +34,7 @@ built to do that, together with everything we learned about the file along the w
   * qualifies a file against the values you intended before you upload and after you re-download,
   * mines a library of archived downloads into a dated, per-inverter change log (`mk2vsc history`).
 * A corpus of 92 real device files with a manifest, and a test suite that checks every documented
-  claim against that corpus (528 tests).
+  claim against that corpus (582 tests).
 * A written account of the format as we understand it, and of what we do not understand.
 
 ## What this is not

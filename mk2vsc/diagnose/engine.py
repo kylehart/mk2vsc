@@ -24,7 +24,10 @@ def diagnose_bytes(data: bytes, name: str = "<bytes>", assume: Optional[Dict[str
     ctx = build_context(data, name=name, assume=assume)
     fr = FileReport(name=name, status=ctx.status, message=ctx.message, serials=ctx.serials, editable=ctx.editable,
                     refusal_reason=ctx.refusal_reason, nominal_voltage=ctx.nominal, chemistry=ctx.chemistry,
-                    chemistry_source=ctx.chemistry_source, unverified_format=ctx.unverified_format, _ctx=ctx)
+                    chemistry_source=ctx.chemistry_source, unverified_format=ctx.unverified_format,
+                    assumptions={k: v for k, v in (("chemistry", ctx.chemistry if ctx.chemistry_source == "stated" else None),
+                                                   ("shared_battery", ctx.shared_battery), ("ess_intended", ctx.ess_intended)) if v is not None},
+                    _ctx=ctx)
     if ctx.status == "upload_form":
         fr.findings = [_p3(ctx)]
     elif ctx.status == "ok":

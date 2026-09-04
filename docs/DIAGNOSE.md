@@ -22,9 +22,17 @@ mk2vsc diagnose download.rvms --json
 Findings are observations with evidence, not verdicts: "absorption is 48.00 V, the schema minimum; default
 57.60 V; a lithium bank above that voltage is never charged", never "misconfigured". Nothing is applied
 silently: `--fix` writes `<FILE>.corrected.rvms` only for the finding ids named with `--accept`, the input is
-never touched, and the corrected file goes through `set_settings` and `set_bits` with every guard they have
-(docs/SAFETY.md). A fix that needs a value the file cannot supply asks for it (`--set FIELD=VALUE`); no
-generic chemistry template is ever proposed. A copy fix with no automatic source asks for `--copy-from`.
+never touched (a path that is the input or a link to it is refused, `--overwrite` or not), and the corrected
+file goes through `set_settings` and `set_bits` with every guard they have (docs/SAFETY.md). `--sheet` runs
+the same guards before printing, so a sheet never asks a human to type a value the writer would refuse. A fix
+that needs a value the file cannot supply asks for it (`--set FIELD=VALUE`); no generic chemistry template is
+ever proposed. A copy fix with no automatic source asks for `--copy-from`, and an explicit `--copy-from`
+overrides the source a rule proposed (the LithiumBattery flag follows the source in both directions). Two
+accepted findings that want different values for one setting are refused rather than resolved by order.
+
+**A conditional finding's fix is refused until its question is answered.** D1 and V1 need the chemistry, D2
+needs `shared_battery=yes`, E2 needs `ess_intended`; `--assume` answers them and the report's `assumptions`
+records what was stated. Under `--assume chemistry=lead-acid` D1 and V1 do not run and D2 proposes no source.
 
 ## Two confidences per finding
 
@@ -48,11 +56,11 @@ whole device-form corpus (82 files, 164 blocks); the counts below are those test
 
 | id | Finding | Signature | Severity | Evidence class | Corpus hits | Fix |
 |---|---|---|---|---|---|---|
-| D1 | Lead-acid factory profile on a lithium bank | Lithium chemistry (stated or inferred) and two or more of: LithiumBattery flag clear; absorption or float at the schema minimum or at the lead-acid schema default; flags0 bit 11 set; charge curve 3 (adaptive + BatterySafe); low-voltage shutdown at the schema default; capacity 0 Ah; VS return at the schema default | BLOCKS when absorption sits at the schema minimum (the bank is never charged), else DEGRADES | device-confirmed (talas9's 24 V case; three of eight fleet inverters) | 48 | copy the profile from the other inverter when exactly one passes D1 and carries the flag; else enter absorption, float and low-voltage shutdown; set the LithiumBattery flag; curve to 1. Storage mode (flags0 bit 11) is reported, not written: that bit is not yet qualified |
-| D2 | Paired inverters disagree on a shared battery | Different values on any CONFIRMED charger field, or a different LithiumBattery flag | DEGRADES | device-confirmed | 44 | copy from the one block that passes D1; when both pass or both fail, the user names the source (`--copy-from`). Conditional on `shared_battery` |
+| D1 | Lead-acid factory profile on a lithium bank | Lithium chemistry (stated or inferred) and two or more of: LithiumBattery flag clear; absorption or float at the schema minimum or at the lead-acid schema default; flags0 bit 11 set; charge curve 3 (adaptive + BatterySafe); low-voltage shutdown at the schema default; capacity 0 Ah; VS return at the schema default | BLOCKS when absorption sits at the schema minimum (the bank is never charged), else DEGRADES | device-confirmed (talas9's 24 V case; three of eight fleet inverters) | 48 | copy the profile from the other inverter when it is clean (zero votes and the flag set; a one-vote block passes D1 but is never a source); else enter absorption, float and low-voltage shutdown; set the LithiumBattery flag; curve to 1. Storage mode (flags0 bit 11) is reported, not written: that bit is not yet qualified |
+| D2 | Paired inverters disagree on a shared battery | Different values on any CONFIRMED charger field, or a different LithiumBattery flag | DEGRADES | device-confirmed | 44 | copy from the one clean lithium block (zero D1 votes, flag set) unless lead-acid was stated; otherwise the user names the source (`--copy-from`). Conditional on `shared_battery` |
 | C1 | Setpoint at the edge of its allowed range | `mk2vsc.limits.at_limits()`: a CONFIRMED/HIGH physical setting at its schema minimum or maximum when that limit is not the default | DEGRADES | inferred (heuristic after talas9/rvsc-tools) | 14 | enter the intended value |
 | V1 | Low-voltage shutdown at the lead-acid default | `dc_low_shutdown_V` equals the file's schema default (37.20 V on the 48 V model) with lithium chemistry | FRAGILE | inferred (fleet forensics: a blackout at 48.5 V while SOC read 39 %) | 18 | enter a floor for this battery |
-| V2 | Virtual Switch return threshold unreachable | VS in use, no assistant, and `vs_accept_battery_above_V` at or above `absorption_V` or at its schema default (64.00 V on the 48 V model) | FRAGILE | inferred (a 5.6-day pass-through episode) | 11 | enter a return voltage below absorption |
+| V2 | Virtual Switch return threshold unreachable | VS in an ignore-AC mode (`vs_usage` 2, 3, 5 or 6; in relay or generator mode the threshold is inert), no assistant, and `vs_accept_battery_above_V` at or above `absorption_V` or at its schema default (64.00 V on the 48 V model) | FRAGILE | inferred (a 5.6-day pass-through episode) | 1 (System C unit 1, 2026-06-23: return 53.0 V above absorption 48.0 V; the factory blocks carry 64.0 V but sit in relay mode) | enter a return voltage below absorption |
 | E1 | Failed by-file assistant install (empty stub) | the `40 00 a7 fe` container signature in the assistant area | BLOCKS | device-confirmed (four corpus downloads) | 6 | by file only through `mk2vsc assistant reinstall` from an earlier download carrying the assistant (resets the VE.Bus); else VEConfigure. The writer refuses the file until then |
 | E2 | Assistant on one inverter of the pair | records on one block, none on the other | BLOCKS | device-confirmed (System C, 2026-07-17 to 07-20) | 10 | as E1; names the inverter that lacks it. Conditional on `ess_intended` |
 | P3 | Upload-form file offered as device state | the 16-byte GUI export blob at +0x45 | INFO | device-confirmed | 7 files | none: diagnose a fresh device download |
@@ -88,7 +96,9 @@ findings[]:  id (stable: RULE or RULE:SERIAL[:FIELD]), rule, title, severity (BL
                                    edits[]: {serial, field, value}, bit_edits[]: {serial, field, bit, set}}
                 | {kind: "gui",    text, lacks[]}
 questions[]: id, text, affects[] (finding ids)
-intent:      {edits[], bit_edits[]}   only after --fix or --sheet; the same record is written to <out>.intent.json
+assumptions: on each file, the answers stated with --assume (chemistry, shared_battery, ess_intended)
+intent:      {edits[], bit_edits[]}   only after --fix or --sheet. <out>.intent.json holds the same edits plus the
+             form `mk2vsc check --intent` reads (settings per field, serials); bit edits are listed but not checkable there
 ```
 
 A page or script refuses a `report_version` it does not know.
@@ -103,8 +113,10 @@ honouring boxes that are ticked when the bit is clear.
 ## Nominal voltage
 
 `mk2vsc.schema.nominal_voltage()` reads 12, 24 or 48 V from the absorption record's minimum in the file's
-own schema and refuses anything else. The writer scales its voltage plausibility bounds by nominal/48, so a
-24 V correction is accepted where it was refused before. Observed: 48 V on every corpus file. Inferred: 24
+own schema and refuses anything else. The writer scales the plausibility bounds of the DC battery settings
+(`fields.DC_VOLT_IDS`: absorption, float, low shutdown and restart, the VS thresholds, sustain) by nominal/48, so a
+24 V correction is accepted where it was refused before; AC settings such as the inverter output voltage keep
+their fixed bounds. Observed: 48 V on every corpus file. Inferred: 24
 and 12 V from the schema convention (talas9's 24 V unit reads absorption 24.00 to 32.00 V).
 
 ## Bit-level writes

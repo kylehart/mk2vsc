@@ -121,9 +121,10 @@ def test_refuses_fractional_value_for_integer_field(good_files):
 VOLT_IDS = (2, 3, 11, 12, 17, 18, 54, 58, 68, 88)   # every /100 V setting the writer or rules read
 
 
-def make_24v_twin(data: bytes) -> bytes:
-    """A synthetic 24 V file: halve the schema range and the stored value of every /100 V setting, keep
-    everything else, recompute checksums.  Alignment still passes because value and range move together."""
+def make_twin(data: bytes, divisor: int) -> bytes:
+    """A synthetic 24 V (divisor 2) or 12 V (divisor 4) file: divide the schema range and the stored value of every DC
+    /100 V setting, keep everything else (AC settings included), recompute checksums.  Alignment still passes because
+    value and range move together."""
     import struct
     from mk2vsc.schema import HEADER_LEN, RECORD_LEN
     from mk2vsc.sections import SECTION_INFO, SECTION_DATA
@@ -135,15 +136,27 @@ def make_24v_twin(data: bytes) -> bytes:
             for sid in VOLT_IDS:
                 o = HEADER_LEN + RECORD_LEN * sid
                 sc, off, d, mn, mx = struct.unpack_from("<hhHHH", pl, o)
-                struct.pack_into("<hhHHH", pl, o, sc, off, d // 2, mn // 2, mx // 2)
+                struct.pack_into("<hhHHH", pl, o, sc, off, d // divisor, mn // divisor, mx // divisor)
         elif s.name == SECTION_DATA:
             u = [x for x in units_by_serial(f).values() if x.section is s][0]
             for sid in VOLT_IDS:
                 o = u.setting_offset(sid) - (len(s.name) + 4)
                 v = struct.unpack_from("<H", pl, o)[0]
-                struct.pack_into("<H", pl, o, v // 2)
+                struct.pack_into("<H", pl, o, v // divisor)
         payloads.append(bytes(pl))
     return f.rebuild(payloads).to_bytes()
+
+
+def make_24v_twin(data: bytes) -> bytes:
+    return make_twin(data, 2)
+
+
+def test_ac_output_bound_does_not_scale_with_nominal(good_files):
+    """inverter_output_V is an AC setting: 126 V is valid on a 24 V and a 12 V system alike."""
+    for divisor in (2, 4):
+        twin = make_twin(good_files[BARE], divisor)
+        out, edits = set_settings(twin, [(None, "inverter_output_V", 126)])
+        assert {e.new_raw for e in edits} == {126}
 
 
 def test_24v_twin_accepts_24v_absorption_and_refuses_48v_values(good_files):

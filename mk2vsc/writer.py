@@ -22,7 +22,7 @@ from typing import Dict, Iterable, List, Optional, Tuple
 
 from .sections import RvmsFile
 from .units import units_by_serial, unit_blocks
-from .fields import lookup, CONFIRMED, HIGH, Field, BY_NAME
+from .fields import lookup, CONFIRMED, HIGH, Field, BY_NAME, DC_VOLT_IDS
 from .assistants import parse_assistant_area
 from .schema import schema_of, nominal_voltage
 
@@ -61,7 +61,7 @@ def set_settings(data: bytes, changes: Iterable[Tuple[Optional[str], object, obj
     unscaled fields.  Raises ``WriteRefused`` rather than emit a file it cannot prove correct.
     """
     f, by_serial, schema, nominal = _prepare(data)
-    volt_scale = nominal / 48.0          # Field.lo/hi are written for a 48 V system; voltage bounds scale with nominal
+    volt_scale = nominal / 48.0          # Field.lo/hi are written for a 48 V system; DC voltage bounds scale with nominal
     payloads = [s.payload for s in f.sections]
     edits: List[Edit] = []
     touched_sections = set()
@@ -82,7 +82,7 @@ def set_settings(data: bytes, changes: Iterable[Tuple[Optional[str], object, obj
             raise WriteRefused(f"{fld.name}: raw {new_raw} is outside the device's own range {info.min}..{info.max} "
                                f"({fld.decode(info.min)}..{fld.decode(info.max)} {fld.unit}) from BareSettingInfo")
         if not allow_out_of_range and fld.lo is not None:
-            k = volt_scale if fld.unit == "V" else 1.0
+            k = volt_scale if (fld.unit == "V" and fld.id in DC_VOLT_IDS) else 1.0   # AC bounds do not scale
             lo, hi = fld.lo * k, fld.hi * k
             if not (lo <= fld.decode(new_raw) <= hi):
                 raise WriteRefused(f"{fld.name}={fld.decode(new_raw)} {fld.unit} is outside the plausible range "

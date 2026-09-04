@@ -7,12 +7,14 @@ from . import Rule
 from ..context import FileContext
 from ..report import Finding, INFERRED
 
+IGNORE_AC_USAGES = {2, 3, 5, 6}     # vs_usage values that use the ignore-AC thresholds (fields.py setting 15)
+
 
 def run(ctx: FileContext) -> List[Finding]:
     out = []
     for s in ctx.serials:
-        if ctx.raw(s, "vs_usage") == 0 or ctx.assistant[s]["kind"] == "records":
-            continue                       # VS not in use, or dead under an assistant (E4)
+        if ctx.raw(s, "vs_usage") not in IGNORE_AC_USAGES or ctx.assistant[s]["kind"] == "records":
+            continue                       # relay-only / generator / off: the return threshold is inert; or dead under an assistant (E4)
         ret, absorb = ctx.raw(s, "vs_accept_battery_above_V"), ctx.raw(s, "absorption_V")
         default = ctx.at_default(s, "vs_accept_battery_above_V")
         if ret < absorb and not default:
@@ -30,7 +32,7 @@ def run(ctx: FileContext) -> List[Finding]:
 
 
 RULE = Rule("V2", "Virtual Switch return threshold unreachable", INFERRED,
-            "vs_usage != 0, no assistant, and vs_accept_battery_above_V at or above absorption_V or at its schema default "
+            "vs_usage in an ignore-AC mode (2, 3, 5, 6), no assistant, and vs_accept_battery_above_V at or above absorption_V or at its schema default "
             "(64.00 V on the 48 V model). Inferred from fleet forensics: a 5.6-day pass-through episode with the return "
             "threshold at 64 V.",
             "system_c/system_c_2026-06-18_download_bare_deviceform_1.rvms", run)

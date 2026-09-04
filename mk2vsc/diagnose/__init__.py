@@ -14,10 +14,10 @@ Rules live in ``mk2vsc/diagnose/rules``, one module each; docs/DIAGNOSE.md lists
 """
 from .report import Report, FileReport, Finding, Question, REPORT_VERSION
 from .engine import diagnose_bytes, diagnose_files
-from .fix import apply_fixes, plan_edits, FixRefused
+from .fix import apply_fixes, plan_edits, dry_run, intent_for_check, FixRefused
 from .sheet import sheet_rows, render_sheet
 from .render import render
 from .rules import load_rules
 
 __all__ = ["Report", "FileReport", "Finding", "Question", "REPORT_VERSION", "diagnose_bytes", "diagnose_files",
-           "apply_fixes", "plan_edits", "FixRefused", "sheet_rows", "render_sheet", "render", "load_rules"]
+           "apply_fixes", "plan_edits", "dry_run", "intent_for_check", "FixRefused", "sheet_rows", "render_sheet", "render", "load_rules"]

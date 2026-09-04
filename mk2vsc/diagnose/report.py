@@ -70,6 +70,7 @@ class FileReport:
     chemistry: str
     chemistry_source: str
     unverified_format: bool
+    assumptions: Dict[str, object] = field(default_factory=dict)   # the answers that were stated (chemistry, shared_battery, ess_intended)
     findings: List[Finding] = field(default_factory=list)
     questions: List[Question] = field(default_factory=list)
     _ctx: object = field(default=None, repr=False, compare=False)
@@ -78,7 +79,7 @@ class FileReport:
         return {"name": self.name, "status": self.status, "message": self.message, "serials": self.serials,
                 "editable": self.editable, "refusal_reason": self.refusal_reason, "nominal_voltage": self.nominal_voltage,
                 "chemistry": self.chemistry, "chemistry_source": self.chemistry_source,
-                "unverified_format": self.unverified_format}
+                "unverified_format": self.unverified_format, "assumptions": self.assumptions}
 
 
 @dataclass

@@ -40,13 +40,22 @@ def votes(ctx: FileContext, s: str) -> List[dict]:
 
 
 def passes(ctx: FileContext, s: str) -> bool:
+    """Below the two-vote threshold: not a D1 finding.  Not the same as clean (see ``clean``)."""
     return len(votes(ctx, s)) < 2
 
 
+def clean(ctx: FileContext, s: str) -> bool:
+    """Zero lead-acid votes and the lithium flag set: the only profile D1 will copy from automatically.  A block with
+    one vote (say absorption at the schema minimum) passes D1 but would propagate that value to the target."""
+    return not votes(ctx, s) and ctx.lithium_flag(s)
+
+
 def healthy_peer(ctx: FileContext, s: str) -> Optional[str]:
-    """Another inverter in the file that passes D1 and carries the lithium flag: the copy source."""
+    """Another inverter in the file with a clean lithium profile: the copy source.  None means enter the values."""
+    if ctx.chemistry == "lead-acid":
+        return None
     for other in ctx.serials:
-        if other != s and passes(ctx, other) and ctx.lithium_flag(other):
+        if other != s and clean(ctx, other):
             return other
     return None
 
