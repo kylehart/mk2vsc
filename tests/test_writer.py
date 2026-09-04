@@ -47,8 +47,8 @@ def test_edit_works_on_ess_blocks_and_leaves_assistant_untouched(good_files):
 def test_refuses_unverified_field_without_override(good_files):
     data = good_files[BARE]
     with pytest.raises(WriteRefused):
-        set_settings(data, [(None, "param66_V", 57.72)])
-    out, edits = set_settings(data, [(None, "param66_V", 57.72)], allow_unverified=True)
+        set_settings(data, [(None, "fs_ubat_start_V", 57.72)])
+    out, edits = set_settings(data, [(None, "fs_ubat_start_V", 57.72)], allow_unverified=True)
     assert edits[0].new_raw == 5772
 
 

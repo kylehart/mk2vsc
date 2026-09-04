@@ -13,8 +13,9 @@ assistants (ESS, AC PV and the rest), so anyone maintaining a real installation 
 machine or a virtual machine. The configuration itself travels as a small binary file: `.rvsc` for a
 single unit, `.rvms` for parallel and multi-phase systems, downloaded and uploaded through VRM's Remote
 VEConfigure. A Victron Community thread titled "RVSC File Format Specification" asked Victron to publish
-the format so people could write their own editors; it received no answer. As of September 2026 we
-found no open-source parser, specification or editor for these files anywhere.
+the format so people could write their own editors; it received no answer. When we started (June 2026) we
+found no open-source parser, specification or editor for these files; one has since appeared for the
+single-unit `.rvsc` format (see Related projects below), and the two agree where they overlap.
 
 We operate four two-inverter systems and needed to change charge voltages and Virtual Switch
 thresholds on them remotely, repeatably, and with a record of what changed. This repository is what we
@@ -216,6 +217,17 @@ consequences on a live battery system, remain yours. Read docs/SAFETY.md first.
 Every change goes through a public pull request, every open question is a labelled issue, and every
 format claim is tied to a test on real files. The project is developed with AI assistance, disclosed
 in commits and in docs/PRACTICES.md.
+
+## Related projects
+
+* [talas9/rvsc-tools](https://github.com/talas9/rvsc-tools) (July 2026): a read-only viewer and format
+  specification for single-unit `.rvsc` files, with VEConfigure's internal setting identifiers extracted
+  from the application binary. It decoded the same settings schema independently; we adopted its
+  identifier table (MIT) for the `VEConfigure identifier` column in docs/FIELDS.md. It does not cover
+  multi-unit `.rvms`, assistants, or editing, and reports no checksum on `.rvsc`, which our `.rvms` files
+  contradict; reconciling the two is open.
+* [xcellsior/ve-bus-programming](https://github.com/xcellsior/ve-bus-programming): the same settings
+  over an MK3 cable, live, on Linux.
 
 ## Acknowledgements
 

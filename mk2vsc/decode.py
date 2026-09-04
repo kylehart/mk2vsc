@@ -47,7 +47,7 @@ def decode_bytes(data: bytes, include_unknown: bool = True, include_raw_settings
                 continue
             if fld.confidence == UNKNOWN and not include_unknown:
                 continue
-            entry = {"id": sid, "offset": f"+0x{u.setting_offset(sid):03x}", "raw": raw, "name": fld.name,
+            entry = {"id": sid, "offset": f"+0x{u.setting_offset(sid):03x}", "raw": raw, "name": fld.name, "eprom": fld.eprom,
                      "label": fld.label, "value": fld.decode(raw), "unit": fld.unit, "confidence": fld.confidence}
             if fld.bits:
                 entry["bits_set"] = [fld.bits[b] for b in fld.bits if raw & (1 << b)]

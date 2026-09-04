@@ -55,6 +55,11 @@ class Field:
     period: bool = False         # value = scale / raw (a period stored where a frequency is shown)
 
     @property
+    def eprom(self) -> str:
+        """VEConfigure's internal identifier for this setting (see EPROM_NAMES)."""
+        return EPROM_NAMES[self.id] if self.id < len(EPROM_NAMES) else ""
+
+    @property
     def offset(self) -> int:
         """Device-form block offset (add 10 for upload-form blocks)."""
         return 0x59 + 2 * self.id
@@ -75,7 +80,15 @@ class Field:
         return raw
 
 
+# VEConfigure's own identifier for every setting index, from the Delphi RTTI symbol table of the
+# VEConfig.exe binary as extracted and published by talas9/rvsc-tools (MIT, 2026; core/settings.json,
+# validated against two independent tables in the binary with zero mismatches over 192 entries).
+# Index n here is VE.Bus setting ID n.  A name is an identity, not a meaning: "NotDefinedYet" and
+# "GridSettingsInt" say what the vendor calls the slot, nothing more.
+EPROM_NAMES = ["EPROM_FlagsWord0", "EPROM_FlagsWord1", "EPROM_UBatAbs", "EPROM_UBatFloat", "EPROM_IBatBulk", "EPROM_UInvSetpoint", "EPROM_IMainsLimit", "EPROM_EqualiseQuarters", "EPROM_FloatDays", "EPROM_AbsorptionHours", "EPROM_ChargeCharacteristic", "EPROM_UBat2Low", "EPROM_UBat2LowMargin", "EPROM_NrOfSlaves", "EPROM_SpecialThreePhase", "EPROM_vsUsage", "EPROM_vsonIInvHigh", "EPROM_vsonUBatHigh", "EPROM_vsonUBatLow", "EPROM_vstonIInvHigh", "EPROM_vstonUBatHigh", "EPROM_vstonUBatLow", "EPROM_vstonNotCharging", "EPROM_vstonFanOn", "EPROM_vstonTemperatureAlarm", "EPROM_vstonLowBatteryAlarm", "EPROM_vstonOverloadAlarm", "EPROM_vstonUBatRippleAlarm", "EPROM_vsoffIInvLow", "EPROM_vsoffUBatHigh", "EPROM_vsoffUBatLow", "EPROM_vstoffIInvLow", "EPROM_vstoffUBatHigh", "EPROM_vstoffUBatLow", "EPROM_vstoffCharging", "EPROM_vstoffFanOff", "EPROM_vstoffChargeBulkFinished", "EPROM_vstoffNoVSOnCondition", "EPROM_vstoffNoACInput", "EPROM_vstoffTemperatureAlarm", "EPROM_vstoffLowBatteryAlarm", "EPROM_vstoffOverloadAlarm", "EPROM_vstoffUBatRippleAlarm", "EPROM_vsMinimumOnTime", "EPROM_UMains2LowForFine", "EPROM_UMains2LowForFineHysterese", "EPROM_UMains2High", "EPROM_UMains2HighHysterese", "EPROM_AssistBoostFactor", "EPROM_IMainsLimitAC1", "EPROM_IInv2AES", "EPROM_IInvAESHysterese", "EPROM_vs2onILoadHigh", "EPROM_vs2tonILoadHigh", "EPROM_vs2onUBatLow", "EPROM_vs2tonUBatLow", "EPROM_vs2offILoadLow", "EPROM_vs2toffILoadLow", "EPROM_vs2offUBat", "EPROM_vs2toffUBat", "EPROM_FlagsWord2", "EPROM_FlagsWord3", "EPROM_vsInverterPeriodTime", "EPROM_UBatLowPreAlarmOffset", "EPROM_BatteryCapacity", "EPROM_ChargePercentageResetValueForBatteryMonitor", "EPROM_fsUBatStart", "EPROM_fsUBatStartDelay", "EPROM_fsUBatStop", "EPROM_fsUBatStopDelay", "EPROM_vs2StartOnSOC", "EPROM_vllTempCompensation", "EPROM_ChargeEfficiency", "EPROM_IInvLimitDuringAssist", "EPROM_AbsToFloatSOCReset", "EPROM_IBatForStopAbsorption", "EPROM_InvertRedundancy", "EPROM_ExpectedPresenceFlags0", "EPROM_ExpectedPresenceFlags2", "EPROM_RelativePhaseInfo", "EPROM_MyShortID", "EPROM_GridCode", "EPROM_PermanentFlags0", "EPROM_SOCStopInvert", "EPROM_SOCStartInvert", "EPROM_InfoID0", "EPROM_TBatStopCharge", "EPROM_TempCompensationSlope", "EPROM_UBatDontCharge", "EPROM_CurrentSensorFactor", "EPROM_NotDefinedYet37", "EPROM_NotDefinedYet36", "EPROM_NotDefinedYet35", "EPROM_NotDefinedYet34", "EPROM_NotDefinedYet33", "EPROM_NotDefinedYet32", "EPROM_NotDefinedYet31", "EPROM_NotDefinedYet30", "EPROM_NotDefinedYet29", "EPROM_NotDefinedYet28", "EPROM_NotDefinedYet27", "EPROM_NotDefinedYet26", "EPROM_NotDefinedYet25", "EPROM_NotDefinedYet24", "EPROM_NotDefinedYet23", "EPROM_NotDefinedYet22", "EPROM_NotDefinedYet21", "EPROM_NotDefinedYet20", "EPROM_NotDefinedYet19", "EPROM_NotDefinedYet18", "EPROM_NotDefinedYet17", "EPROM_NotDefinedYet16", "EPROM_NotDefinedYet15", "EPROM_NotDefinedYet14", "EPROM_NotDefinedYet13", "EPROM_NotDefinedYet12", "EPROM_NotDefinedYet11", "EPROM_NotDefinedYet10", "EPROM_NotDefinedYet9", "EPROM_NotDefinedYet8", "EPROM_NotDefinedYet7", "EPROM_NotDefinedYet6", "EPROM_NotDefinedYet5", "EPROM_NotDefinedYet4", "EPROM_NotDefinedYet3", "EPROM_NotDefinedYet2", "EPROM_NotDefinedYet1", "EPROM_NotDefinedYet0", "EPROM_GridSettingsValidCheckerA", "EPROM_GridSettingsInt0", "EPROM_GridSettingsInt1", "EPROM_GridSettingsInt2", "EPROM_GridSettingsInt3", "EPROM_GridSettingsInt4", "EPROM_GridSettingsInt5", "EPROM_GridSettingsInt6", "EPROM_GridSettingsInt7", "EPROM_GridSettingsInt8", "EPROM_GridSettingsInt9", "EPROM_GridSettingsInt10", "EPROM_GridSettingsInt11", "EPROM_GridSettingsInt12", "EPROM_GridSettingsInt13", "EPROM_GridSettingsInt14", "EPROM_GridSettingsInt15", "EPROM_GridSettingsInt16", "EPROM_GridSettingsInt17", "EPROM_GridSettingsInt18", "EPROM_GridSettingsInt19", "EPROM_GridSettingsInt20", "EPROM_GridSettingsInt21", "EPROM_GridSettingsInt22", "EPROM_GridSettingsInt23", "EPROM_GridSettingsInt24", "EPROM_GridSettingsInt25", "EPROM_GridSettingsInt26", "EPROM_GridSettingsInt27", "EPROM_GridSettingsInt28", "EPROM_GridSettingsInt29", "EPROM_GridSettingsInt30", "EPROM_GridSettingsInt31", "EPROM_GridSettingsInt32", "EPROM_GridSettingsInt33", "EPROM_GridSettingsInt34", "EPROM_GridSettingsInt35", "EPROM_GridSettingsInt36", "EPROM_GridSettingsInt37", "EPROM_GridSettingsInt38", "EPROM_GridSettingsInt39", "EPROM_GridSettingsInt40", "EPROM_GridSettingsInt41", "EPROM_GridSettingsInt42", "EPROM_GridSettingsInt43", "EPROM_GridSettingsInt44", "EPROM_GridSettingsInt45", "EPROM_GridSettingsInt46", "EPROM_GridSettingsInt47", "EPROM_GridSettingsInt48", "EPROM_GridSettingsInt49", "EPROM_GridSettingsInt50", "EPROM_GridSettingsInt51", "EPROM_GridSettingsInt52", "EPROM_GridSettingsInt53", "EPROM_GridSettingsInt54", "EPROM_GridSettingsInt55", "EPROM_GridSettingsInt56", "EPROM_GridSettingsInt57", "EPROM_GridSettingsInt58", "EPROM_GridSettingsInt59", "EPROM_GridSettingsInt60", "EPROM_GeneralGridSettingsInt", "EPROM_GridSettingsValidCheckerB"]
+
 XC = "xcellsior/ve-bus-programming FINDINGS.md"
+RT = "VEConfigure identifier table (talas9/rvsc-tools, from VEConfig.exe RTTI)"
 MK2 = "Victron 'Interfacing with VE.Bus products - MK2 Protocol 3.14' section 7.3.13"   # public PDF
 SCH = "device schema (BareSettingInfo = CommandGetSettingInfo records)"
 
@@ -141,8 +154,8 @@ FIELDS: List[Field] = [
     _f(9, "max_absorption_time_min", "(Maximum) Absorption duration", 1, "min", HIGH,
        "Maximum absorption time, in minutes (raw x 60).", f"{MK2}; schema scale 60, 1 to 24 h.", "1, 8", "mk2"),
     _f(10, "charge_characteristic", "Charge characteristic", 1, "enum", HIGH,
-       "Charge curve selector (schema 1 to 3, default 3). The community reference reads 0 = variable, 1 = fixed, 2 = fixed + storage; our lithium systems read 1.",
-       f"{MK2}; enum values from {XC}.", "1, 3", "mk2 + xcellsior"),
+       "Charge curve: 1 = Fixed, 2 = Adaptive, 3 = Adaptive + BatterySafe (VEConfigure's option text). Our lithium systems read 1.",
+       f"{MK2}; option text from VEConfigure via {RT}.", "1, 3", "mk2 + rtti"),
     _f(11, "dc_low_shutdown_V", "UBatLowLimit for Inverter", 100, "V", HIGH,
        "Battery voltage at which the inverter shuts down.", f"{MK2}; schema 37.20 to 52.00 V.", "4850, 3720, 4800", "mk2", lo=36.0, hi=56.0),
     _f(12, "dc_low_restart_offset_V", "UBatLow hysteresis for Inverter", 100, "V", HIGH,
@@ -152,8 +165,9 @@ FIELDS: List[Field] = [
     _f(14, "three_phase_setting", "Special three phase setting", 1, "enum", HIGH,
        "0 = 3 phase, 1 = split phase 180, 2 = 2-leg 3-phase 120.", f"{MK2}; schema unused on this model; 0.", "0", "mk2"),
     _f(15, "vs_usage", "vsUsage", 1, "enum", HIGH,
-       "Virtual Switch usage: 0 = not used, 1 = VS controls the relay, 2 = VS ignores the AC input.",
-       f"{MK2}; schema 0 to 6. Reads 3 on our configured systems, 0 or 1 on older blocks.", "0, 1, 3", "mk2"),
+       "Virtual Switch usage: 0 do not use, 1 drive the aux relay, 2 ignore AC input, 3 dedicated ignore AC input, "
+       "4 dedicated generator control, 5 relay + dedicated ignore AC, 6 ignore AC input (VS off = ignore). Our systems read 3.",
+       f"{MK2} (0 to 2); options 3 to 6 from VEConfigure's UI via {RT}.", "0, 1, 3", "mk2 + rtti"),
     # Virtual Switch, relay mode (15 to 43): documented names; values on our systems are defaults.
     _vs_level(16, "vs_on_inverter_current_high_A", "vsonIInvHigh", "on when inverter current higher than (0.01 A)", "2125", scale=100, unit="A"),
     _vs_level(17, "vs_on_ubat_high_V", "vsonUBatHigh", "on when battery voltage higher than", "6400"),
@@ -237,32 +251,46 @@ FIELDS: List[Field] = [
     _f(65, "soc_at_bulk_end_pct", "SoC when bulk finished", 2, "%", HIGH,
        "State of charge the built-in monitor assumes when the charge state changes from bulk to absorption.",
        f"{MK2}; schema /2, 30 to 100 %.", "170, 190, 196", "mk2"),
-    # Beyond 65 Victron's public document stops.  Names below are ours; evidence is the schema and our corpus.
-    _f(66, "param66_V", "", 100, "V", LOW, "57.72 V, schema range 0 to 70.00 V; paired with 68 (54.00 V) and durations 67/69. Probably a second charge-voltage pair.",
-       SCH, "5772", "schema"),
-    _f(67, "param67_time_s", "", 1, "s", LOW, "A duration in seconds (schema 1/60 min, offset -1) next to 66; 2 s here.", SCH, "3", "schema", raw_offset=-1),
-    _f(68, "param68_V", "", 100, "V", LOW, "54.00 V, pairs with 66.", SCH, "5400", "schema"),
-    _f(69, "param69_time_s", "", 1, "s", LOW, "A duration in seconds next to 68; 2 s here.", SCH, "3", "schema", raw_offset=-1),
-    _f(70, "vs_dont_ignore_soc_below_pct", "VS: do not ignore AC input when SoC lower than", 2, "%", MEDIUM,
-       "Ignore-AC mode battery condition on state of charge (not in Victron's 3.14 document, which predates it).",
-       f"{SCH}: /2, 0 to 100 %. 25 % on every configured block, the fleet-wide SoC setpoint the installer's note describes; "
-       "the tab captured before that change showed 20.0 %.", "50, 0", "schema + installer note", lo=0, hi=100),
-    _f(71, "signed_offset_71", "", 1, "", LOW, "A signed value centred on 32768 (schema +/-800); 0 here.", SCH, "32768", "schema", raw_offset=-32768),
-    _f(72, "charge_efficiency", "Battery charge efficiency", 256, "", MEDIUM, "Fraction (raw + 1)/256: 255 = 1.000, 242 = 0.949.",
-       f"{SCH}: scale -256, offset +1; name from {XC}.", "250, 242, 255", "schema + xcellsior", raw_offset=1),
-    _f(73, "voltage_threshold_73_V", "", 100, "V", MEDIUM, "A voltage threshold; 63.00 V on every block, the DC over-voltage level in our alarm history.",
-       f"{SCH}: 8.03 to 106.00 V; {XC} lists it as a voltage threshold.", "6300", "schema + xcellsior"),
-    _f(74, "soc_pct_74", "", 2, "%", LOW, "A percentage at the half-percent scale (schema 30 to 100 %, default 85 %); 100 % here.", SCH, "200", "schema"),
-    _f(81, "grid_code", "Grid code", 1, "enum", HIGH,
-       "0 = none; a non-zero value selects a grid code (country standard), set with the dealer password in VEConfigure. Schema 0 to 32.",
-       "0 on every bare block, 1 on every GUI-authored ESS block.", "0, 1", "ours"),
-    _f(85, "param85", "", 1, "", UNKNOWN, "", "Schema: scale 50, offset 1069, default 3000, min 2400; 65535 here.", "65535"),
-    _f(87, "param87", "", 1, "", UNKNOWN, "", "Schema: scale -12800, 0 to 1536, default 829.", "829"),
-    _f(88, "solar_wind_priority_V", "Sustain voltage", 100, "V", MEDIUM, "52.00 V on every block; the community reference calls it the solar & wind priority (sustain) voltage.",
-       f"{XC}; {SCH}: 48.00 to 64.00 V.", "5200", "xcellsior + schema"),
-    _f(128, "lom_config_a", "LOM configuration A", 1, "", LOW, "Loss-of-mains configuration (grid code related). 0xffff on bare blocks; the GUI ESS install writes 1 or 0x0101.",
-       f"{XC}; observed transition.", "65535, 1, 257, 65281, 0", "xcellsior"),
+    # Beyond 65 Victron's public document stops.  Identifiers come from VEConfigure's own symbol table (RT);
+    # scales and ranges from the device schema; meanings inferred from the identifier and marked as such.
+    _f(66, "fs_ubat_start_V", "fsUBatStart", 100, "V", MEDIUM, "Battery voltage at which the 'fs' function starts (57.72 V here; the prefix is not expanded in any public source).", f"{RT}; {SCH}: 0 to 70.00 V.", "5772", "rtti + schema"),
+    _f(67, "fs_ubat_start_delay_s", "fsUBatStartDelay", 1, "s", MEDIUM, "Delay for fsUBatStart, seconds (raw - 1).", f"{RT}; {SCH}: 1/60 min, offset -1.", "3", "rtti + schema", raw_offset=-1),
+    _f(68, "fs_ubat_stop_V", "fsUBatStop", 100, "V", MEDIUM, "Battery voltage at which the 'fs' function stops (54.00 V here).", f"{RT}; {SCH}.", "5400", "rtti + schema"),
+    _f(69, "fs_ubat_stop_delay_s", "fsUBatStopDelay", 1, "s", MEDIUM, "Delay for fsUBatStop, seconds (raw - 1).", f"{RT}; {SCH}.", "3", "rtti + schema", raw_offset=-1),
+    _f(70, "vs_dont_ignore_soc_below_pct", "vs2StartOnSOC", 2, "%", HIGH,
+       "Ignore-AC mode battery condition on state of charge: do not ignore the AC input when SoC is below this.",
+       f"{RT}: vs2StartOnSOC; {SCH}: /2, 0 to 100 %. 25 % on every configured block, the fleet-wide setpoint the installer's note describes.",
+       "50, 0", "rtti + schema + installer note", lo=0, hi=100),
+    _f(71, "vll_temp_compensation", "vllTempCompensation", 1, "", LOW, "Signed value centred on 32768 (schema +/-800); 0 here. Meaning of 'vll' unknown.", f"{RT}; {SCH}.", "32768", "rtti + schema", raw_offset=-32768),
+    _f(72, "charge_efficiency", "ChargeEfficiency", 256, "", HIGH, "Battery charge efficiency as a fraction (raw + 1)/256: 255 = 1.000, 242 = 0.949.", f"{RT}; {SCH}: scale -256, offset +1.", "250, 242, 255", "rtti + schema", raw_offset=1),
+    _f(73, "inverter_current_limit_during_assist_A", "IInvLimitDuringAssist", 100, "A", HIGH, "Inverter current limit while PowerAssist is active: 63.00 A on every block.", f"{RT}; {SCH}: /100, 8.03 to 106.00.", "6300", "rtti + schema"),
+    _f(74, "abs_to_float_soc_reset_pct", "AbsToFloatSOCReset", 2, "%", HIGH, "SoC the battery monitor is set to when the charger goes from absorption to float (100 % here; schema 30 to 100 %, default 85 %).", f"{RT}; {SCH}.", "200", "rtti + schema"),
+    _f(75, "ibat_for_stop_absorption", "IBatForStopAbsorption", 1, "", LOW, "Battery current at which absorption stops (schema unused on this model).", f"{RT}.", "0", "rtti"),
+    _f(76, "invert_redundancy", "InvertRedundancy", 1, "", LOW, "", f"{RT}; schema unused here.", "0", "rtti"),
+    _f(77, "expected_presence_flags0", "ExpectedPresenceFlags0", 1, "bitmask", LOW, "", f"{RT}; schema unused here.", "0", "rtti", bits={}),
+    _f(78, "expected_presence_flags2", "ExpectedPresenceFlags2", 1, "bitmask", LOW, "", f"{RT}; schema unused here.", "0", "rtti", bits={}),
+    _f(79, "relative_phase_info", "RelativePhaseInfo", 1, "", LOW, "", f"{RT}; schema unused here.", "0", "rtti"),
+    _f(80, "my_short_id", "MyShortID", 1, "", LOW, "", f"{RT}; schema unused here.", "0", "rtti"),
+    _f(81, "grid_code", "GridCode", 1, "enum", HIGH,
+       "Country / grid code standard: 0 = none; a non-zero index selects a grid code, set with the dealer password in VEConfigure. Schema 0 to 32.",
+       f"{RT}: GridCode; 0 on every bare block, 1 on every GUI-authored ESS block.", "0, 1", "rtti + ours"),
+    _f(82, "permanent_flags0", "PermanentFlags0", 1, "bitmask", LOW, "", f"{RT}; schema unused here.", "0", "rtti", bits={}),
+    _f(83, "soc_stop_invert_pct", "SOCStopInvert", 2, "%", MEDIUM, "SoC at which inverting stops ('shut-down on SOC'); schema unused on this model.", f"{RT}.", "0", "rtti"),
+    _f(84, "soc_start_invert_pct", "SOCStartInvert", 2, "%", MEDIUM, "SoC at which inverting restarts; schema unused on this model.", f"{RT}.", "0", "rtti"),
+    _f(85, "info_id0", "InfoID0", 1, "", LOW, "Schema: scale 50, offset 1069, default 3000, min 2400; 65535 here.", f"{RT}; {SCH}.", "65535", "rtti + schema"),
+    _f(86, "tbat_stop_charge", "TBatStopCharge", 1, "", LOW, "Battery temperature at which charging stops; schema unused here.", f"{RT}.", "0", "rtti"),
+    _f(87, "temp_compensation_slope", "TempCompensationSlope", 12800, "", LOW, "Charge-voltage temperature compensation slope (schema /12800, 0 to 1536, default 829 = 0.0648).", f"{RT}; {SCH}.", "829", "rtti + schema"),
+    _f(88, "ubat_dont_charge_V", "UBatDontCharge", 100, "V", HIGH, "Battery voltage below which the charger does not charge (52.00 V here; VEConfigure shows it as the sustain voltage).", f"{RT}; {SCH}: 48.00 to 64.00 V; {XC} calls it the solar & wind priority voltage.", "5200", "rtti + schema"),
+    _f(89, "current_sensor_factor", "CurrentSensorFactor", 1, "", LOW, "", f"{RT}; schema unused here.", "0", "rtti"),
+    _f(128, "grid_settings_valid_checker_a", "GridSettingsValidCheckerA", 1, "", MEDIUM,
+       "Validity marker for the grid-settings block (129 to 189). 0xffff on bare blocks; the GUI ESS install writes 1 or 0x0101.",
+       f"{RT}; observed transition.", "65535, 1, 257, 65281, 0", "rtti + ours"),
+    _f(190, "general_grid_settings_int", "GeneralGridSettingsInt", 1, "", LOW, "Beyond the 190-entry array the unit blocks carry; present in the schema only.", f"{RT}.", "", "rtti"),
+    _f(191, "grid_settings_valid_checker_b", "GridSettingsValidCheckerB", 1, "", LOW, "Present in the schema only.", f"{RT}.", "", "rtti"),
 ]
+FIELDS += [_f(n, f"not_defined_yet_{127 - n}", EPROM_NAMES[n], 1, "", UNKNOWN, "Reserved slot; 0 on every block.", RT, "0", "rtti") for n in range(90, 128)]
+FIELDS += [_f(n, f"grid_settings_int{n - 129}", EPROM_NAMES[n], 1, "", UNKNOWN, "Grid-code settings block, written by the grid-code step in VEConfigure; 0xffff on bare blocks.", RT, "65535", "rtti") for n in range(129, 190)]
+FIELDS.sort(key=lambda f: f.id)
 
 BY_ID: Dict[int, Field] = {f.id: f for f in FIELDS}
 BY_NAME: Dict[str, Field] = {f.name: f for f in FIELDS}
