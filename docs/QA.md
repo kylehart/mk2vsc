@@ -70,7 +70,7 @@ hardware; if not, you have a finding worth an issue. The longer form:
 3. `mk2vsc show a.rvms`. Compare absorption, float, charge current and the AC input current limit
    with VEConfigure's Charger and General tabs or the VRM device page. If they match, the
    settings-array mapping holds for your block layout. The line under each inverter is the same
-   self-check `census` runs: `alignment OK (+0x059, 186/186 in range)` means every scorable setting
+   self-check `census` runs: `alignment OK (+0x059, 138/138 in range)` means every scorable setting
    lies inside the range the file's own schema declares for it; `ALIGNMENT SUSPECT` means the
    numbers on that block are not to be trusted. A row marked `at minimum of allowed range` or
    `at maximum of allowed range` is a physical setting (V, A, Ah, Hz) typed as the extreme value
