@@ -172,6 +172,7 @@ things on your own system before trusting the tool with it.
 | docs/HISTORY.md | How this came to be, in order, including the things we got wrong |
 | docs/ESS_INJECTION.md | The ESS-by-file experiment in full: what a GUI install writes, every attempt, hypotheses, the next test |
 | docs/FIXTURES.md | What every file in the corpus is |
+| docs/PRACTICES.md | How the project is run: public record, evidence rules, safety rules, AI-assistance disclosure |
 
 ## Limits and unknowns
 
@@ -201,6 +202,12 @@ See CONTRIBUTING.md for how to add a fixture and what the privacy expectations a
 MIT, see LICENSE. This tool is for people who are already responsible for, and authorized to
 configure, the systems they apply it to. It produces files; the decision to upload one, and the
 consequences on a live battery system, remain yours. Read docs/SAFETY.md first.
+
+## How this project is run
+
+Every change goes through a public pull request, every open question is a labelled issue, and every
+format claim is tied to a test on real files. The project is developed with AI assistance, disclosed
+in commits and in docs/PRACTICES.md.
 
 ## Acknowledgements
 

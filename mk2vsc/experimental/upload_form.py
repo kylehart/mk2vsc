@@ -142,7 +142,15 @@ def _compact_no_reference(area: bytes) -> bytes:
         body = _strip_ff_runs(area[pos + 6: pos + 6 + length])
         out += b"\xf5\xff" + struct.pack("<HH", subtype, len(body)) + body
         pos += 6 + length
-    out += _strip_ff_runs(area[pos:])
+    # tail: device form is 0xff padding + `0e 00 8e 01 15 00 <4 slot bytes> ff 00 00`; the GUI writes
+    # `ff <u16 free> 0a 00` + the same 10 trailer bytes + `00 00 00`, where free = 2812 - bytes used by the
+    # compact records (observed on the installer's export and on the one transformed file the device accepted).
+    tail = area[pos:]
+    k = tail.find(b"\x0e\x00\x8e\x01\x15\x00")
+    if k < 0 or len(tail) < k + 13:
+        raise TransformRefused("device tail does not carry the expected 0e 00 8e 01 15 00 trailer")
+    trailer10 = tail[k: k + 10]
+    out += b"\xff" + struct.pack("<H", 2812 - len(out)) + b"\x0a\x00" + trailer10 + b"\x00\x00\x00"
     return bytes(out)
 
 

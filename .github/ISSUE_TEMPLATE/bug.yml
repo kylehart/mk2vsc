@@ -1,0 +1,21 @@
+name: Bug
+description: The tool did something wrong on a file
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes: {label: mk2vsc version, placeholder: "mk2vsc --version"}
+  - type: textarea
+    id: what
+    attributes: {label: What happened, description: Command, output, and what you expected}
+    validations: {required: true}
+  - type: textarea
+    id: census
+    attributes: {label: Output of `mk2vsc census` and `mk2vsc validate` on the file(s)}
+  - type: checkboxes
+    id: file
+    attributes:
+      label: File
+      options:
+        - label: I can attach the .rvms file (it contains inverter serials and save timestamps; nothing else identifying)
+        - label: I am entitled to publish this file and agree it may be added to the fixture corpus under MIT

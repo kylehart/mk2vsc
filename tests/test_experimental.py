@@ -82,10 +82,7 @@ def test_upload_form_transform_reproduces_the_accepted_guava_v2(good_files):
     export_ts = max(u.export_timestamp for u in v2u)
     out = to_upload_form(good_files[GUAVA_ESS_T18], timestamp=export_ts)
     diffs = compare_per_slot(out, v2)
-    # v2 was compacted against the OTHER system's GUI export, so it carried that system's four
-    # per-inverter tail bytes; the no-reference path keeps the target's own.  Everything else matches.
-    for slot, d in diffs.items():
-        assert 0 < len(d) <= 4 and all(i > 1100 for i in d), (slot, d)
+    assert all(not d for d in diffs.values()), diffs
 
 
 def test_upload_form_transform_refuses_bare_and_upload_inputs(good_files):

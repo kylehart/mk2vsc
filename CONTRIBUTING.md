@@ -4,6 +4,13 @@ This project advances one controlled experiment at a time. The most valuable con
 files and observations, not code. Everything below is about making those contributions safe for
 you, for the systems involved, and for the people who rely on the field table.
 
+## AI assistance, disclosed
+
+This project is developed with AI assistance (Claude). Commits produced that way carry a
+`Co-Authored-By` trailer. The model does not decide what is true: every format claim is checked by
+tests against real files and every live result was observed on hardware by the maintainer. See
+docs/PRACTICES.md for the rules we follow.
+
 ## A note on what the fixtures disclose
 
 The fixtures carry the eight inverter serial numbers of our systems and their save timestamps. Victron
