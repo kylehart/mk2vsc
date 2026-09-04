@@ -44,7 +44,7 @@ GROUPS: List[Tuple[str, List[str]]] = [
                                           "vs_load_below_for_min", "vs_ignore_ac_below_V", "vs_udc_below_for_s",
                                           "vs_dont_ignore_soc_below_pct", "vs_accept_battery_above_V", "vs_udc_above_for_min",
                                           "aes_low_current_limit_A", "aes_current_hysteresis_A"]),
-    ("Grid / ESS related", ["grid_code", "grid_settings_valid_checker_a", "flags2", "ubat_dont_charge_V",
+    ("Grid / ESS related", ["grid_code", "grid_settings_valid_checker_a", "general_grid_settings_int", "grid_settings_valid_checker_b", "flags2", "ubat_dont_charge_V",
                             "inverter_current_limit_during_assist_A"]),
     ("Flag registers", ["flags0", "flags1", "flags2"]),
 ]

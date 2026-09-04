@@ -88,7 +88,7 @@ slot-(86,01) block. The low nibble is the slot; the high nibble drops from f to 
 
 **Two records in the assistant area** (docs/FORMAT.md section 5), one per inverter:
 
-| Slot | Flag | Record | Subtype | Device-form length | Upload-form length |
+| Slot | Flag | Record | Setting 191 | Device-form length | Upload-form length |
 |---|---|---|---|---|---|
 | (00,00) | e4 | first record | 0001 | 1152 | 1102 |
 | (86,01) | e5 | second record | 0101 (0001 on System B) | 704 | 670 |

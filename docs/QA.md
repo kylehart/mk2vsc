@@ -115,8 +115,8 @@ matching GUI screenshot.
 | area | status | evidence |
 |---|---|---|
 | Section grammar and checksum | proven | every section of all 84 unique files (107 counting archive duplicates); four live uploads accepted; byte-exact round trip on every fixture |
-| Settings array as VE.Bus setting IDs 0 to 189 | strong | absorption/float anchor IDs 2/3; IDs 5, 6, 65, 73, 81, 88 corroborate on every block; one firmware only |
-| Individual fields | mixed | of 190 IDs, 62 are named: 4 CONFIRMED (written and read back live), 10 HIGH, 9 MEDIUM, 19 LOW, 20 UNKNOWN; the other 128 are unnamed (mostly 0 or 0xffff); docs/FIELDS.md lists each with its evidence |
+| Settings array as VE.Bus setting IDs 0 to 191 | strong | absorption/float anchor IDs 2/3; IDs 5, 6, 65, 73, 81, 88 corroborate on every block; one firmware only |
+| Individual fields | mixed | of 192 IDs, 64 are named: 4 CONFIRMED (written and read back live), 10 HIGH, 9 MEDIUM, 19 LOW, 20 UNKNOWN; the other 128 are unnamed (mostly 0 or 0xffff); docs/FIELDS.md lists each with its evidence |
 | Guarded writer | proven for its surface | edit-and-revert byte identity on every fixture; reproduces the archived prepared files; 4 live uploads |
 | By-serial diff and bookkeeping model | proven | real consecutive downloads, including the swapped-order pair |
 | Qualifier | proven against its motivating incident | catches the 2026-08-14 rollback file (fixture); the 2026-08-21 one-inverter GUI write is the case the agreement check was written for, but we hold no fixture from that day |

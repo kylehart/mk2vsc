@@ -52,7 +52,7 @@ built to do that, together with everything we learned about the file along the w
 |---|---|---|
 | Section grammar and integrity checksum | Proven | Validates on every section of all 84 fixture files (107 counting archive duplicates); edited files accepted by the device on 4 systems |
 | Settings array = VE.Bus setting IDs at +0x59 + 2n | High | Reference IDs reproduce 120 V output, 50.0 A limit, 95 %/98 % SoC, grid-code flag on all 162 blocks of the 81 well-formed fixtures |
-| Field table (190 entries) | Partial | 4 CONFIRMED, 10 HIGH, 9 MEDIUM, 19 LOW, 20 UNKNOWN named; the rest unnamed |
+| Field table (192 entries) | Partial | 4 CONFIRMED, 10 HIGH, 9 MEDIUM, 19 LOW, 20 UNKNOWN named; the rest unnamed |
 | Guarded writer (`mk2vsc edit`) | Proven live | Absorption, float and Virtual Switch thresholds written and read back on 4 systems, July to August 2026 |
 | By-serial diff (`mk2vsc diff`) | Proven | Consecutive downloads, including a pair whose blocks swapped position, classify as bookkeeping only |
 | Checker (`mk2vsc check`) | Proven | Reproduces the incident that motivated it (a rollback that reverted a charge-voltage fix) |

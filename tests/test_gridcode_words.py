@@ -1,4 +1,4 @@
-"""Settings 190/191 are the grid-code / LOM words, not an assistant-record header (xcellsior FINDINGS 7.4)."""
+"""Settings 190/191 are grid-code words in the settings array, not an assistant-record header."""
 import collections
 
 from mk2vsc.sections import RvmsFile
@@ -14,8 +14,7 @@ def test_settings_array_has_192_entries_and_the_area_starts_after_191(good_files
             assert len(u.settings()) == 192
 
 
-def test_lom_words_take_only_the_bench_values(good_files):
-    """Every block reads 190 in {0xffff, 0xfff5} and 191 in {0xffff, 0x0000, 0xff00, 0x0001, 0x0101}."""
+def test_grid_code_words_take_only_the_observed_values(good_files):
     seen = collections.Counter()
     for name, data in good_files.items():
         for u in unit_blocks(RvmsFile.parse(data)):
@@ -23,23 +22,64 @@ def test_lom_words_take_only_the_bench_values(good_files):
             assert w["w190"] in (0xFFFF, 0xFFF5), (name, u.serial, w)
             assert w["w191"] in (0xFFFF, 0x0000, 0xFF00, 0x0001, 0x0101), (name, u.serial, w)
             seen[w["state"]] += 1
-    assert seen["never"] and seen["lom_b"] and seen["no_lom"] and seen["residual"], seen
-    assert not seen["other"], seen
+    assert seen["never"] and seen["set"] and seen["residual"], seen
 
 
-def test_grid_code_blocks_carry_lom_words_and_bare_never_coded_blocks_do_not(good_files, manifest):
-    """Device downloads only: hand-prepared files in the corpus stamped setting 81 without the LOM words."""
-    by_file = {e["file"]: e for e in manifest["entries"]}
+GUI_AUTHORED = [   # ESS installs authored in VEConfigure by the installer and running (docs/ESS_INJECTION.md section 1)
+    "system_b/system_b_2026-08-12_download_ess_deviceform_1.rvms",
+    "system_c/system_c_2026-07-24_download_ess_deviceform_1.rvms",
+    "system_a/system_a_2026-09-03_download_ess_deviceform_1.rvms",
+]
+GRAFTED = [        # our byte-grafted installs, stored by the device and never started
+    "system_a/system_a_2026-08-13_download_ess_deviceform_1.rvms",
+    "system_d/system_d_2026-08-13_download_ess_deviceform_1.rvms",
+]
+
+
+def test_on_gui_authored_downloads_128_equals_191_per_inverter(good_files):
+    """128 == 191 on each inverter; the pair may differ (System C) or match (Systems A, B); 190 is 0xfff5 throughout."""
+    per_system = {}
+    for name in GUI_AUTHORED:
+        vals = set()
+        for u in unit_blocks(RvmsFile.parse(good_files[name])):
+            w = grid_code_words(u)
+            assert w["grid_code"] == 1 and w["w190"] == 0xFFF5 and w["words_agree"], (name, u.serial, w)
+            assert w["w191"] in (0x0001, 0x0101)
+            vals.add(w["w191"])
+        per_system[name.split("/")[0]] = vals
+    assert per_system == {"system_b": {0x0001}, "system_c": {0x0001, 0x0101}, "system_a": {0x0101}}, per_system
+
+
+def test_grafted_installs_show_128_and_191_disagreeing_on_one_inverter(good_files):
+    for name in GRAFTED:
+        agree = [grid_code_words(u)["words_agree"] for u in unit_blocks(RvmsFile.parse(good_files[name]))]
+        assert sorted(agree) == [False, True], (name, agree)
+
+
+def test_never_coded_blocks_read_ffff_in_all_three_words(good_files):
     for name, data in good_files.items():
-        if by_file[name]["origin"] != "download":
-            continue
         for u in unit_blocks(RvmsFile.parse(data)):
             w = grid_code_words(u)
-            if w["grid_code"] == 1:
-                assert w["w190"] == 0xFFF5 and w["w191"] in (0x0001, 0x0101), (name, u.serial, w)
-                assert w["w128"] & 0x00FF == w["w191"] & 0x00FF or w["w128"] == 0xFF01, (name, u.serial, w)
             if w["state"] == "never":
-                assert w["w128"] == 0xFFFF and u.setting(81) == 0
+                assert (w["w128"], w["w190"], w["w191"]) == (0xFFFF, 0xFFFF, 0xFFFF) and u.setting(81) == 0
+
+
+def test_flags0_bit11_is_not_the_charge_curve_selector(good_files):
+    """xcellsior reads setting 0 bit 11 as adaptive(set)/fixed(clear). Here every block with bit 11 clear has a
+    fixed curve (setting 10 = 1), but three blocks have bit 11 set with a fixed curve, so the bit is independent
+    of the curve: consistent with Victron's EnableReducedFloat (storage mode)."""
+    both = collections.Counter()
+    for name, data in good_files.items():
+        for u in unit_blocks(RvmsFile.parse(data)):
+            both[((u.setting(0) >> 11) & 1, u.setting(10))] += 1
+    assert both[(0, 3)] == 0
+    assert both[(1, 1)] >= 1
+
+
+def test_setting_17_is_the_relay_mode_default_on_every_block(good_files):
+    for name, data in good_files.items():
+        for u in unit_blocks(RvmsFile.parse(data)):
+            assert u.setting(17) == 6400 and u.setting(18) == 4700
 
 
 def test_gui_ess_record_lengths_unchanged_under_the_new_model(good_files, manifest):

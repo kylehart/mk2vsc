@@ -42,8 +42,9 @@ in the corpus. On ESS blocks the last three bytes read `ff 00 00` and the relati
 
 Every GUI-installed ESS system we hold carries exactly two records, one on each inverter: 704 bytes and
 1152 bytes. Which inverter gets which follows its role in the pair (the slot bytes at +0x35/+0x37 and
-the low nibble of the flag at +0x36). Setting 191 next to the record reads 0x0001 (LOM type B) or
-0x0101 (no loss-of-mains detection) and is a per-inverter grid-code setting, independent of the record.
+the low nibble of the flag at +0x36). Settings 128 and 191 just before the record are grid-code words
+set per inverter; on every GUI-authored install they are equal on each inverter (1 or 0x0101), and the
+two inverters of a pair may carry different values (System C) or the same (Systems A and B).
 
 Aligned by role, the 1152-byte body is byte-identical across System C, System B and System A. The 704-byte body
 differs by one byte across systems (a primary/secondary flag near the record start). So the payload is a

@@ -210,18 +210,18 @@ area   := len(2) | body[len] | tail
 ```
 
 The four bytes before `len` are settings 190 and 191, the grid-code / loss-of-mains words (0xffff = not
-applicable; 0xfff5 and 0x0001 / 0x0101 once a grid code has been applied; see docs/FIELDS.md and the
-xcellsior/ve-bus-programming bench table they match). They are settings, not part of the record.
+applicable; 0xfff5 and 0x0001 / 0x0101 once a grid code has been applied; see docs/FIELDS.md). They are
+settings, not part of the record.
 
 Every block in the corpus fits one of these shapes (settings 190/191 shown first for orientation):
 
 | Shape | Bytes | Where seen |
 |---|---|---|
 | bare | `ff ff ff ff` \| `00 00` + `ff 00 0b` | every well-formed block without an assistant and without a grid code |
-| bare, grid code removed | `f5 ff 00 00` or `f5 ff 00 ff` \| `00 00` + `ff 00 0b` | bare blocks on which a grid code was once applied: the LOM words stay (residual) |
+| bare, grid code removed | `f5 ff 00 00`, `f5 ff 00 ff` or `ff ff 00 00` \| `00 00` + `ff 00 0b` | bare blocks on which a grid code was once applied: some words stay (residual) |
 | 6-byte container | `ff ff ff ff` \| `06 00` + `a7 fe 00 00 57 01` + `ff fa 0a` | two files written by an older tool build (see docs/FIXTURES.md) |
 | stub | `ff ff ff ff` \| `40 00` + `a7 fe 00 00 57 01` + 56 × `ff` + `c0 0a`, then `ff 40 0a` | what VEConfigure wrote on both inverters after accepting a transplanted assistant and discarding it |
-| GUI-installed ESS | `f5 ff 01 01` or `f5 ff 01 00` \| `c0 02` + 704-byte body, or `80 04` + 1152-byte body, then a 72-byte tail | every working ESS install (one record per inverter; the pair holds one of each). 191 = 0x0001 is LOM type B, 0x0101 no LOM detection: a per-inverter grid-code setting |
+| GUI-installed ESS | `f5 ff 01 01` or `f5 ff 01 00` \| `c0 02` + 704-byte body, or `80 04` + 1152-byte body, then a 72-byte tail | every working ESS install (one record per inverter; the pair holds one of each). Settings 128 and 191 read 1 or 0x0101, equal to each other on every GUI-authored block, set per inverter |
 
 **Observed.** On bare, container and stub blocks the tail is `ff` + u16, and that u16 plus the body length
 is always 2816. **Inferred.** The u16 is a remaining-space counter over a 2816-byte assistant budget.
@@ -250,7 +250,7 @@ it does not author them, and `docs/ASSISTANTS.md` explains why we stopped trying
 * upload-form shift of exactly 10 bytes; setting 5 reads 120 (V) on every block under the shifted or
   unshifted offset, which is how the shift was pinned
 * save timestamp plausible on every device-form block
-* assistant area shapes as tabulated; free + used = 2822 on non-ESS blocks; ESS records 704/1152 only
+* assistant area shapes as tabulated; free + body = 2816 on non-ESS blocks; ESS records 704/1152 only
 * block order not stable; content identical by serial
 
 **Inferred**

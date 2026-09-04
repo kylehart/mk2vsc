@@ -86,27 +86,26 @@ def parse_assistant_area(u: UnitBlock) -> Dict:
 
 
 def grid_code_words(u: UnitBlock) -> Dict:
-    """Settings 81, 128, 190 and 191 with the reading the xcellsior bench table and our corpus support.
+    """Settings 81, 128, 190 and 191: the grid-code words, with the state the corpus supports.
 
-    state: ``never`` (all three words 0xffff, no grid code), ``lom_b`` (LOM type B), ``no_lom`` (no
-    loss-of-mains detection), ``residual`` (grid code 0 but the words are not 0xffff: a grid code was
-    applied and later removed; the firmware keeps the words), ``other``.
+    state: ``never`` (81 = 0 and all three words 0xffff: no grid code was ever applied), ``set`` (81 = 1;
+    the words are populated and 128/191 follow the inverter's role in the pair), ``residual`` (81 = 0 but at
+    least one word is not 0xffff: a grid code was applied and later removed; the firmware keeps some words).
+    Which loss-of-mains mode a value encodes is documented for a single bench unit (xcellsior FINDINGS 7.4)
+    and is not asserted here.
     """
     s81, s128, s190, s191 = (u.setting(i) for i in (81, 128, 190, 191))
+    words = f"128={s128:#06x} 190={s190:#06x} 191={s191:#06x}"
     if s81 == 0 and s128 == 0xFFFF and s190 == 0xFFFF and s191 == 0xFFFF:
-        state = "never"
+        state, summary = "never", "no grid code"
     elif s81 == 0:
-        state = "residual"
-    elif s191 == 0x0001 or s128 == 0x0001:
-        state = "lom_b"
-    elif s191 == 0x0101 or s128 == 0x0101:
-        state = "no_lom"
+        state, summary = "residual", f"no grid code, words residual ({words})"
     else:
-        state = "other"
-    return {"grid_code": s81, "w128": s128, "w190": s190, "w191": s191, "state": state,
-            "summary": {"never": "no grid code", "lom_b": "grid code, LOM type B", "no_lom": "grid code, no LOM detection",
-                        "residual": "no grid code, LOM words residual (a grid code was applied and removed)",
-                        "other": f"grid code {s81}, words 128={s128:#06x} 190={s190:#06x} 191={s191:#06x}"}[state]}
+        state, summary = "set", f"grid code {s81} ({words})"
+        if s128 != s191:
+            summary += "; 128 != 191, not seen on any GUI-authored download"
+    return {"grid_code": s81, "w128": s128, "w190": s190, "w191": s191, "state": state, "summary": summary,
+            "words_agree": s128 == s191}
 
 
 def _sha8(b: bytes) -> str:
