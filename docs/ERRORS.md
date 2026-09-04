@@ -51,8 +51,9 @@ on 2026-08-14 System A accepted a device-form bare rollback while it held an ESS
 (`system_a_2026-08-14_download_ess_deviceform_1`: 128 = 1 on both inverters, 191 = 1 and 257). The two
 candidate rollback files are in the corpus (`system_a_2026-08-14_prepared_bare_deviceform_1`, words
 0xffff/0xff00, and `_2`, words 1/0xff00); which one was uploaded, and that it was accepted, come from the
-operator's incident notes rather than from a re-download in the corpus (the next download, 08-19, follows
-an installer session and matches neither file). **Inferred**, then: a device-form file with differing words
+operator's incident notes rather than from a re-download in the corpus (the next download, 08-19, matches
+neither file: its charge profile is the pre-07-20 one, docs/HISTORY.md 2026-08-19, so the file that landed is
+not in the corpus). **Inferred**, then: a device-form file with differing words
 was not refused that day. (b) A transient state of the device in the minutes after an
 interrupted install: both refusals of archived files happened within the same session as an install
 attempt that ended at commit or in error 10, and the 08-14 acceptance came a day later. Neither reading
