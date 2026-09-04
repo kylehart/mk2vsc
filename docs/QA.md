@@ -28,15 +28,14 @@ python -m venv .venv
 .venv/bin/pytest
 ```
 
-468 tests, under a second.
+475 tests, under a second.
 
 ## The corpus and its limits
 
 84 unique files (81 well-formed, 162 inverter blocks, plus 3 negative controls), 8 inverters in 4 two-inverter split-phase systems, one
 firmware version (2729560), one format version (1.33), downloads spanning June to September 2026.
 Three files are deliberately broken and listed in `tests/conftest.py` `KNOWN_BAD` with the reason:
-a file with stale checksums that we built in June to learn whether the device validates the
-trailer, and two hand-built assistant grafts with broken pointer chains.
+a file with deliberately stale checksums (a negative control for the validator).
 
 What the corpus does not cover, and therefore what the tests cannot promise:
 
@@ -58,7 +57,7 @@ A claim test failing on a file from outside this envelope is the expected way to
    and your VEConfigure version compute. If any section reads BAD on a genuine download, stop: the
    integrity model does not hold for your files, and nothing else here should be trusted until it
    is understood.
-3. `mk2vsc decode a.rvms`. Compare absorption, float, charge current and the AC input current limit
+3. `mk2vsc show a.rvms`. Compare absorption, float, charge current and the AC input current limit
    with VEConfigure's Charger and General tabs or the VRM device page. If they match, the
    settings-array mapping holds for your block layout.
 4. Run the test suite with your file added to `fixtures/` (and to the manifest, see
@@ -68,7 +67,7 @@ A claim test failing on a file from outside this envelope is the expected way to
 
 When a claim test fails on your file, open an issue with the file (device downloads contain
 inverter serials and nothing else identifying) and the output of `mk2vsc census` and
-`mk2vsc decode --all --json`.
+`mk2vsc show --all --json`.
 
 ## The live-verification protocol we used
 

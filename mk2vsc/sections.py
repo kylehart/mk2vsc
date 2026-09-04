@@ -16,16 +16,8 @@ Sections seen, always in this order:
     BareSettingInfo  payload: 4001 bytes (0xfa1), byte-identical across every file we hold (a template/schema)
     BareSettingData  one per inverter in the VE.Bus system (our systems are pairs -> two sections)
 
-Notes on history, because earlier tooling used a different (equivalent) description:
-
-* The first implementation summed ``block[0x02:field]`` where ``block`` began at the ``B`` of
-  ``BareSettingData`` and added a "magic init constant" ``0x6142000F``.  That constant is simply the
-  first word of the section read from its length prefix: ``0f 00 42 61`` -> LE ``0x6142000F``.
-  There is no magic constant; the sum starts at the length prefix.
-* The "``0f 00`` framing" that ended every block but the last is the *next section's* name-length
-  prefix (15 = len("BareSettingData")).  It belongs to the next section, not to the block.
-* The checksum applies to every section (Mk2vscInfo, BareSettingInfo, BareSettingData), not only the
-  per-unit blocks.  All 84 unique files (107 with archive duplicates) x all sections validate.
+Checking aid: the first word of a ``BareSettingData`` section, read from its length prefix, is
+``0f 00 42 61``; a sum that starts at the ``B`` instead must add that word (``0x6142000F``) to agree.
 
 This module does not know what the payloads mean.  See ``units.py`` for the per-inverter block layout
 and ``fields.py`` for the settings table.

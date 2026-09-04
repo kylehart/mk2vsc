@@ -251,7 +251,7 @@ Preconditions, all required:
    (`com.victronenergy.battery` service present with live voltage and SoC, CAN RX counters increasing).
 2. A bypass path for the loads and a person at the switches.
 3. Battery above 80 %, grid present.
-4. A fresh bare download taken minutes before the upload; `mk2vsc validate` OK; `mk2vsc qualify` with the
+4. A fresh bare download taken minutes before the upload; `mk2vsc validate` OK; `mk2vsc check` with the
    system's intent file OK; keep it as the rollback file.
 5. A template: a device download of a GUI-installed ESS system with the same inverter model and firmware
    (ours: `fixtures/papaya/papaya_2026-07-24_download_ess_deviceform_1.rvms`, firmware 2729560).
@@ -262,7 +262,7 @@ Steps:
 mk2vsc experimental graft fresh.rvms template.rvms prepared.rvms --install-state --capacity-ah <Ah> --i-accept-the-risk
 mk2vsc validate prepared.rvms
 mk2vsc diff fresh.rvms prepared.rvms          # expect: flag byte, the install-state settings, assistant area only
-mk2vsc qualify prepared.rvms --intent intent.json
+mk2vsc check prepared.rvms --intent intent.json
 ```
 
 Upload `prepared.rvms` through VRM Remote VEConfigure. Re-download immediately, then:
@@ -306,7 +306,7 @@ None of this touches hardware.
   words are constants.
 
 To contribute: add the file under `fixtures/` following CONTRIBUTING.md, run `pytest` (a failing claim
-test on your file is itself the finding), and open an issue with `mk2vsc census` and `mk2vsc decode --json`
+test on your file is itself the finding), and open an issue with `mk2vsc census` and `mk2vsc show --json`
 output.
 
 ## 7. Do not, and how to recover

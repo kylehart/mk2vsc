@@ -73,8 +73,8 @@ def test_refuses_upload_form_and_corrupt_input(good_files):
         set_settings(bytes(corrupt), [(None, "float_V", 54.0)])
 
 
-def test_legacy_field_names_still_resolve(good_files):
-    out, edits = set_settings(good_files[BARE], [(None, "vs_return_V", 52.5), (None, "vs_entry_V", 51.0)])
+def test_aliases_resolve(good_files):
+    out, edits = set_settings(good_files[BARE], [(None, "vs_return", 52.5), (None, "vs_entry", 51.0)])
     assert {e.field.id for e in edits} == {58, 54}
 
 

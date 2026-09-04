@@ -2,9 +2,8 @@
 Qualify a file against *intended* values before upload and after re-download.
 
 Why: structural validity is not correctness.  A file that passes every checksum and every diff
-guard can still carry the wrong settings.  We learned this by uploading a rollback built from a month-old
-baseline that silently re-introduced an out-of-spec charge voltage on one inverter; every structural
-check passed and nobody noticed for a month.  The fix is to keep the intended values *outside* the
+guard can still carry the wrong settings.  A rollback built from an old baseline can re-introduce a
+setting you corrected since, and every structural check will pass (docs/HISTORY.md).  The fix is to keep the intended values *outside* the
 file under test and check the file against them, every time.
 
 An intent file is JSON (or a dict)::

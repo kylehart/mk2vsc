@@ -33,8 +33,7 @@ found:
 * `prepared`: a file our tools produced. Some were uploaded (and the corresponding download follows
   them in the manifest), some were never uploaded, and a few are known-defective early attempts
   kept precisely because they were rejected.
-* `experiment`: one file with deliberately stale checksums, made in June 2026 to learn whether the
-  device validates the trailer (it does).
+* `experiment`: one file with deliberately stale checksums, kept as a negative control.
 
 **state**
 
@@ -97,7 +96,7 @@ Keep them. A parser that accepts these is wrong.
   both. They are the only upload-form files not made by us, and `papaya_2026-07-24_download_ess_deviceform_1.rvms`
   is the device's own download after the second one was applied: the same settings, the same
   assistant records in padded form, zeros at +0x45.
-* **The legacy layout.** `mango/mango_2026-06-08_download_bare_deviceform_{1,2}.rvms` were written
+* **The older-build layout.** `mango/mango_2026-06-08_download_bare_deviceform_{1,2}.rvms` were written
   by an older tool build. Their assistant area is 15 bytes instead of 9 (a six-byte empty container)
   and a few header settings differ. They are the only files of that shape we have.
 * **The post-service download.** `guava/guava_2026-09-03_download_ess_deviceform_1.rvms` is Guava

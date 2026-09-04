@@ -30,7 +30,7 @@ built to do that, together with everything we learned about the file along the w
   * qualifies a file against the values you intended before you upload and after you re-download,
   * mines a library of archived downloads into a dated, per-inverter change log (`mk2vsc history`).
 * A corpus of 84 real device files with a manifest, and a test suite that checks every documented
-  claim against that corpus (468 tests).
+  claim against that corpus (475 tests).
 * A written account of the format as we understand it, and of what we do not understand.
 
 ## What this is not
@@ -49,9 +49,9 @@ built to do that, together with everything we learned about the file along the w
 | Section grammar and integrity checksum | Proven | Validates on every section of all 84 fixture files (107 counting archive duplicates); edited files accepted by the device on 4 systems |
 | Settings array = VE.Bus setting IDs at +0x59 + 2n | High | Reference IDs reproduce 120 V output, 50.0 A limit, 95 %/98 % SoC, grid-code flag on all 162 blocks of the 81 well-formed fixtures |
 | Field table (190 entries) | Partial | 4 CONFIRMED, 10 HIGH, 9 MEDIUM, 19 LOW, 20 UNKNOWN named; the rest unnamed |
-| Guarded writer (`mk2vsc set`) | Proven live | Absorption, float and Virtual Switch thresholds written and read back on 4 systems, July to August 2026 |
+| Guarded writer (`mk2vsc edit`) | Proven live | Absorption, float and Virtual Switch thresholds written and read back on 4 systems, July to August 2026 |
 | By-serial diff (`mk2vsc diff`) | Proven | Consecutive downloads, including a pair whose blocks swapped position, classify as bookkeeping only |
-| Qualifier (`mk2vsc qualify`) | Proven | Reproduces the incident that motivated it (a rollback that reverted a charge-voltage fix) |
+| Checker (`mk2vsc check`) | Proven | Reproduces the incident that motivated it (a rollback that reverted a charge-voltage fix) |
 | Assistant area | Read only | Record structure and stub signature recognised; record bodies not understood |
 | Upload-form (GUI export) files | Read only | Detected and decoded; the writer refuses them |
 | ESS injection (`mk2vsc experimental`) | Experimental, never ran | Graft and device-to-upload-form transform reproduce the August 2026 files byte-for-byte; the device stored them, the system never started |
@@ -68,92 +68,89 @@ pip install mk2vsc
 Or from source, with the fixture corpus and tests:
 
 ```
-git clone https://github.com/kylehart/mk2vsc.git
-cd mk2vsc
+git clone https://github.com/kylehart/mk2vsc.git && cd mk2vsc
 python3 -m venv .venv && .venv/bin/pip install -e ".[test]"
-.venv/bin/pytest          # 468 tests against the fixture corpus
+.venv/bin/pytest          # 475 tests against the fixture corpus
 ```
 
-Or run without installing: `PYTHONPATH=. python3 -m mk2vsc.cli ...`.
+## Quickstart: one download, one change
 
-## Quickstart
-
-```
-mk2vsc info fixtures/mango/mango_2026-07-24_download_bare_deviceform_1.rvms
-```
-```
-format 1.33  length 5055  checksums OK
-  HQ24149MY9U  fw 2729560  form=device  flag=f5  saved 2026-07-24T22:49:20+00:00  assistant: no assistant
-      flags0                          33268 bitmask [HIGH] (+0x059)
-      flags1                          19966 bitmask [HIGH] (+0x05b)
-      absorption_V                     56.8 V    [CONFIRMED] (+0x05d)
-      float_V                          54.0 V    [CONFIRMED] (+0x05f)
-      charge_current_A                   35 A    [HIGH] (+0x061)
-      ...
-```
-
-Two downloads of the same system a few minutes apart differ only in bookkeeping (pointer, save
-timestamp, checksum), even though the two inverter blocks may have swapped position in the file:
+Download the file from VRM (Device list, Remote VEConfigure, Download). Then:
 
 ```
-mk2vsc diff fixtures/mango/mango_2026-07-24_download_bare_deviceform_1.rvms \
-          fixtures/mango/mango_2026-07-24_download_bare_deviceform_2.rvms
+mk2vsc show download.rvms
 ```
 ```
-lengths 5055 -> 5055; prologue same; verdict: ONLY BOOKKEEPING (settings verbatim)
-  HQ2240FKJDE: len 482->482 form device->device bookkeeping=6B header=0B assistant=0B
-  HQ24149MY9U: len 482->482 form device->device bookkeeping=6B header=0B assistant=0B
-```
-
-Edit a setting on every inverter, then check the result against what you intended:
-
-```
-mk2vsc set fixtures/guava/guava_2026-07-20_download_bare_deviceform_1.rvms /tmp/prepared.rvms \
-         absorption_V=56.8 float_V=54.0
-mk2vsc qualify /tmp/prepared.rvms --intent examples/intent.example.json
-```
-```
-HQ2414U6FVN  absorption_V  56.0 -> 56.8 V  (+0x05d / file 0x1056)
-HQ2414AXENJ  absorption_V  57.6 -> 56.8 V  (+0x05d / file 0x123a)
-...
-wrote /tmp/prepared.rvms; verified: only the listed bytes and their section checksums changed
-/tmp/prepared.rvms: QUALIFIED
-  ok   all section checksums valid
-  ok   serials match the intended system
-  ok   absorption_V = 56.8 on all inverters
-  ok   float_V = 54.0 on all inverters
+download.rvms: 5055 bytes, 2 inverter(s), form=device, checksums OK
+  HQ2414AXENJ: firmware 2729560, saved 2026-07-20T18:41:22+00:00, assistant: no assistant
+  HQ2414U6FVN: firmware 2729560, saved 2026-07-20T18:41:28+00:00, assistant: no assistant
+  Charger
+    absorption_V        Absorption voltage       57.6 V    56 V   <- inverters differ
+    float_V             Float voltage            55.2 V    54 V   <- inverters differ
+    charge_current_A    Charge current             35 A    35 A
+    ...
 ```
 
-Every command: `info`, `validate`, `decode`, `diff`, `set`, `qualify`, `fix`, `fields`, `census`,
-`history`. `mk2vsc --help` and `mk2vsc <command> --help` describe the options.
+Change what needs changing. The output is written next to the input; the input is never touched:
 
-From Python:
+```
+mk2vsc edit download.rvms absorption=56.8 float=54.0
+```
+```
+  HQ2414AXENJ  absorption_V   57.6 -> 56.8 V
+  HQ2414U6FVN  absorption_V   56.0 -> 56.8 V
+  HQ2414AXENJ  float_V        55.2 -> 54.0 V
+  HQ2414U6FVN  float_V        54.0 -> 54.0 V (unchanged)
+
+wrote download.edited.rvms
+verified: only those bytes and their section checksums changed; the input file is untouched.
+
+Next:
+  1. VRM > Device list > Remote VEConfigure > Upload: download.edited.rvms
+  2. Download again from the same page.
+  3. mk2vsc verify download.edited.rvms <the new download>
+```
+
+After the upload, prove the device took exactly your change and nothing else, and that the values are
+what you intended on both inverters:
+
+```
+mk2vsc verify download.edited.rvms redownload.rvms
+mk2vsc check  redownload.rvms --expect absorption=56.8 float=54.0
+```
+
+That is the whole loop. `show`, `edit`, `verify`, `check`; plus `diff` for any two files, `history` for
+a folder of old downloads, `validate`, `fields`, and `experimental` (read docs/ESS_INJECTION.md first).
+Field names take aliases (`absorption`, `float`, `charge_current`, `ac_limit`, `low_shutdown`,
+`vs_entry`, `vs_return`, `capacity`), full names from `mk2vsc fields`, or VE.Bus setting IDs.
+
+From Python, the same loop:
 
 ```python
-from mk2vsc import RvmsFile, units_by_serial, set_settings, diff_bytes
+import mk2vsc
 
-data = open("download.rvms", "rb").read()
-print(units_by_serial(RvmsFile.parse(data))["HQ2414U6FVN"].setting(2) / 100)   # absorption, volts
-out, edits = set_settings(data, [(None, "absorption_V", 56.8)])                # None = every inverter
-assert not diff_bytes(data, out).only_bookkeeping                               # the setting changed
-open("prepared.rvms", "wb").write(out)
+cfg = mk2vsc.load("download.rvms")
+print(cfg["HQ2414U6FVN"]["absorption"])        # 56.0
+cfg.set("absorption", 56.8)                      # every inverter
+cfg.set("float", 54.0)
+path = cfg.save()                                # download.edited.rvms
+# upload through VRM, download again, then:
+ok, report = mk2vsc.verify(path, "redownload.rvms")
+ok, results = mk2vsc.load("redownload.rvms").check(absorption=56.8, float=54.0)
 ```
 
-See examples/edit_and_verify.py for the full loop.
-
-## The change-control loop
+## When you run a fleet: the change-control loop
 
 Uploading a file replaces the whole configuration of every inverter in the system. These five steps
 are how we make that safe; docs/CHANGE_CONTROL.md explains each one and the incident behind it.
 
 1. Download a fresh file from VRM (Remote VEConfigure) into `00_baseline/`. Never start from an
    archived copy: the device rejects stale save timestamps, and old files carry old values.
-2. `mk2vsc set` the baseline into `01_prepared/`, then `mk2vsc qualify` it against an intent file that
-   lives outside the file under test.
+2. `mk2vsc edit` the baseline into `01_prepared/`, then `mk2vsc check` it against the values you intend
+   (on the command line, or an intent file that lives outside the file under test).
 3. Upload `01_prepared/` through VRM.
 4. Download again into `02_downloaded/`.
-5. `mk2vsc diff` prepared against downloaded (expect "ONLY BOOKKEEPING") and `mk2vsc qualify` the
-   download. "Success" in the upload dialog is not the same as "the settings are right".
+5. `mk2vsc verify` prepared against downloaded and `mk2vsc check` the download. "Success" in the upload dialog is not the same as "the settings are right".
 
 ## Corpus and tests
 
