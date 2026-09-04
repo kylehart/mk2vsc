@@ -35,7 +35,7 @@ The sections always appear in this order:
 | `BareSettingInfo` | 4001 bytes, byte-identical across all 84 files | 1 |
 | `BareSettingData` | one inverter's configuration | one per inverter (2 in every corpus file) |
 
-A real header, from `fixtures/guava/guava_2026-07-20_download_bare_deviceform_1.rvms`:
+A real header, from `fixtures/system_a/system_a_2026-07-20_download_bare_deviceform_1.rvms`:
 
 ```
 00000000: 1d00 5645 436f 6e66 6967 2073 6574 7469  ..VEConfig setti
@@ -101,7 +101,7 @@ Offsets below are relative to the section's **name start** (the `B`), because th
 change record in this project addressed them. The section proper begins two bytes earlier at the length
 prefix, so the section-relative offset is always +2.
 
-The same Guava file, first unit block:
+The same System A file, first unit block:
 
 ```
 00000ff8: 0f 0042 6172 6553 6574 7469 6e67 4461 7461  ..BareSettingData

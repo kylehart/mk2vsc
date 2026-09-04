@@ -16,4 +16,4 @@ jobs:
       - run: pytest -q
       - run: bash tools/leakscan.sh
         if: runner.os != 'Windows'
-      - run: mk2vsc validate fixtures/mango/mango_2026-07-20_download_bare_deviceform_1.rvms
+      - run: mk2vsc validate fixtures/system_b/system_b_2026-07-20_download_bare_deviceform_1.rvms

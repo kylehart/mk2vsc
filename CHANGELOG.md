@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+* Installations are referred to by public aliases System A to D. Fixture directories and files are
+  `system_a` ... `system_d`; the manifest key `site` is now `system` with values `A` ... `D`.
+  `tools/leakscan.sh` refuses the former names.
+
 ## 0.2.0 (2026-09-04)
 
 Redesigned for first use. No backward compatibility with 0.1.x command names.

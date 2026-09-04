@@ -6,8 +6,8 @@ the only supported way to change their configuration was a Windows-only program 
 machine. Every design choice in the code traces back to something that happened to a real system. This
 file tells those stories in order, with dates, so the choices make sense.
 
-Systems are referred to by their names: Guava, Mango, Papaya, Sugar Apple. Inverters are referred to by
-serial. "The installer" is the company that commissioned the systems and holds the grid-code password.
+Systems are referred to by public aliases, System A to System D, never by the property they serve.
+Inverters are referred to by serial. "The installer" is the company that commissioned the systems and holds the grid-code password.
 
 ## June 2026: reading files, and a first patcher we later froze
 
@@ -15,7 +15,7 @@ We started by downloading each system's `.rvms` from VRM Remote VEConfigure and 
 ASCII inverter serials were obvious. Scanning for adjacent u16 pairs in the 45 to 59 V range found the
 absorption and float voltages at block offsets +0x5d and +0x5f, and they matched what VRM reported.
 
-That alone paid for itself. Two of the four systems (Guava and Papaya) had one inverter set to
+That alone paid for itself. Two of the four systems (System A and System C) had one inverter set to
 48.0 / 48.0 V absorption / float while its partner ran 57.6 / 55.2 V. On a shared battery, a
 48 V charge target means that inverter never really charges. The installer's technician had told us it
 was harmless because "the slave's config is ignored". The files and the live per-leg currents said
@@ -23,12 +23,12 @@ otherwise: these are split-phase pairs, each inverter governs its own leg.
 
 A second find came from a VEConfigure screenshot of the Virtual Switch tab, which let us anchor the
 "ignore AC input when Udc lower than" and "accept battery again when Udc higher than" thresholds at
-+0xc5 and +0xcd. Guava and Papaya carried a return threshold of 64.00 V. A 48 V lithium battery cannot
++0xc5 and +0xcd. System A and System C carried a return threshold of 64.00 V. A 48 V lithium battery cannot
 reach 64 V, so once those systems dropped to grid pass-through they could never come back on voltage.
 That was the mechanism behind a 5.6-day stuck-on-grid episode we had been unable to explain from
 telemetry alone.
 
-We wrote a byte patcher. Two files from Mango produced by an older tool build (block length 0x1ea)
+We wrote a byte patcher. Two files from System B produced by an older tool build (block length 0x1ea)
 differed in three body bytes and two trailer bytes, and the trailer bytes moved by exactly the body
 deltas. We concluded "two 8-bit sum checksums" and reproduced that file byte-for-byte. A code review a
 few days later froze the patcher: it had been validated on one edit of one legacy file, the production
@@ -61,7 +61,7 @@ in the fixture corpus validates.
 
 ## 2026-07-20: the first live proof
 
-The same afternoon we changed float from 54.0 to 54.1 V on both Sugar Apple inverters with the new
+The same afternoon we changed float from 54.0 to 54.1 V on both System D inverters with the new
 writer, uploaded the file through VRM Remote VEConfigure, and got "Success, the system has been
 configured". The re-download read 54.1 V on both inverters and passed our validator, which meant
 VEConfigure and the device compute the field the same way we do. The diff between what we uploaded and
@@ -77,11 +77,11 @@ docs/CHANGE_CONTROL.md.
 We tell this part in detail because the failures shaped the safety rules, and because someone will be
 tempted to repeat it.
 
-Papaya had the ESS assistant loaded on one inverter only, a half-installation that caused power to
+System C had the ESS assistant loaded on one inverter only, a half-installation that caused power to
 flow across the two phases. We wanted ESS on both inverters of every system, and we wanted to do it by
 file rather than wait for another Windows session.
 
-**Removal test, 2026-07-20 afternoon.** We truncated Papaya's ESS block back to a bare block, recomputed
+**Removal test, 2026-07-20 afternoon.** We truncated System C's ESS block back to a bare block, recomputed
 the pointer and checksum, and uploaded. Two earlier versions were cleanly rejected (mk2vsc-49) and taught
 us the pointer and framing rules. The third was accepted, and the running assistant became corrupt:
 VE.Bus error 6 (DDC program error), the system dropped from ESS to pass-through, the inverter went off.
@@ -95,7 +95,7 @@ code step with mk2vsc-36. The VE.Bus sat in error 10 for about 17 minutes, then 
 reboots. Afterwards even the clean pre-incident files were rejected with mk2vsc-36. At the time we
 read that as the device now demanding a password; see the recovery lesson below for what it really was.
 
-**Mango, 2026-07-24.** Two versions were rejected with mk2vsc-47 ("more than one unknown unit"). One had
+**System B, 2026-07-24.** Two versions were rejected with mk2vsc-47 ("more than one unknown unit"). One had
 a real defect (a block copied from a GUI export in upload form, so every field after +0x45 was shifted
 10 bytes). Fixing it changed nothing, because the actual cause was the GX showing one serial as
 "Unknown"; a GX reboot cleared it and the same construction was accepted. Then VEConfigure wrote a
@@ -103,7 +103,7 @@ a real defect (a block copied from a GUI export in upload form, so every field a
 re-download taught us that the two blocks swap file position between downloads, so every comparison must
 be by serial (see mk2vsc/diff.py).
 
-**Guava, August.** On 2026-08-12 a graft with assistant records byte-identical to the working Papaya
+**System A, August.** On 2026-08-12 a graft with assistant records byte-identical to the working System C
 install was accepted and stubbed again, with a tunnel timeout mid-write and a VE.Bus reset. A second
 version that also stamped the seven header bytes that differ between bare and grid-coded blocks got
 further, into "Resetting VE.Bus products", and was rejected at commit with mk2vsc-36. The archived bare
@@ -125,21 +125,21 @@ form to upload form and proved it reproduces the installer's actual export from 
 download, byte-for-byte per block. The first upload was rejected mk2vsc-49 because we emitted blocks in
 the download's order and the two-byte prefix that follows the first block belongs to the next section,
 so the parser miscounted units. Fixing order and stamping current unix timestamps (that is what the
-"nonce" fields are) produced a file the device accepted. Guava then stored a perfect ESS configuration
+"nonce" fields are) produced a file the device accepted. System A then stored a perfect ESS configuration
 and still did not start.
 
-**Sugar Apple, 2026-08-13.** A one-shot graft from a clean bare state, carrying every header value the
+**System D, 2026-08-13.** A one-shot graft from a clean bare state, carrying every header value the
 working installs had, was accepted and stored, and the system did not start either. Telemetry was dark
 for six hours and the building was found without power; it was put on manual bypass.
 
-**Pattern and hypothesis.** GUI-authored files (Papaya, Mango) load and run. Our byte-authored files
-(Guava, Sugar Apple) load, store byte-perfect, advertise the assistant, and never leave the connecting
+**Pattern and hypothesis.** GUI-authored files (System C, System B) load and run. Our byte-authored files
+(System A, System D) load, store byte-perfect, advertise the assistant, and never leave the connecting
 state. The only discriminator we could not falsify was live BMS data: the two runners had it, the two
-non-starters did not (Guava's CAN bus had been physically dead since 2026-07-20, Sugar Apple has no BMS
+non-starters did not (System A's CAN bus had been physically dead since 2026-07-20, System D has no BMS
 connected). A loaded ESS assistant may gate system start on valid battery data. This is a hypothesis,
 not a finding.
 
-**End state, 2026-09-02.** The installer performed GUI sessions on the remaining systems. Guava, with
+**End state, 2026-09-02.** The installer performed GUI sessions on the remaining systems. System A, with
 its CAN bus repaired and a third battery module installed, now runs ESS on both inverters with the
 charge profile corrected in the same session. That is consistent with the BMS hypothesis but does not
 test it: the assistant was GUI-authored. Whether a file built by our transform would have started on a
@@ -148,7 +148,7 @@ and documented in docs/ESS_INJECTION.md, so that someone can run that test.
 
 ## 2026-08-19: the month-long regression
 
-A routine decode showed Guava back at the mismatched 56.0 / 57.6 V and 54.0 / 55.2 V charge profile
+A routine decode showed System A back at the mismatched 56.0 / 57.6 V and 54.0 / 55.2 V charge profile
 we had corrected on 2026-07-20. Every August full-configuration upload (grafts, the upload-form test,
 the rollback) had been built from a baseline that predated the fix. A `.rvms` upload replaces the whole
 configuration; there is no merge and no warning. Our configuration-change monitor logged the reversion
@@ -162,7 +162,7 @@ other. Run before upload and again on the re-download.
 
 ## 2026-08-21: seven settings on one inverter
 
-During a GUI session on Sugar Apple, seven settings were written to one inverter and none to the other,
+During a GUI session on System D, seven settings were written to one inverter and none to the other,
 leaving the two legs 0.3 V apart on a shared battery. VEConfigure sends settings one inverter at a time
 and it is easy to forget the second. The qualifier's agreement check exists for exactly this case.
 

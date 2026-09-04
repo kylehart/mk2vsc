@@ -9,8 +9,8 @@ built to test that.  Result on 2026-08-13: the device ACCEPTED a transformed fil
 this module now contains), stored the configuration, and the system still did not start.  The
 hypothesis is weakened, not dead: the target system had a broken BMS bus at the time (H3).
 
-Derivation.  We hold one matched pair: the installer's real GUI export for Papaya (upload form) and
-Papaya's own device download taken after that upload succeeded (device form).  Per block, upload =
+Derivation.  We hold one matched pair: the installer's real GUI export for System C (upload form) and
+System C's own device download taken after that upload succeeded (device form).  Per block, upload =
 
     raw[0x00:0x45]                        name, pointer, header, slot/flag bytes, serial (unchanged)
     BLOB12 + u32 export_timestamp         16 bytes; BLOB12 is identical in every GUI export we hold

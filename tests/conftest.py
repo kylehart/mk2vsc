@@ -14,11 +14,11 @@ FIXTURES = os.path.join(ROOT, "fixtures")
 
 # file -> why it is malformed (these are kept on purpose as negative controls)
 KNOWN_BAD = {
-    "guava/guava_2026-06-18_experiment_bare_deviceform_1.rvms":
+    "system_a/system_a_2026-06-18_experiment_bare_deviceform_1.rvms":
         "deliberately stale checksums (June 2026 probe of whether the device validates the trailer)",
-    "guava/guava_2026-07-21_prepared_ess_uploadform_1.rvms":
+    "system_a/system_a_2026-07-21_prepared_ess_uploadform_1.rvms":
         "v1 graft: upload-form block transplanted into a device-form file; pointer chain broken (never uploaded)",
-    "papaya/papaya_2026-07-20_prepared_ess_deviceform_1.rvms":
+    "system_c/system_c_2026-07-20_prepared_ess_deviceform_1.rvms":
         "v4 of the 2026-07-20 ESS-load-both attempt: last pointer points inside the file (rejected mk2vsc-49)",
 }
 
