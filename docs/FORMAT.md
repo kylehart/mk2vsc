@@ -87,7 +87,8 @@ version; it is the same in every file, including those written by two different 
 Configurator builds.
 
 **Observed.** `BareSettingInfo`'s 4001-byte payload is byte-identical in every file. It is the settings
-schema for this firmware: an 11-byte header (`04 00 00 00` | u32 firmware 2729560 | `02 80 07`), then 192
+schema for this firmware, the same record Victron's MK2 protocol returns for `CommandGetSettingInfo`
+(document 'Interfacing with VE.Bus products, MK2 Protocol 3.14', section 7.3.8): an 11-byte header (`04 00 00 00` | u32 firmware 2729560 | `02 80 07`), then 192
 records of 10 bytes, one per setting ID:
 
 ```

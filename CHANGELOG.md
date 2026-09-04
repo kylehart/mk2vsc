@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0 (2026-09-04)
+
+* Settings 0 to 65 and all flag bits now carry Victron's own names from the public MK2 Protocol 3.14 document; 63 of 80 named fields are HIGH confidence. New: Virtual Switch relay-mode settings 15 to 43, mains voltage window 44 to 47, assist boost factor 48, AES current limit 50/51, low-battery pre-alarm offset 63, three-phase mode 14, slave count 13.
+* Renamed: `grid_code_active` -> `grid_code`, `solar_wind_priority_flags` -> `flags2`, absorption timers gain `_min`.
+* Values with a schema offset (durations, pre-alarm offset, highest mains voltage) decode and encode correctly.
+
 ## 0.3.0 (2026-09-04)
 
 * `BareSettingInfo` decoded as the device settings schema: one 10-byte record per setting with scale, offset, default, min and max (`mk2vsc.schema`). The writer now refuses raw values outside the device's own range; the fields table shows each setting's default and range.

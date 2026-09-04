@@ -21,7 +21,7 @@ def test_no_args_prints_help(capsys):
 def test_show_default_and_all_and_json(capsys):
     assert main(["show", BARE]) == 0
     out = capsys.readouterr().out
-    assert "Absorption voltage" in out and "inverters differ" in out and "Charger" in out
+    assert "UBatAbsorption" in out and "inverters differ" in out and "Charger" in out
     assert "param85" not in out
     assert main(["show", BARE, "--all"]) == 0
     assert "param85" in capsys.readouterr().out
@@ -56,7 +56,7 @@ def test_edit_refusals(tmp_path, capsys):
     assert main(["edit", str(src), "absorption=5.68"]) == 1           # implausible
     err = capsys.readouterr().err
     assert "plausible" in err or "outside the device" in err
-    assert main(["edit", str(src), "vs_load_above_for_s=3"]) == 1           # low confidence
+    assert main(["edit", str(src), "param66_V=57.72"]) == 1           # low confidence
     assert "allow_unverified" in capsys.readouterr().err
     assert main(["edit", str(src), "absorption=abc"]) == 2
     assert main(["edit", str(src), "absorption"]) == 2
