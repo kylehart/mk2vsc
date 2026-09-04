@@ -16,6 +16,7 @@ jobs:
     # Requires the PyPI project "mk2vsc" with this repository registered as a trusted publisher
     # (environment "pypi"). Until then this job fails harmlessly at the publish step; see issue #11.
     needs: build
+    if: vars.PYPI_TRUSTED_PUBLISHING == 'true'   # set this repository variable once the PyPI project exists (issue #11)
     runs-on: ubuntu-latest
     environment: pypi
     permissions: {id-token: write}
