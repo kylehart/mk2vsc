@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0 (2026-09-04)
+
+* `BareSettingInfo` decoded as the device settings schema: one 10-byte record per setting with scale, offset, default, min and max (`mk2vsc.schema`). The writer now refuses raw values outside the device's own range; the fields table shows each setting's default and range.
+* From the schema: Virtual Switch durations are `raw - 1` seconds/minutes (MEDIUM, editable with `--allow-unverified`), setting 62 is the output frequency (60.00 Hz, stored as a period), charge efficiency is `(raw + 1) / 256`, settings 63/71 are signed offsets, 70/74 percentages, 81 a 0..32 grid-code index.
+* Field values now honour the schema offset (e.g. `vs_udc_below_for_s=20`).
+
 ## 0.2.1 (2026-09-04)
 
 * Virtual Switch block decoded from the VEConfigure tab and the same-period download (issue #8): load thresholds are current in 0.01 A (`vs_load_high`, `vs_load_low`, HIGH, editable), SoC-lower is setting 51 at x0.5 % (MEDIUM), SoC-higher 50 (LOW), durations 53/55/57/59 located but encoding unknown. Settings 16 to 18 and 28 to 30 identified as a second copy of the same conditions.

@@ -24,6 +24,7 @@ from .sections import RvmsFile
 from .units import units_by_serial, unit_blocks
 from .fields import lookup, CONFIRMED, HIGH, Field, BY_NAME
 from .assistants import parse_assistant_area
+from .schema import schema_of
 
 
 class WriteRefused(RuntimeError):
@@ -66,6 +67,7 @@ def set_settings(data: bytes, changes: Iterable[Tuple[Optional[str], object, obj
         raise WriteRefused(f"{stubbed} carry the empty assistant STUB of a failed by-file install; restore the "
                            "system from a fresh bare download before editing settings")
 
+    schema = schema_of(f)
     payloads = [s.payload for s in f.sections]
     edits: List[Edit] = []
     touched_sections = set()
@@ -75,11 +77,16 @@ def set_settings(data: bytes, changes: Iterable[Tuple[Optional[str], object, obj
             raise WriteRefused(f"{fld.name} is {fld.confidence}; pass allow_unverified=True to edit it anyway")
         if fld.bits is not None:
             raise WriteRefused(f"{fld.name} is a flag register; bit-level editing is not supported")
-        new_raw = fld.encode(value) if not isinstance(value, int) or fld.scale != 1.0 else int(value)
-        if not 0 <= new_raw <= 0xFFFF:
-            raise WriteRefused(f"{fld.name}={value} does not fit u16")
-        if fld.scale == 1.0 and float(value) != new_raw:
-            raise WriteRefused(f"{fld.name} is an integer field; {value} would be rounded to {new_raw}")
+        try:
+            new_raw = fld.encode(value)
+        except ValueError as e:
+            raise WriteRefused(str(e))
+        if fld.scale == 1.0 and not fld.period and float(value) != float(fld.decode(new_raw)):
+            raise WriteRefused(f"{fld.name} is an integer field; {value} would be rounded to {fld.decode(new_raw)}")
+        info = schema[fld.id]
+        if not allow_out_of_range and not info.unused and not info.in_range(new_raw):
+            raise WriteRefused(f"{fld.name}: raw {new_raw} is outside the device's own range {info.min}..{info.max} "
+                               f"({fld.decode(info.min)}..{fld.decode(info.max)} {fld.unit}) from BareSettingInfo")
         if not allow_out_of_range and fld.lo is not None and not (fld.lo <= fld.decode(new_raw) <= fld.hi):
             raise WriteRefused(f"{fld.name}={fld.decode(new_raw)} {fld.unit} is outside the plausible range "
                                f"{fld.lo}..{fld.hi} for a 48 V system; pass allow_out_of_range=True if you mean it")

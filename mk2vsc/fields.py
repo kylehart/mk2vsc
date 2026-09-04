@@ -51,6 +51,8 @@ class Field:
     bits: Optional[Dict[int, str]] = None   # for flag registers: bit -> meaning when SET
     lo: Optional[float] = None   # plausibility range in engineering units (48 V systems); writer refuses outside
     hi: Optional[float] = None
+    raw_offset: int = 0          # added to the raw value before scaling (the device schema's offset word)
+    period: bool = False         # value = scale / raw (a period stored where a frequency is shown)
 
     @property
     def offset(self) -> int:
@@ -58,10 +60,16 @@ class Field:
         return 0x59 + 2 * self.id
 
     def decode(self, raw: int):
-        return raw / self.scale if self.scale != 1.0 else raw
+        if self.period:
+            return round(self.scale / raw, 4) if raw else 0
+        v = raw + self.raw_offset
+        return v / self.scale if self.scale != 1.0 else v
 
     def encode(self, value) -> int:
-        raw = int(round(value * self.scale))
+        if self.period:
+            raw = int(round(self.scale / value))
+        else:
+            raw = int(round(value * self.scale)) - self.raw_offset
         if not 0 <= raw <= 0xFFFF:
             raise ValueError(f"{self.name}: {value} does not fit in u16 after scaling")
         return raw
@@ -125,8 +133,8 @@ FIELDS: List[Field] = [
           "Reference; 2.00 V fleet-wide.", "200, 640", XC, lo=0.0, hi=12.0),
     Field(13, "unknown_13", "", 1, "", UNKNOWN, "", "", "0"),
     Field(14, "unknown_14", "", 1, "", UNKNOWN, "", "", "0"),
-    Field(15, "unknown_toggle_15", "Unknown toggle", 1, "", LOW,
-          "The reference notes this 'differs between units'.",
+    Field(15, "unknown_toggle_15", "Unknown toggle", 1, "enum", LOW,
+          "An enumeration 0..6 (device schema: default 1, min 0, max 6).",
           "Values track the installer's configuration pass (3 on configured, 1/0 on older).", "0, 1, 3", XC),
     Field(16, "param16", "", 1, "", LOW, "First of a repeated block (16-18 and 28-30) whose values equal the Virtual "
           "Switch load-high, Udc-high and Udc-low settings of an untouched system (2125 / 6400 / 4700 and 531 / 6400 / "
@@ -166,36 +174,45 @@ FIELDS: List[Field] = [
           "The tab showed 1000 W while the same-period download held 833 = 8.33 A = 1000 W / 120 V; the 750 W "
           "field matched setting 56 the same way. Current values 1750 = 17.5 A = 2100 W.", "833, 1750, 2125", "ours",
           lo=0, hi=100),
-    Field(53, "vs_load_above_for", "VS: ... for (seconds)", 1, "", LOW,
-          "Duration for the load-high condition (1 second on the tab). Encoding unknown.",
-          "Adjacent to setting 52.", "0, 4, 6"),
+    Field(53, "vs_load_above_for_s", "VS: ... for (seconds)", 1, "s", MEDIUM,
+          "Duration for the load-high condition, in seconds.",
+          "Device schema: offset -1, unit 1/60 minute; raw 4 = 3 s. Adjacent to setting 52.", "0, 4, 6",
+          "schema", lo=0, hi=254, raw_offset=-1),
     Field(54, "vs_ignore_ac_below_V", "VS: do not ignore AC input when Udc lower than", 100, "V", CONFIRMED,
           "Battery condition for accepting the grid: DC voltage below this for the configured time.",
           "Matched to the VEConfigure tab (51.40 V) and to the installer's note of lowering it to 51.0 at all "
           "sites; later GUI changes landed here; written by us.", "5100 (current), 4700 (old)", "ours"),
-    Field(55, "vs_udc_below_for", "VS: ... for (seconds)", 1, "", LOW,
-          "Duration for the Udc-low condition (20 seconds on the tab). Encoding unknown.",
-          "Adjacent to setting 54; 21 on current blocks.", "0, 6, 21"),
+    Field(55, "vs_udc_below_for_s", "VS: ... for (seconds)", 1, "s", MEDIUM,
+          "Duration for the Udc-low condition, in seconds.",
+          "Device schema: offset -1; raw 21 = 20 s, the value on the VEConfigure tab. Adjacent to setting 54.",
+          "0, 6, 21", "schema", lo=0, hi=254, raw_offset=-1),
     Field(56, "vs_ignore_load_below_A", "VS: when accepting AC due to load, ignore AC when load lower than", 100, "A", HIGH,
           "Load condition for returning to battery: AC load below this current (tab shows watts).",
           "750 W on the tab; 625 = 6.25 A = 750 W / 120 V in the same-period download. Current 1500 = 15 A = 1800 W.",
           "625, 1500, 531", "ours", lo=0, hi=100),
-    Field(57, "vs_load_below_for", "VS: ... for (minutes)", 1, "", LOW,
-          "Duration for the load-low condition (1 minute on the tab). Encoding unknown.",
-          "Adjacent to setting 56.", "0, 2"),
+    Field(57, "vs_load_below_for_min", "VS: ... for (minutes)", 1, "min", MEDIUM,
+          "Duration for the load-low condition, in minutes.",
+          "Device schema: offset -1; raw 2 = 1 min, the value on the tab. Adjacent to setting 56.", "0, 2",
+          "schema", lo=0, hi=254, raw_offset=-1),
     Field(58, "vs_accept_battery_above_V", "VS: when accepting AC due to a battery condition, ignore AC when Udc higher than", 100, "V", CONFIRMED,
           "Battery condition for returning to battery: DC voltage above this. A value the battery cannot reach "
           "(64.00 V on a 48 V LFP) makes grid pass-through permanent.",
           "Tab match (53.00 V); the installer's per-site values (53.0 / 52.5) appear here; written by us.",
           "5250, 5300, 6400 (unreachable)", "ours"),
-    Field(59, "vs_udc_above_for", "VS: ... for (minutes)", 1, "", LOW,
-          "Duration for the Udc-high condition (1 minute on the tab). Encoding unknown.",
-          "Adjacent to setting 58.", "0, 2"),
+    Field(59, "vs_udc_above_for_min", "VS: ... for (minutes)", 1, "min", MEDIUM,
+          "Duration for the Udc-high condition, in minutes.",
+          "Device schema: offset -1; raw 2 = 1 min, the value on the tab. Adjacent to setting 58.", "0, 2",
+          "schema", lo=0, hi=254, raw_offset=-1),
     Field(60, "solar_wind_priority_flags", "Solar & wind priority flags", 1, "bitmask", MEDIUM,
           "Reference: bit 4 (16) = off, 528 = on.", "Reference; 16 on bare blocks, 48 after GUI ESS install.",
           "16, 48, 0", XC),
-    Field(62, "param62", "", 1, "", UNKNOWN, "", "", "41667, 41666"),
-    Field(63, "param63", "", 1, "", UNKNOWN, "", "", "32668, 32768"),
+    Field(62, "output_frequency_Hz", "Inverter output frequency", 2500, "Hz", HIGH,
+          "AC output frequency, stored as the period in units of 1/2500 ms: 41667 = 16.667 ms = 60 Hz.",
+          "Device schema: scale -2500, range 38461..55555 = 65 Hz down to 45 Hz, default 41666; every block reads 60.00 Hz.",
+          "41667, 41666", "schema", lo=45, hi=65, period=True),
+    Field(63, "signed_offset_63_V", "", 100, "V", LOW,
+          "A signed voltage offset centred on 32768 (device schema: offset -32768, scale -100, range -37.20 to +48.00 V); 0.00 or -1.00 V here.",
+          "Schema only.", "32668, 32768", "schema", raw_offset=-32768),
     Field(64, "battery_capacity_Ah", "Battery capacity", 1, "Ah", HIGH,
           "Capacity used by the inverter's built-in battery monitor; 0 disables the monitor.",
           "Reference; 200 / 300 Ah match the installed EG4 module counts (2 x 100 Ah vs 3 x 100 Ah).",
@@ -208,22 +225,27 @@ FIELDS: List[Field] = [
     Field(67, "param67", "", 1, "", LOW, "Changed 04 -> 02 by the GUI ESS install on one inverter.", "", "3, 2, 4"),
     Field(68, "param68_V", "", 100, "V?", LOW, "54.00 V -- voltage-like, pairs with 66.", "", "5400"),
     Field(69, "param69", "", 1, "", LOW, "Changed 1c -> 04 by the GUI ESS install on one inverter.", "", "3, 4, 28"),
-    Field(70, "param70", "", 1, "", LOW, "0 -> 50 during the installer's configuration pass ('?flag_e5').", "",
-          "50, 0"),
-    Field(71, "param71", "", 1, "", UNKNOWN, "", "", "32768"),
-    Field(72, "charge_efficiency", "Battery charge efficiency", 1, "", MEDIUM,
-          "Reference: 242 is about 95 % for LiFePO4.", "Reference.", "250, 242, 255", XC),
+    Field(70, "soc_pct_70", "", 2, "%", LOW, "A state-of-charge value (device schema: scale -2, 0..100 %); "
+          "25 % on configured blocks, the value the installer set fleet-wide as the reserve.", "Schema scale; one value.",
+          "50, 0", "schema"),
+    Field(71, "signed_offset_71", "", 1, "", LOW, "A signed value centred on 32768 (schema range -800..+800); 0 here.",
+          "Schema only.", "32768", "schema", raw_offset=-32768),
+    Field(72, "charge_efficiency", "Battery charge efficiency", 256, "", MEDIUM,
+          "Fraction: (raw + 1) / 256. 255 = 1.000, 242 = 0.949 (the reference's 'about 95 % for LiFePO4').",
+          "Device schema: scale -256, offset +1.", "250, 242, 255", "schema + " + XC, raw_offset=1),
     Field(73, "voltage_threshold_73_V", "Voltage threshold", 100, "V", MEDIUM,
           "Reference calls it a voltage threshold that 'varies significantly'. Ours reads 63.00 V everywhere, "
           "the same value as the DC over-voltage protection trip we found in the alarm history.",
           "Value coincidence with a known protection level; not toggled.", "6300", "ours + " + XC),
-    Field(74, "param74", "", 1, "", UNKNOWN, "", "", "200"),
-    Field(81, "grid_code_active", "Grid code active flag", 1, "flag", HIGH,
-          "1 when a grid code (country standard) has been set with the dealer password in VEConfigure.",
+    Field(74, "soc_pct_74", "", 2, "%", LOW, "A state-of-charge value (schema: scale -2, 30..100 %, default 85 %); 100 % here.",
+          "Schema only.", "200", "schema"),
+    Field(81, "grid_code_active", "Grid code", 1, "enum", HIGH,
+          "0 = none; a non-zero value selects a grid code (country standard) set with the dealer password in "
+          "VEConfigure. Device schema: 0..32, so an index into the grid-code list rather than a flag; 1 here.",
           "Reference; 0 on every bare block, 1 on every GUI-authored ESS block. Part of the 'grid-code "
           "fingerprint' our failed grafts tried to stamp.", "0, 1", XC, lo=0, hi=1),
-    Field(85, "param85", "", 1, "", UNKNOWN, "", "", "65535"),
-    Field(87, "param87", "", 1, "", UNKNOWN, "", "", "829"),
+    Field(85, "param85", "", 1, "", UNKNOWN, "", "Schema: scale 50, offset 1069, default 3000, min 2400; 65535 here (disabled?).", "65535"),
+    Field(87, "param87", "", 1, "", UNKNOWN, "", "Schema: scale -12800, range 0..1536, default 829 (0.0648).", "829"),
     Field(88, "solar_wind_priority_V", "Solar & wind priority (sustain) voltage", 100, "V", MEDIUM,
           "Reference: sustain voltage for solar & wind priority.",
           "Reference; 52.00 V everywhere. The byte at +0x10a (which reads 20) is the high byte of this value "
@@ -254,6 +276,7 @@ ALIASES = {
     "vs_load_high": "vs_dont_ignore_load_above_A",
     "vs_load_low": "vs_ignore_load_below_A",
     "vs_soc": "vs_dont_ignore_soc_below_pct",
+    "frequency": "output_frequency_Hz",
     "capacity": "battery_capacity_Ah",
     "soc_bulk_end": "soc_at_bulk_end_pct",
     "grid_code": "grid_code_active",

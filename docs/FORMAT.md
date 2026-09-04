@@ -32,7 +32,7 @@ The sections always appear in this order:
 | Section | Payload | Count |
 |---|---|---|
 | `Mk2vscInfo` | 10 bytes: `u32 1`, `u16 4`, `"1.33"` | 1 |
-| `BareSettingInfo` | 4001 bytes, byte-identical across all 84 files | 1 |
+| `BareSettingInfo` | 4001 bytes, byte-identical across all 84 files: the settings schema (scale, offset, default, min, max per setting) | 1 |
 | `BareSettingData` | one inverter's configuration | one per inverter (2 in every corpus file) |
 
 A real header, from `fixtures/system_a/system_a_2026-07-20_download_bare_deviceform_1.rvms`:
@@ -86,14 +86,22 @@ this field; see `docs/ERRORS.md` and `docs/ASSISTANTS.md`.
 version; it is the same in every file, including those written by two different VEConfigure/System
 Configurator builds.
 
-**Observed.** `BareSettingInfo`'s 4001-byte payload is byte-identical in every file regardless of the
-system, its settings, or the presence of an assistant. Its first bytes are
-`04 00 00 00 58 a6 29 00 02 80 07 01 ...`; `58 a6 29 00` is 2729560, the firmware version that also appears in
-every unit block.
+**Observed.** `BareSettingInfo`'s 4001-byte payload is byte-identical in every file. It is the settings
+schema for this firmware: an 11-byte header (`04 00 00 00` | u32 firmware 2729560 | `02 80 07`), then 192
+records of 10 bytes, one per setting ID:
 
-**Inferred.** It is a template or schema describing the settings that follow, tied to the firmware
-version. **Unknown.** Its internal structure. We tried and failed to read field names or scaling out of
-it; it does not contain the per-unit values.
+```
+record := i16 scale | i16 offset | u16 default | u16 min | u16 max
+value   = (raw + offset) / |scale|   when scale < 0      (divisor: -100 for centivolts, -10, -2, -256, -2500)
+value   = (raw + offset) * scale     when scale > 0      (unit: 15-minute, 60-minute, 360-minute steps)
+```
+
+Setting 2 (absorption) reads scale -100, default 5760, min 4800, max 6400. 189 of 190 settings in the
+corpus lie inside their own range; the flags register's "max" is a settable-bits mask. `mk2vsc.schema`
+parses it; docs/FIELDS.md shows each setting's default and range.
+
+**Unknown.** The 2070 bytes after the records: a byte-per-setting attribute table (values 0x80, 0x81,
+0xc0) and an offset-indexed set of variable-length records that each begin `f5 ff 3e 0f` (issue #6).
 
 ## 3. `BareSettingData`: one inverter's block
 
@@ -248,7 +256,7 @@ it does not author them, and `docs/ASSISTANTS.md` explains why we stopped trying
 
 **Unknown**
 
-* `BareSettingInfo` semantics (4001 bytes)
+* the 2070 bytes after the schema records in `BareSettingInfo`
 * header bytes +0x1f..+0x34 and the `0x0180` word at +0x57
 * the 12 constant blob bytes of the upload form and whether they gate an install
 * the ESS record body encoding and the 13-byte ESS trailer
