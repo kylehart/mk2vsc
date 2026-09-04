@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+* docs: every Remote VEConfigure download or upload shows as a sub-minute disconnect and Passthru on GX-based monitoring while the MK2 tunnel holds the VE.Bus port; not a file fault; health checks must allow for the window (WORKFLOW, CHANGE_CONTROL Rule 4).
+
 ## 0.9.0 (2026-09-04)
 
 * VEConfigure placement for every setting and flag bit the GUI shows (`mk2vsc/ui.py`): tab, group and field label, from the layout talas9/rvsc-tools observed on VEConfigure 1.33 (MIT, credited), keyed by identifier. `Field.ui`, `mk2vsc fields --by-tab`, and an "In VEConfigure" column in docs/FIELDS.md. 62 settings and 32 bits placed; 7 GUI fields are computed by the GUI from other settings; 6 have no known setting. The Ignore AC input tab (settings 52 to 59, 70) is placed from our own screenshot; UPS function (setting 0 bit 3, inverted) and Dynamic current limiter (setting 1 bit 12) from Victron's MK2 document and xcellsior's toggle-and-diff. NOTICE.md gains a third-party section with the MIT notice.

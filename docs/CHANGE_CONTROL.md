@@ -118,7 +118,9 @@ a GUI session on System D wrote seven settings to one inverter and none to the o
 the two legs of a shared battery 0.3 V apart. The only proof of a change is the re-download:
 `mk2vsc diff` against the prepared file must report only bookkeeping bytes (pointer, save timestamp,
 checksum), and `mk2vsc check` must pass on the re-download with the same intent file that passed
-on the prepared file.
+on the prepared file. Give the GX a minute before reading telemetry: every remote read or write shows
+as a brief disconnect and Passthru while the MK2 tunnel holds the VE.Bus port (docs/WORKFLOW.md,
+Download).
 
 ## The CLI sequence for one change
 
