@@ -1,5 +1,7 @@
 # mk2vsc
 
+[![tests](https://github.com/kylehart/mk2vsc/actions/workflows/test.yml/badge.svg)](https://github.com/kylehart/mk2vsc/actions/workflows/test.yml) [![PyPI](https://img.shields.io/pypi/v/mk2vsc.svg)](https://pypi.org/project/mk2vsc/) [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 Read, validate, decode, diff, edit and qualify Victron VEConfigure `.rvms` configuration files
 without VEConfigure, on any operating system, from Python or the command line.
 
@@ -60,7 +62,13 @@ docs/FIELDS.md. The writer edits CONFIRMED and HIGH fields; anything lower needs
 ## Install
 
 ```
-git clone <this repository>
+pip install mk2vsc
+```
+
+Or from source, with the fixture corpus and tests:
+
+```
+git clone https://github.com/kylehart/mk2vsc.git
 cd mk2vsc
 python3 -m venv .venv && .venv/bin/pip install -e ".[test]"
 .venv/bin/pytest          # 468 tests against the fixture corpus
