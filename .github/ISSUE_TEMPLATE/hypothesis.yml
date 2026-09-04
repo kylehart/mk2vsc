@@ -1,0 +1,15 @@
+name: Hypothesis
+description: A testable idea about the format or device behaviour (for example the ESS no-start)
+labels: [hypothesis]
+body:
+  - type: textarea
+    id: claim
+    attributes: {label: The hypothesis, description: One sentence that could be false}
+    validations: {required: true}
+  - type: textarea
+    id: test
+    attributes: {label: The test that would settle it, description: What to do, what to observe, what each outcome would mean}
+    validations: {required: true}
+  - type: textarea
+    id: evidence
+    attributes: {label: Existing evidence for and against}

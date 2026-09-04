@@ -14,4 +14,6 @@ jobs:
           python-version: ${{ matrix.python }}
       - run: pip install -e .[test]
       - run: pytest -q
-      - run: rvms validate fixtures/mango/mango_2026-07-20_download_bare_deviceform_1.rvms
+      - run: bash tools/leakscan.sh
+        if: runner.os != 'Windows'
+      - run: mk2vsc validate fixtures/mango/mango_2026-07-20_download_bare_deviceform_1.rvms

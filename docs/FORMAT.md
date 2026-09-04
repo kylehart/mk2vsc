@@ -225,8 +225,9 @@ used by the records is always 2822 (= 2816 + the 6-byte empty header). **Inferre
 remaining-space counter over a 2816-byte assistant budget.
 
 **Observed.** On device-form ESS blocks the 72-byte tail is `ff` padding followed by
-`0e 00 8e 01 15 00 <4 bytes> ff 00 00`, where the 4 bytes are constant per inverter (`20 51 b8 4d` on one
-Papaya unit, `76 c4 e8 db` on one Guava unit). The upload form carries the same 13-byte trailer without
+`0e 00 8e 01 15 00 <4 bytes> ff 00 00`, where the 4 bytes follow the record slot, not the inverter or the
+system (`20 51 b8 4d` after every 1152-byte record, `76 c4 e8 db` after every 704-byte record, on every
+system and in the GUI export too). The upload form carries the same 13-byte trailer without
 the padding and ending `00 00 00`. **Unknown.** What any of it means.
 
 **Observed.** The 1152-byte body is byte-identical across every system; the 704-byte body differs between

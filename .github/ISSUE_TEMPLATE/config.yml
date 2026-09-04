@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Questions and reports from other systems
+    url: https://github.com/kylehart/mk2vsc/discussions
+    about: Not sure it is a bug or a claim? Start a discussion.

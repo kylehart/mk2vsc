@@ -1,0 +1,17 @@
+name: Field claim
+description: Name a setting, promote its confidence, or dispute a label in the settings table
+labels: [field-claim]
+body:
+  - type: input
+    id: id
+    attributes: {label: Setting ID and current name, placeholder: "e.g. 52 (vs_param52)"}
+    validations: {required: true}
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: The gold standard is a controlled pair (download, change ONE setting in VEConfigure, download again) plus a screenshot of the tab showing the value. Reference documentation also counts.
+    validations: {required: true}
+  - type: input
+    id: proposed
+    attributes: {label: Proposed name, label, scale, unit, confidence}
