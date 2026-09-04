@@ -12,7 +12,7 @@ have not seen it ourselves.
 
 The single most useful rule in this file: **if an upload is rejected and you are not sure why, download
 a fresh copy from the device, then upload that (edited or not).** Most rejections we hit were the device
-refusing a file whose save timestamp was older than the one it already had.
+refusing an archived file whose grid-code words differed from its own (the mechanism we first read as a timestamp check; see mk2vsc-36).
 
 ## Remote VEConfigure upload errors (from the device's VE.Bus layer)
 
