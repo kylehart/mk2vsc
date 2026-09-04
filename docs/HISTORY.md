@@ -239,6 +239,28 @@ exactly what they said, and the dialog's closing "Error 1303" turned out to mean
 timed out while the device finished. The lesson for the record: when the device stores your bytes and does
 nothing with them, ask which procedure it ran, not which bytes it disliked.
 
+## 2026-09-04, evening: the checker word
+
+The same day's robustness tests had shown the device dropping any single out-of-range register and
+running its reset procedure to do it, and storing an inconsistent pair of in-range values without
+comment: it range-checks per register and does not check relationships. One candidate for the
+"incorrect grid code password or old configuration file" refusal was left: that a device-form file
+whose grid-code words disagree with the device's is refused before anything is written. The test built
+for it changed setting 191, `GridSettingsValidCheckerB`, from 0x0101 to 0xff00 on both inverters of
+System A, the value that system had itself held after a failed install in August, and nothing else.
+The expected result was a clean refusal.
+
+The device accepted the file and reset the VE.Bus. Ten seconds into the write the GX stopped reporting
+everything, including devices that are not on the VE.Bus, and did not come back that evening. System D
+had taken the same reset procedure four times earlier that day with its GX reporting throughout.
+
+What was wrong was the framing, not the byte. The August value came from a system with no assistant
+stored and ESS not running; on a live ESS system with a grid code, breaking one half of the firmware's
+validity check on that grid code is fault injection, and the reset procedure is where the firmware
+checks it. The writer now refuses settings 81, 128, 129 to 189, 190 and 191 outright, with no override
+(`fields.GRID_CODE_LOCKED`). The rule that came out of it: a test whose expected outcome is a refusal is
+still a write, and gets a change's approval, naming the register, the value and the failure branch.
+
 ## What remains open
 
 The open questions are tracked as GitHub issues, in priority order, at

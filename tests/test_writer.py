@@ -218,3 +218,15 @@ def test_set_bits_refuses_unqualified_bits_non_flag_fields_and_unsettable_bits(g
     assert "settable" in str(ei.value)
     out, edits = set_bits(data, [(None, "flags0", 11, False)], allow_unqualified=True)
     assert all(not (e.new_raw >> 11) & 1 for e in edits)
+
+
+@pytest.mark.parametrize("field", ["grid_code", 81, 128, 150, 190, 191, "grid_settings_valid_checker_b"])
+def test_grid_code_block_and_words_are_locked_with_no_override(good_files, field):
+    """Settings 81, 128, 129-189, 190, 191 are never edited: not with allow_unverified, not with
+    allow_out_of_range.  Live evidence 2026-09-04 (System A): a file that changed only setting 191
+    (0x0101 -> 0xff00) was accepted, reset the VE.Bus and left the GX offline."""
+    data = good_files[BARE]
+    with pytest.raises(WriteRefused, match="grid-code"):
+        set_settings(data, [(None, field, 1)], allow_unverified=True, allow_out_of_range=True)
+    with pytest.raises(WriteRefused, match="grid-code"):
+        set_settings(data, [(None, field, 1)])

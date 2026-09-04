@@ -75,14 +75,29 @@ damage hardware. Before writing them:
 - Check the re-download on both inverters. A mismatch between the two inverters on a shared battery
   is a defect in itself; our qualifier fails on it.
 
-## The grid-code password
+## The grid code: what the writer never touches
 
-Victron gates the grid code (country standard, loss-of-mains behaviour, feed-in) behind a password
-held by the dealer or distributor. That is their credential and their responsibility. This project
-does not attempt to reproduce, derive, or bypass it, and will not accept contributions that do.
-Setting 81 (grid-code active flag) and the LOM entries are documented so that files can be read and
-compared; the writer does not touch them. If your job needs a grid code, it needs the dealer and
-VEConfigure.
+Victron gates the grid code (country standard, loss-of-mains behaviour, feed-in) behind a password held
+by the dealer or distributor. That is their credential and their responsibility. This project does not
+attempt to reproduce, derive, or bypass it, and will not accept contributions that do.
+
+The grid code lives in the file as setting 81, a settings block 129 to 189, and three words the
+firmware keeps with it: 128 and 191 (`GridSettingsValidCheckerA/B`, equal on each inverter of every
+GUI-authored download) and 190. Those words are the firmware's own validity check on the block. The
+writer refuses all of them (`fields.GRID_CODE_LOCKED`) and there is no override flag, because a file
+that carries them inconsistently is not a settings change but a fault the device meets at its next boot:
+
+- On 2026-09-04 a live System A, ESS running, grid code set, took a device-form file that changed only
+  setting 191 from 0x0101 to 0xff00 on both inverters. The device accepted it, ran "Resetting VE.Bus
+  products", and within ten seconds every data source on the GX (VE.Bus, BMS, both solar chargers, the
+  GX itself) went silent and stayed silent. The system was offline on VRM for the rest of the evening.
+  Three other systems on the same network path were unaffected. The file had been built to test whether
+  the device would refuse mismatched words before writing; it did not refuse.
+
+A grid code reaches a device through VEConfigure with the password, or by file only as a complete
+device-authored block: a fresh download of the same system, or `mk2vsc assistant reinstall` built from
+one, which carries 81/128/190/191 exactly as the device last wrote them. That path has never needed
+the password (docs/ASSISTANTS.md §8).
 
 ## Recovery playbook
 
@@ -128,3 +143,6 @@ In the order we have found to work:
   intended values outside the file and check every upload against them.
 - We compared downloads by file position and saw dozens of spurious differences. Block order is not
   stable. Compare by serial.
+- We treated a field named "valid checker" as a bookkeeping word and wrote one of its two halves on a
+  live system to see whether the device would object. It did not object; it accepted the file, reset the
+  bus, and the GX went dark. A validity check is not a setting. Read the name before the test.
