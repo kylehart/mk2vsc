@@ -94,7 +94,7 @@ slot-(86,01) block. The low nibble is the slot; the high nibble drops from f to 
 | (86,01) | e5 | second record | 0101 (0001 on System B) | 704 | 670 |
 
 The 1152-byte body is byte-identical on System C, System B, System A and System D. The 704-byte body is
-byte-identical too; the one byte that differs between systems is the subtype word in the record
+byte-identical too; the one byte that differs between systems is setting 191 (the LOM word) before the record
 header (0101 on three systems, 0001 on System B). So the assistant payload is a template chosen by role,
 not compiled per inverter. We cannot read the body: entropy about 6.2 bits per byte, recurring two and
 three byte sequences, and recognisable parameter values inside it (48.00 V as `c0 12`, 10 % as
@@ -299,13 +299,11 @@ None of this touches hardware.
   parameters (48.00 V is `c0 12`, 10 % is `0a 00`, 25 % would be `19 00`) and check whether they track
   the ESS settings shown on the GX of the same system at the time of the download. If they do, the body
   carries the wizard's answers and a by-file install must set them per system.
-- **The record header.** Why System B's 704 record is subtype 0001 and the others 0101. System B is the only
-  mixed-hardware-generation pair in our corpus (one 2022 and one 2024 inverter).
 - **The tail.** `0e 00 8e 01 15 00` and the two per-slot words; the `40 00` / `0a 00` and `ff` / `00`
   differences between device and GUI form.
 - **Other assistants.** A file with a different assistant (AC PV, generator start/stop, relay
-  assistants) would show whether the subtype identifies the assistant and whether every assistant
-  writes the same install state.
+  assistants) would show how the record length and body identify the assistant and whether every
+  assistant writes the same install state.
 - **Other topologies.** A single-unit `.rvsc`, a three-phase `.rvms`, a Quattro. We hold none.
 - **Another GUI export.** A second export from another system would settle whether BLOB12 and the tail
   words are constants.

@@ -23,6 +23,7 @@ from .schema import SettingInfo
 from .units import UnitBlock, N_SETTINGS, OFF_SETTINGS_DEVICE, UPLOAD_SHIFT
 
 BITFIELD_IDS = {0, 1, 60, 61, 77, 78, 82}
+N_SCORED = 190            # 190 and 191 are 0..65535 in the schema and score nothing
 
 
 @dataclass
@@ -48,7 +49,7 @@ class Alignment:
 def score(raw: bytes, offset: int, schema: List[SettingInfo]) -> Tuple[int, int]:
     """(in_range, scorable) for a settings array assumed to start at ``offset`` within ``raw``."""
     hit = tot = 0
-    for r in schema[:N_SETTINGS]:
+    for r in schema[:N_SCORED]:
         if r.unused or r.id in BITFIELD_IDS:
             continue
         o = offset + 2 * r.id

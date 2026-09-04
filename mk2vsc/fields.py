@@ -1,7 +1,7 @@
 """
 The settings table: what each u16 in the per-inverter settings array means, and how sure we are.
 
-Every ``BareSettingData`` block carries a flat array of 190 little-endian u16 values starting at
+Every ``BareSettingData`` block carries a flat array of 192 little-endian u16 values starting at
 block offset +0x59 (device form).  Entry *n* of that array is VE.Bus **setting ID n** as documented by
 the community MK2/MK3 protocol work (github.com/xcellsior/ve-bus-programming, "Persistent Settings
 IDs 0-255").  We established the mapping by noticing that the two fields we had confirmed
@@ -283,10 +283,20 @@ FIELDS: List[Field] = [
     _f(88, "ubat_dont_charge_V", "UBatDontCharge", 100, "V", HIGH, "Battery voltage below which the charger does not charge (52.00 V here; VEConfigure shows it as the sustain voltage).", f"{RT}; {SCH}: 48.00 to 64.00 V; {XC} calls it the solar & wind priority voltage.", "5200", "rtti + schema"),
     _f(89, "current_sensor_factor", "CurrentSensorFactor", 1, "", LOW, "", f"{RT}; schema unused here.", "0", "rtti"),
     _f(128, "grid_settings_valid_checker_a", "GridSettingsValidCheckerA", 1, "", MEDIUM,
-       "Validity marker for the grid-settings block (129 to 189). 0xffff on bare blocks; the GUI ESS install writes 1 or 0x0101.",
-       f"{RT}; observed transition.", "65535, 1, 257, 65281, 0", "rtti + ours"),
-    _f(190, "general_grid_settings_int", "GeneralGridSettingsInt", 1, "", LOW, "Beyond the 190-entry array the unit blocks carry; present in the schema only.", f"{RT}.", "", "rtti"),
-    _f(191, "grid_settings_valid_checker_b", "GridSettingsValidCheckerB", 1, "", LOW, "Present in the schema only.", f"{RT}.", "", "rtti"),
+       "Grid-code / loss-of-mains word A. 0xffff = not applicable (no grid code). With a grid code: 1 = LOM type B, "
+       "0x0101 = no LOM detection (xcellsior bench table, matched by every GUI ESS block here). Bare blocks in this corpus read 0xffff.",
+       f"{RT}; xcellsior FINDINGS 7.4 (wire reads 1 / 257 / residual 512); observed transition.", "65535, 1, 257, 65281, 0", "rtti + xcellsior + ours"),
+    _f(190, "general_grid_settings_int", "GeneralGridSettingsInt", 1, "", MEDIUM,
+       "Grid-code / LOM word B, firmware-managed (wire writes are silently dropped). 0xffff = never set; 0xfff5 once a grid code has "
+       "been applied, and it stays 0xfff5 after the grid code is reverted (residual). Its two bytes are the 'f5 ff' that earlier "
+       "tool builds read as an assistant-record marker.",
+       f"{RT}; xcellsior FINDINGS 7.4/9 (0xfff5 / 0xfff6, residual); corpus: 0xffff on never-coded blocks, 0xfff5 on every GUI ESS block and on post-rollback bare blocks.",
+       "65535, 65525", "rtti + xcellsior + ours"),
+    _f(191, "grid_settings_valid_checker_b", "GridSettingsValidCheckerB", 1, "", MEDIUM,
+       "Grid-code / LOM word C. 0xffff = not applicable; 1 = LOM type B; 0x0101 = no LOM detection; 0 / 0xff00 seen on bare blocks after "
+       "a grid code was removed (residual). Its two bytes are the 'subtype' earlier tool builds attached to the assistant record.",
+       f"{RT}; xcellsior FINDINGS 7.4 (1 / 257 / residual 512); corpus: 0x0001 and 0x0101 on GUI ESS blocks, moving with setting 128.",
+       "65535, 1, 257, 0, 65280", "rtti + xcellsior + ours"),
 ]
 FIELDS += [_f(n, f"not_defined_yet_{127 - n}", EPROM_NAMES[n], 1, "", UNKNOWN, "Reserved slot; 0 on every block.", RT, "0", "rtti") for n in range(90, 128)]
 FIELDS += [_f(n, f"grid_settings_int{n - 129}", EPROM_NAMES[n], 1, "", UNKNOWN, "Grid-code settings block, written by the grid-code step in VEConfigure; 0xffff on bare blocks.", RT, "65535", "rtti") for n in range(129, 190)]

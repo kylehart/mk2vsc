@@ -105,8 +105,8 @@ def _classify(a: UnitBlock, b: UnitBlock) -> UnitDiff:
     else:
         # cannot compare assistant bytes across forms (padding differs); compare record structure instead
         from .assistants import parse_assistant_area
-        ka = [(r["marker"], r["subtype"]) for r in parse_assistant_area(a)["records"]]
-        kb = [(r["marker"], r["subtype"]) for r in parse_assistant_area(b)["records"]]
+        ka = parse_assistant_area(a)["kind"]
+        kb = parse_assistant_area(b)["kind"]
         d.assistant = 0 if ka == kb else 1
     # checksum trailer counted as bookkeeping when it differs
     if ra[-4:] != rb[-4:]:

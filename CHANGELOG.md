@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.8.0 (2026-09-04)
+
+* The settings array is 192 entries. Settings 190 and 191 are the grid-code / loss-of-mains words (0xffff not applicable; 0xfff5 and 0x0001 = LOM type B; 0x0101 = no LOM detection; residual values after a grid code is removed), matching the xcellsior/ve-bus-programming bench table. They were previously read as the assistant record's "marker" and "subtype"; the assistant area now starts at +0x1d9 as `u16 length | body | tail`. `grid_code_words()` reports the state; `census` prints it. Settings 128/190/191 descriptions updated. Closes issue #24 (System B was authored with LOM type B).
+
 ## 0.7.0 (2026-09-04)
 
 * `show` prints the alignment self-check under each inverter and marks any physical setting sitting at the minimum or maximum of its own schema range when that limit is not the default (`mk2vsc.limits`). On the fixture corpus this marks exactly the blocks commissioned with absorption = float = 48.00 V.

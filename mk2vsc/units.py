@@ -22,8 +22,9 @@ Layout of a device-form block (what VRM's Remote VEConfigure *download* produces
     +0x4f  u32 unix timestamp of last save          rewritten on every save -> the "nonce"/freshness token
     +0x53  u32 = 0
     +0x57  u16 = 0x0180                             unknown, constant
-    +0x59  u16[190] VE.Bus settings array           setting ID n at +0x59 + 2n   (see fields.py)
-    +0x1d5 assistant area                           bare: ff ff ff ff 00 00 ff 00 0b ; ESS: f5ff records...
+    +0x59  u16[192] VE.Bus settings array           setting ID n at +0x59 + 2n   (see fields.py);
+                                                    190/191 are the grid-code LOM words (ff ff / f5 ff ...)
+    +0x1d9 assistant area                           u16 length | body | tail;  bare: 00 00 ff 00 0b
     ...    u32 checksum                              last 4 bytes of the section
 
 Upload form (what the VEConfigure/System Configurator GUI *writes* for upload) inserts 16 bytes at
@@ -56,7 +57,7 @@ OFF_BLOB = 0x45          # 10 zero bytes (device form) or 16-byte blob + 4 zeros
 OFF_SAVE_TS_DEVICE = 0x4F
 OFF_SETTINGS_DEVICE = 0x59
 UPLOAD_SHIFT = 10
-N_SETTINGS = 190          # settings 0..189 precede the assistant area in every block we hold
+N_SETTINGS = 192          # settings 0..191 precede the assistant area; the schema has 192 records too
 
 ASSISTANT_FLAGS = {0xE4, 0xE5}
 BARE_FLAGS = {0xF4, 0xF5}

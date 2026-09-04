@@ -36,7 +36,7 @@ from .fields import FIELDS, ALIASES, lookup, CONFIRMED, HIGH
 from .writer import WriteRefused
 from .diff import diff_files, render as render_diff
 from .qualify import Intent, qualify_file, render as render_qual
-from .assistants import parse_assistant_area
+from .assistants import parse_assistant_area, grid_code_words
 from .history import load_snapshots, changes as history_changes, render as render_history
 from . import api
 
@@ -237,6 +237,7 @@ def cmd_census(a):
               f"format {version}, schema {schema_txt}, {len(units)} inverter(s)")
         for u in units:
             asst = parse_assistant_area(u)
+            gcw = grid_code_words(u)
             in_range = ""
             if sch is not None:
                 from .align import check as align_check
@@ -246,7 +247,7 @@ def cmd_census(a):
                     rc = 1
             when = u.save_datetime.isoformat() if u.save_datetime else "?"
             print(f"  {u.serial}: block {len(u.raw)} B, flag {u.assistant_flag:02x}, form {'upload' if u.is_upload_form else 'device'}, "
-                  f"firmware {u.firmware_version}, saved {when}, assistant: {asst['summary']}{in_range}")
+                  f"firmware {u.firmware_version}, saved {when}, assistant: {asst['summary']}; {gcw['summary']}{in_range}")
             keys = [2, 3, 4, 5, 6, 11, 54, 58, 62, 64, 65]
             cells = []
             for k in keys:

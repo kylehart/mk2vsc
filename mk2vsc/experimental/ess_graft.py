@@ -109,6 +109,9 @@ def graft(baseline: bytes, template: bytes, install_state: bool = False,
                     value = capacity_ah
                 new = value if mask is None else (cur & ~mask) | (value & mask)
                 body[off: off + 2] = new.to_bytes(2, "little")
+        for sid in (190, 191):                       # grid-code LOM words: take the template's, as the area did before
+            off = u.setting_offset(sid) - hdr_len
+            body[off: off + 2] = src.raw[src.setting_offset(sid): src.setting_offset(sid) + 2]
         body += src.assistant_area
         payloads.append(bytes(body))
     out_file = fb.rebuild(payloads)
@@ -129,7 +132,7 @@ def _verify(out: bytes, baseline: bytes, template: bytes, install_state: bool) -
     c["records_match_template"] = all(
         u.assistant_area == tu[u.slot].assistant_area for u in ou.values())
     c["no_stub"] = not any(parse_assistant_area(u)["stub"] for u in ou.values())
-    allowed_ids = {BY_NAME[n].id for n, _m, _v in INSTALL_STATE} if install_state else set()
+    allowed_ids = ({BY_NAME[n].id for n, _m, _v in INSTALL_STATE} if install_state else set()) | {190, 191}
     def header_ok(o: UnitBlock, b: UnitBlock) -> bool:
         n = o.assistant_area_offset
         for i in range(0x13, n):                      # after the next-pointer

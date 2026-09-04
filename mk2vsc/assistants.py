@@ -1,18 +1,23 @@
 """
 READ-ONLY parsing of the assistant area that follows the settings array in a unit block.
 
-What we can say with evidence (docs/ASSISTANTS.md has the full story):
+The area starts right after setting 191 (+0x1d9 device form, +0x1e3 upload form) and is one record::
 
-* Bare block (no assistant): the area is the 9 bytes ``ff ff ff ff 00 00 ff 00 0b`` (device form) --
-  i.e. an empty record header (``ff ff`` marker, ``ff ff`` subtype, length ``00 00``) plus 3 trailer bytes.
-* Block with the ESS assistant installed by the GUI: one or more records framed
-  ``f5 ff <subtype u16> <len u16> <body>``; body lengths 704 and 1152 in every working install we hold
-  (one per inverter of the pair; the two bodies differ from each other, and are byte-identical across
-  systems except for a single primary/secondary flag byte).  The device pads records with ``0xff`` runs
-  and appends trailer bytes; the GUI's upload form writes the same records compact.
-* Stub: after VEConfigure accepted one of our transplanted files it wrote a 64-byte empty container
-  ``40 00 a7 fe 00 00 57 01`` + ``0xff`` filler + ``c0 0a`` on both inverters and discarded our payload.
-  Its presence in a download is the signature of a failed by-file assistant install.
+    area := u16 length | body[length] | tail
+
+* Bare block (no assistant): length 0, then the 3 trailer bytes ``ff 00 0b`` (free-space counter 2816).
+* GUI-installed ESS: length 704 or 1152 (one per inverter of the pair, by role), then a 72-byte tail.
+  The two bodies differ from each other and are byte-identical across systems except for a single
+  primary/secondary flag byte.  The device pads the body with ``0xff`` runs; the GUI's upload form
+  writes it compact (670 / 1102).
+* Container: length 6, body ``a7 fe 00 00 57 01`` (two files from an older tool build).
+* Stub: length 64, the same signature + ``0xff`` filler.  VEConfigure wrote this on both inverters after
+  it accepted one of our transplanted files and discarded the payload; its presence in a download is the
+  signature of a failed by-file assistant install.
+
+The four bytes before the length (``ff ff ff ff`` bare, ``f5 ff 01 01`` on ESS blocks) are VE.Bus settings
+190 and 191, the grid-code / loss-of-mains words; see ``grid_code_words`` and docs/FIELDS.md.  Earlier
+tool builds read them as an assistant "marker" and "subtype".
 
 We do NOT understand the record body.  It looks like a compiled program (entropy ~6.2 bits/byte,
 recurring 2-3 byte opcodes, embedded parameter values such as 48.00 V and 10 %).  This module reports
@@ -25,49 +30,31 @@ from typing import Dict, List
 
 from .units import UnitBlock
 
-RECORD_MARK = b"\xf5\xff"
-EMPTY_MARK = b"\xff\xff"
 CONTAINER_SIG = b"\xa7\xfe\x00\x00\x57\x01"
-STUB_MAGIC = b"\x40\x00" + CONTAINER_SIG     # len 64 + signature, as it appears after the ff ff ff ff header
+STUB_MAGIC = b"\x40\x00" + CONTAINER_SIG     # len 64 + signature, as it appears in the area
+BUDGET = 2816                                # free-space counter + body length on bare/container/stub blocks
 
 
 def parse_records(area: bytes):
-    """Walk ``marker(2) subtype(2) len(2) body`` records from the start of the area.
+    """Read the ``u16 length | body`` record at the start of the area.
 
-    Returns (records, tail_offset).  Walking stops at the first byte pair that is not a known marker.
+    Returns (records, tail_offset).  ``records`` is a one-element list (or empty when the area is shorter
+    than a length word) so callers can treat the area uniformly.
     """
     records: List[Dict] = []
-    pos = 0
-    while pos + 6 <= len(area) and area[pos: pos + 2] in (EMPTY_MARK, RECORD_MARK):
-        marker = area[pos: pos + 2]
-        subtype, length = struct.unpack_from("<HH", area, pos + 2)
-        body = area[pos + 6: pos + 6 + length]
-        records.append({"offset": pos, "marker": marker.hex(), "subtype": f"{subtype:04x}", "length": length,
-                        "body_sha8": _sha8(body) if length else "", "nonpad_bytes": sum(1 for b in body if b != 0xFF),
-                        "container_signature": body.startswith(CONTAINER_SIG),
-                        "truncated": len(body) < length})
-        pos += 6 + length
-    return records, pos
+    if len(area) < 2:
+        return records, 0
+    length = struct.unpack_from("<H", area, 0)[0]
+    body = area[2: 2 + length]
+    records.append({"offset": 0, "length": length,
+                    "body_sha8": _sha8(body) if length else "", "nonpad_bytes": sum(1 for b in body if b != 0xFF),
+                    "container_signature": body.startswith(CONTAINER_SIG),
+                    "truncated": len(body) < length})
+    return records, 2 + length
 
 
 def parse_assistant_area(u: UnitBlock) -> Dict:
-    """Describe the assistant area of a unit block.
-
-    Uniform model (every block in the corpus fits it)::
-
-        area := record* tail
-        record := marker(2) subtype(2) len(2) body[len]
-        marker  ff ff  -> empty slot / container.  Bare blocks: len 0.  Two June-2026 files from an older
-                          tool build: len 6, body a7 fe 00 00 57 01.  Stub written by VEConfigure after it
-                          discarded a transplanted assistant: len 64, same signature + 0xff filler.
-                f5 ff  -> assistant record.  GUI-installed ESS: one 704-byte and one 1152-byte record per
-                          system (one on each inverter), subtype 0101 / 0001.
-        tail   := padding(0xff)* | ff | u16 free
-                  On bare, container and stub blocks free == 2816 - bytes used; see docs/FORMAT.md for ESS.
-
-    A ``f5 ff`` header with len 0 where ``ff ff`` is expected is residue seen on downloads taken after a
-    rejected or rolled-back assistant upload; functionally bare.
-    """
+    """Describe the assistant area of a unit block (see the module docstring for the model)."""
     area = u.assistant_area
     records, tail_off = parse_records(area)
     tail = area[tail_off:]
@@ -75,29 +62,52 @@ def parse_assistant_area(u: UnitBlock) -> Dict:
                  "stub": False, "kind": "unknown", "summary": ""}
     if len(tail) >= 3 and tail[-3] == 0xFF:
         out["free"] = struct.unpack_from("<H", tail, len(tail) - 2)[0]
-        out["used"] = tail_off
-        out["free_plus_used"] = out["free"] + tail_off
+        out["used"] = records[0]["length"] if records else 0
+        out["free_plus_used"] = out["free"] + out["used"]
     if any(r["truncated"] for r in records):
         out["kind"] = "malformed"
         out["summary"] = "record length exceeds the area (malformed)"
         return out
-    real = [r for r in records if r["marker"] == "f5ff" and r["length"] > 0]
-    containers = [r for r in records if r["marker"] == "ffff" and r["length"] > 0]
-    if any(r["length"] >= 64 and r["container_signature"] for r in containers):
+    rec = records[0] if records else None
+    if rec is None:
+        out["summary"] = f"{len(area)} unrecognised bytes"
+    elif rec["length"] >= 64 and rec["container_signature"]:
         out["kind"], out["stub"] = "stub", True
         out["summary"] = "EMPTY STUB container (signature of a failed by-file install)"
-    elif real:
-        out["kind"] = "records"
-        out["summary"] = "assistant records: " + ", ".join(f"{r['length']}B/{r['subtype']}" for r in real)
-    elif containers:
+    elif rec["length"] > 0 and rec["container_signature"]:
         out["kind"] = "container"
-        out["summary"] = f"empty {containers[0]['length']}-byte container (no program)"
-    elif records:
-        out["kind"] = "none"
-        out["summary"] = "no assistant" + (" (empty record residue)" if records[0]["marker"] == "f5ff" else "")
+        out["summary"] = f"empty {rec['length']}-byte container (no program)"
+    elif rec["length"] > 0:
+        out["kind"] = "records"
+        out["summary"] = f"assistant record: {rec['length']}B"
     else:
-        out["summary"] = f"{len(area)} unrecognised bytes"
+        out["kind"] = "none"
+        out["summary"] = "no assistant"
     return out
+
+
+def grid_code_words(u: UnitBlock) -> Dict:
+    """Settings 81, 128, 190 and 191 with the reading the xcellsior bench table and our corpus support.
+
+    state: ``never`` (all three words 0xffff, no grid code), ``lom_b`` (LOM type B), ``no_lom`` (no
+    loss-of-mains detection), ``residual`` (grid code 0 but the words are not 0xffff: a grid code was
+    applied and later removed; the firmware keeps the words), ``other``.
+    """
+    s81, s128, s190, s191 = (u.setting(i) for i in (81, 128, 190, 191))
+    if s81 == 0 and s128 == 0xFFFF and s190 == 0xFFFF and s191 == 0xFFFF:
+        state = "never"
+    elif s81 == 0:
+        state = "residual"
+    elif s191 == 0x0001 or s128 == 0x0001:
+        state = "lom_b"
+    elif s191 == 0x0101 or s128 == 0x0101:
+        state = "no_lom"
+    else:
+        state = "other"
+    return {"grid_code": s81, "w128": s128, "w190": s190, "w191": s191, "state": state,
+            "summary": {"never": "no grid code", "lom_b": "grid code, LOM type B", "no_lom": "grid code, no LOM detection",
+                        "residual": "no grid code, LOM words residual (a grid code was applied and removed)",
+                        "other": f"grid code {s81}, words 128={s128:#06x} 190={s190:#06x} 191={s191:#06x}"}[state]}
 
 
 def _sha8(b: bytes) -> str:

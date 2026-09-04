@@ -209,6 +209,21 @@ identifiers from the application binary. Our "no prior art" statement was wrong 
 adopted the identifier table with attribution; it named the settings above 65 that Victron's document
 does not, and corrected two of ours (73 is a current limit, not a voltage; 70 is `vs2StartOnSOC`).
 
+## September 2026: the two bytes before the record
+
+For two months the assistant area was described as `marker(2) subtype(2) len(2) body`, with `ff ff` an
+empty slot and `f5 ff` an assistant record, and issue #24 asked why System B's 704-byte record carried
+subtype `0001` where the other systems carried `0101`. The answer came from reading the wire-protocol
+work in xcellsior/ve-bus-programming rather than from our files: their bench table for settings 128,
+190 and 191 (grid-code / loss-of-mains words) lists 0xFFF5 and 0x0001 with LOM type B, 0xFFF6 / 0x0101
+with no LOM detection, and residual values after the grid code is reverted. Our settings array was read
+as 190 entries; the file's own schema has 192 records. Reading two more words put `f5 ff` at setting
+190 and `01 00` / `01 01` at setting 191 on every ESS block, `ff ff ff ff` on every never-coded block,
+and `f5 ff 00 00` on bare blocks taken after a rollback. The "marker" and "subtype" were settings; the
+record is `len | body`; System B's inverters were authored with LOM type B, the others without LOM
+detection. The lesson repeats the one from the settings array itself: name a byte by its VE.Bus setting
+ID before giving it a meaning, and read what the neighbours measured.
+
 ## What remains open
 
 The open questions are tracked as GitHub issues, in priority order, at
