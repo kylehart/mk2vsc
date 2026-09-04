@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1 (2026-09-04)
+
+* Packaging only: release workflow renamed to `release.yaml` to match the PyPI trusted publisher; first PyPI publish. No code changes.
+
 ## 0.1.0 (2026-09-03)
 
 Initial extraction into a standalone repository from the tooling we built while operating four
