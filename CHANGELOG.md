@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-* docs: every Remote VEConfigure download or upload shows as a sub-minute disconnect and Passthru on GX-based monitoring while the MK2 tunnel holds the VE.Bus port; not a file fault; health checks must allow for the window (WORKFLOW, CHANGE_CONTROL Rule 4).
+* docs: during a Remote VEConfigure operation, GX-based monitoring can report the site disconnected for under a minute and carry a stale inverter state while the MK2 tunnel holds the VE.Bus port (observed on two systems; inverter behaviour not measured independently); not a file fault; health checks must allow for the window (WORKFLOW "Monitoring during a remote operation", CHANGE_CONTROL Rule 4).
 
 ## 0.9.0 (2026-09-04)
 

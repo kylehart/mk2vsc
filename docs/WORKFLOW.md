@@ -34,13 +34,20 @@ A download does not change the device. It does require the GX device to have a w
 to the inverters over VE.Bus; while the VE.Bus is re-enumerating after a reset, downloads fail with
 `mk2vsc-62`.
 
-Every Remote VEConfigure read or write, download and upload alike, takes the VE.Bus port away from
-the GX for its duration: the GX yields the port to the MK2 tunnel, so the GX stops receiving inverter
-data. On monitoring that reads the GX (VRM, MQTT, a gateway built on either) this appears as the site
-disconnected and the inverter in Passthru for under a minute, and it clears on its own when the
-operation ends. Observed on both System D and System A on every operation of 2026-09-04. It is not a
-fault of the uploaded file, and a health rule that judges a site during or right after a remote
-operation must allow for that window before calling anything wrong.
+## Monitoring during a remote operation
+
+**Observed** (2026-09-04, System D and System A, on the operations where monitoring was read during
+the window): while a Remote VEConfigure upload or the re-download that followed it was in progress,
+monitoring that reads the GX (a gateway on VRM and MQTT) reported the site disconnected for under a
+minute, and on System A the inverter state field read Passthru during that gap. Both cleared on their
+own when the operation ended; grid draw and load readings were unchanged before and after; no alarm
+was raised and no "Resetting VE.Bus products" dialog appeared. **Inferred:** the GX stops receiving
+inverter data while the MK2 tunnel holds the VE.Bus port, so values read in that window are a gap in
+the GX's view, not fresh inverter readings. **Unknown:** the inverter's own behaviour during the
+window was not measured independently of the GX; whether a download alone (no upload) produces the
+same gap was not isolated. The gap is not a fault of the uploaded file. A health rule that judges a
+site during or right after a remote operation must allow for that window before calling anything
+wrong.
 
 ## Upload
 
@@ -146,6 +153,7 @@ If the job is a settings edit, none of this is needed; that is the point of the 
 - VE.Bus errors: error 6 (DDC program error) and error 10 (time sync) after an upload mean the
   assistant program or the install was left inconsistent. See docs/ERRORS.md and docs/SAFETY.md for
   the recovery steps.
-- Timing: read health after the operation has finished and the GX has reconnected (see Download:
-  every remote read or write shows as a sub-minute disconnect and Passthru on GX-based monitoring).
-  A settings-only upload that has been accepted leaves the inverter in the state it was in before.
+- Timing: read health after the operation has finished and the GX has reconnected (see "Monitoring
+  during a remote operation": GX-based monitoring can show a sub-minute disconnect, and a stale state
+  field, while the tunnel holds the VE.Bus port). A settings-only upload that has been accepted leaves
+  the inverter in the state it was in before.
