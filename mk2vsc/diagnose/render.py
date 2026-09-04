@@ -1,17 +1,16 @@
 """Plain-text rendering of a report: observations with evidence, never verdicts."""
 from __future__ import annotations
 
-from .report import Report, Finding, SEVERITIES
+from .report import Report, Finding
+from ..fields import format_value
 
 
 def _ev(e: dict) -> str:
     v = e["value"]
-    vs = f"{v:g}" if isinstance(v, float) else (f"0x{v:04x}" if e["field"].startswith("flags") and isinstance(v, int) else str(v))
-    s = f"{e['field']} = {vs} {e['unit']}".strip()
-    if e.get("schema_default") is not None and not e["field"].startswith("flags"):
-        d, lo, hi = e["schema_default"], e["schema_min"], e["schema_max"]
-        fmt = lambda x: f"{x:g}" if isinstance(x, float) else str(x)
-        s += f" (schema {fmt(lo)} to {fmt(hi)}, default {fmt(d)})"
+    is_flags = e["field"].startswith("flags")
+    s = f"{e['field']} = 0x{v:04x} {e['unit']}" if is_flags and isinstance(v, int) else f"{e['field']} = {format_value(v, e['unit'])}"
+    if e.get("schema_default") is not None and not is_flags:
+        s += f" (schema {format_value(e['schema_min'])} to {format_value(e['schema_max'])}, default {format_value(e['schema_default'])})"
     if e.get("vote"):
         s += f": {e['vote']}"
     return s
@@ -53,10 +52,8 @@ def render(report: Report) -> str:
                    + ("" if fr.editable else f"; the writer refuses this file: {fr.refusal_reason}" if fr.status == "ok" else ""))
         if fr.status == "ok" and not fr.findings:
             out.append("  no findings from the Phase 0 rules (D1, D2, C1, V1, V2, E1, E2)")
-        for sev in SEVERITIES:
-            for f in fr.findings:
-                if f.severity == sev:
-                    out.append(render_finding(f))
+        for f in fr.findings:                 # already sorted by severity, rule, serial in the engine
+            out.append(render_finding(f))
         out.append("")
     qs = report.questions
     if qs:

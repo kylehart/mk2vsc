@@ -24,7 +24,7 @@ from typing import Dict, Iterable, List, Optional, Tuple
 
 from .sections import RvmsFile
 from .units import UnitBlock, units_by_serial
-from .fields import lookup, FIELDS, Field, CONFIRMED, HIGH, MEDIUM, ALIASES
+from .fields import lookup, FIELDS, Field, CONFIRMED, HIGH, MEDIUM, ALIASES, format_value
 from .writer import set_settings, WriteRefused, Edit
 from .diff import diff_bytes, FileDiff, render as render_diff
 from .qualify import Intent, qualify_bytes
@@ -211,9 +211,7 @@ def _fmt(f: Field, raw: int) -> str:
     if f.bits:
         on = [f.bits[b] for b in f.bits if raw & (1 << b)]
         return f"0x{raw:04x}" + (f"  ({'; '.join(on)})" if on else "")
-    if isinstance(v, float):
-        return f"{v:g} {f.unit}".strip()
-    return f"{v} {f.unit}".strip()
+    return format_value(v, f.unit)
 
 
 def render_summary(cfg: Config, include_unknown: bool = False) -> str:

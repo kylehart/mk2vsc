@@ -184,7 +184,7 @@ def cmd_diagnose(a):
         if not a.accept:
             return _fail("nothing accepted. Findings are never applied silently: name the ones to take with --accept ID ... "
                          f"(by-file fixes available: {', '.join(fixable) or 'none'})", 2)
-        data = open(a.files[0], "rb").read()
+        data = fr._ctx.data
         try:
             if a.fix:
                 out, intent = apply_fixes(data, fr, accept=a.accept, values=values, copy_from=a.copy_from)
@@ -199,10 +199,11 @@ def cmd_diagnose(a):
             out_path = a.output or f"{root}.corrected{ext or '.rvms'}"
             if os.path.abspath(out_path) == os.path.abspath(a.files[0]):
                 return _fail("refusing to overwrite the input file; keep the download as your rollback", 1)
-            if os.path.exists(out_path) and not a.overwrite:
+            try:
+                with open(out_path, "wb" if a.overwrite else "xb") as fh:
+                    fh.write(out)
+            except FileExistsError:
                 return _fail(f"{out_path} exists; pass --overwrite or -o", 1)
-            with open(out_path, "wb") as fh:
-                fh.write(out)
             with open(out_path + ".intent.json", "w") as fh:
                 json.dump(intent, fh, indent=1)
     if a.json:

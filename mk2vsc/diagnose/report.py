@@ -4,10 +4,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field, asdict
 from typing import Dict, List, Optional
 
+from ..fields import CONFIDENCE_ORDER
+
 REPORT_VERSION = 1
 SEVERITIES = ("BLOCKS", "DEGRADES", "FRAGILE", "INFO")
 DEVICE_CONFIRMED, VENDOR_DOCUMENTED, INFERRED = "device-confirmed", "vendor-documented", "inferred"
-CONF_ORDER = ["CONFIRMED", "HIGH", "MEDIUM", "LOW", "UNKNOWN"]
+CONF_ORDER = list(CONFIDENCE_ORDER)
 
 QUESTIONS: Dict[str, str] = {
     "chemistry": "What battery chemistry is on this system, lithium or lead-acid? (Inferred lithium when any inverter "

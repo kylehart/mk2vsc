@@ -18,7 +18,7 @@ from ..schema import schema_of, nominal_voltage, SettingInfo
 from ..fields import lookup, Field, BY_NAME
 from ..assistants import parse_assistant_area
 from ..align import check as align_check
-from ..writer import WriteRefused, _prepare
+from ..writer import WriteRefused, preflight
 
 STATUSES = ("ok", "unparseable", "checksum_invalid", "duplicate_serial", "upload_form", "no_schema", "misaligned")
 LITHIUM_FIELD, LITHIUM_BIT = "flags2", 4
@@ -46,6 +46,7 @@ class FileContext:
     refusal_reason: str = ""
     unverified_format: bool = False
     assistant: Dict[str, dict] = field(default_factory=dict)
+    memo: Dict[object, object] = field(default_factory=dict)   # per-file cache for rules (D1 votes)
 
     # ------------------------------------------------------------- values
     @property
@@ -91,9 +92,13 @@ class FileContext:
                 "schema_min": f.decode(r.min), "schema_max": f.decode(r.max), "schema_default": f.decode(r.default)}
 
 
+def is_rvsc(name: str) -> bool:
+    return name.lower().endswith(".rvsc")
+
+
 def build_context(data: bytes, name: str = "<bytes>", assume: Optional[Dict[str, str]] = None) -> FileContext:
     ctx = FileContext(name=name, data=data, assume=dict(assume or {}))
-    ctx.unverified_format = name.lower().endswith(".rvsc")
+    ctx.unverified_format = is_rvsc(name)
     try:
         f = RvmsFile.parse(data)
     except RvmsParseError as e:
@@ -139,9 +144,9 @@ def build_context(data: bytes, name: str = "<bytes>", assume: Optional[Dict[str,
         flagged = [s for s in ctx.serials if ctx.lithium_flag(s)]
         if flagged:
             ctx.chemistry, ctx.chemistry_source = "lithium", f"flag:{','.join(flagged)}"
-    # would the writer take this file?
+    # would the writer take this file?  Same guards, same words, on the state already parsed above.
     try:
-        _prepare(data)
+        preflight(ctx.units, ctx.schema)
         ctx.editable = True
     except WriteRefused as e:
         ctx.editable, ctx.refusal_reason = False, str(e)

@@ -112,13 +112,19 @@ def _prepare(data: bytes):
         bad = [n for n, *_ , ok in f.checksum_report() if not ok]
         raise WriteRefused(f"input file has invalid checksums in {bad}; refusing to build on a corrupt base")
     by_serial = units_by_serial(f)
+    schema = schema_of(f)
+    return (f, by_serial, schema, preflight(by_serial, schema))
+
+
+def preflight(by_serial, schema) -> int:
+    """The guards that need parsed state: device form, no stub, a known nominal voltage, alignment.  Returns the
+    nominal voltage.  ``_prepare`` runs it after parsing; the diagnose context runs it on state it already holds."""
     if any(u.is_upload_form for u in by_serial.values()):
         raise WriteRefused("input is in GUI upload form (blob at +0x45); edit a device download instead")
     stubbed = [u.serial for u in by_serial.values() if parse_assistant_area(u)["stub"]]
     if stubbed:
         raise WriteRefused(f"{stubbed} carry the empty assistant STUB of a failed by-file install; restore the "
                            "system from a fresh bare download before editing settings")
-    schema = schema_of(f)
     try:
         nominal = nominal_voltage(schema)
     except ValueError as e:
@@ -129,7 +135,7 @@ def _prepare(data: bytes):
         if not al.ok:
             raise WriteRefused(f"{u.serial}: settings array does not sit where the layout model expects "
                                f"({al.summary}); this file's layout is not one this writer knows, refusing")
-    return f, by_serial, schema, nominal
+    return nominal
 
 
 def _poke(f: RvmsFile, payloads: List[bytes], touched: set, u, fld: Field, new_raw: int, bit: Optional[int] = None) -> Edit:

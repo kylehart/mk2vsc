@@ -90,7 +90,6 @@ def firmware_of_schema(info_payload: bytes) -> int:
 
 
 NOMINALS = (12, 24, 48)
-ABSORPTION_ID = 2
 
 
 def nominal_voltage(schema: List[SettingInfo]) -> int:
@@ -101,7 +100,8 @@ def nominal_voltage(schema: List[SettingInfo]) -> int:
     ``ValueError`` when the minimum is not within 10 % of one of those, so a caller never scales a bound
     by a guess.  Observed on the corpus: 48 on every file.  Inferred: 24 and 12 from the schema convention.
     """
-    r = schema[ABSORPTION_ID]
+    from .fields import BY_NAME
+    r = schema[BY_NAME["absorption_V"].id]
     if r.scale == 0:
         raise ValueError("schema record 2 (absorption) is unused; cannot infer the nominal voltage")
     v = r.decode(r.min)

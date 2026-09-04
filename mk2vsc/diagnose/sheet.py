@@ -6,14 +6,10 @@ from __future__ import annotations
 from typing import List
 
 from .report import FileReport
-from ..fields import lookup
+from ..fields import lookup, format_value
 from ..ui import ui_for_bit
 
 UNKNOWN_TAB = "(tab unknown)"
-
-
-def _fmt(f, v) -> str:
-    return f"{v:g} {f.unit}".strip() if isinstance(v, float) else f"{v} {f.unit}".strip()
 
 
 def sheet_rows(report: FileReport, intent: dict) -> List[dict]:
@@ -23,7 +19,7 @@ def sheet_rows(report: FileReport, intent: dict) -> List[dict]:
         f = lookup(e["field"])
         ui = f.ui
         rows.append({"serial": e["serial"], "tab": ui.path if ui else UNKNOWN_TAB, "label": ui.label if ui else f.label,
-                     "field": f.name, "old": _fmt(f, ctx.value(e["serial"], f.name)), "new": _fmt(f, e["value"])})
+                     "field": f.name, "old": format_value(ctx.value(e["serial"], f.name), f.unit), "new": format_value(e["value"], f.unit)})
     for b in intent.get("bit_edits", []):
         f = lookup(b["field"])
         ui = ui_for_bit(f.id, b["bit"])

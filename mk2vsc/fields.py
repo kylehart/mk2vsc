@@ -34,6 +34,12 @@ from dataclasses import dataclass, field
 from typing import Callable, Dict, List, Optional
 
 CONFIRMED, HIGH, MEDIUM, LOW, UNKNOWN = "CONFIRMED", "HIGH", "MEDIUM", "LOW", "UNKNOWN"
+CONFIDENCE_ORDER = (CONFIRMED, HIGH, MEDIUM, LOW, UNKNOWN)
+
+
+def format_value(v, unit: str = "") -> str:
+    """An engineering value for humans: ``56.8 V``, ``35 A``, ``3``; floats print with ``:g``."""
+    return (f"{v:g} {unit}" if isinstance(v, float) else f"{v} {unit}").strip()
 
 
 @dataclass(frozen=True)

@@ -7,7 +7,7 @@ from . import Rule
 from .d1 import passes
 from ..context import FileContext, LITHIUM_FIELD, LITHIUM_BIT
 from ..report import Finding, DEVICE_CONFIRMED, weakest
-from ...fields import FIELDS, CONFIRMED
+from ...fields import FIELDS, CONFIRMED, format_value
 
 CHARGER_FIELDS = [f.name for f in FIELDS if f.confidence == CONFIRMED and f.bits is None and f.id < 190]
 
@@ -33,8 +33,7 @@ def run(ctx: FileContext) -> List[Finding]:
     if source and flags[source]:
         bit_edits = [{"serial": t, "field": LITHIUM_FIELD, "bit": LITHIUM_BIT, "set": True} for t in targets if not flags[t]]
     fix = {"kind": "copy", "source": source, "candidates": list(ctx.serials), "targets": targets, "fields": fields, "bit_edits": bit_edits}
-    detail = "; ".join(f"{n}: " + ", ".join(f"{s}={ctx.value(s, n):g}" if isinstance(ctx.value(s, n), float) else f"{s}={ctx.value(s, n)}"
-                                            for s in ctx.serials) for n in fields)
+    detail = "; ".join(f"{n}: " + ", ".join(f"{s}={format_value(ctx.value(s, n))}" for s in ctx.serials) for n in fields)
     if len(set(flags.values())) > 1:
         detail += "; LithiumBattery flag: " + ", ".join(f"{s}={'set' if v else 'clear'}" for s, v in flags.items())
     msg = (f"The inverters disagree on {detail}. On one shared battery these must match. "

@@ -4,7 +4,7 @@ from __future__ import annotations
 import os
 from typing import Dict, List, Optional
 
-from .context import build_context, FileContext
+from .context import build_context, FileContext, is_rvsc
 from .report import Finding, Question, FileReport, Report, QUESTIONS, SEVERITIES
 from .rules import load_rules
 
@@ -53,7 +53,7 @@ def diagnose_files(paths: List[str], assume: Optional[Dict[str, str]] = None) ->
         except OSError as e:
             files.append(FileReport(name=os.path.basename(p), status="unparseable", message=str(e), serials=[], editable=False,
                                     refusal_reason=str(e), nominal_voltage=None, chemistry="unknown", chemistry_source="unknown",
-                                    unverified_format=p.lower().endswith(".rvsc")))
+                                    unverified_format=is_rvsc(p)))
             continue
         files.append(diagnose_bytes(data, name=os.path.basename(p), assume=assume))
     return Report(files=files)

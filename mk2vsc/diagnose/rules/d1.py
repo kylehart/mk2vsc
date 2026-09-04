@@ -13,8 +13,12 @@ VALUE_FIELDS = ["absorption_V", "float_V", "dc_low_shutdown_V"]
 
 
 def votes(ctx: FileContext, s: str) -> List[dict]:
-    """The lead-acid signature, one evidence record per vote.  Two or more votes make the finding."""
-    out = []
+    """The lead-acid signature, one evidence record per vote.  Two or more votes make the finding.  Cached per
+    block on the context: D1's peer search and D2's source choice ask for the same answer."""
+    key = ("d1_votes", s)
+    if key in ctx.memo:
+        return ctx.memo[key]
+    out = ctx.memo[key] = []
     if not ctx.lithium_flag(s):
         out.append(ctx.evidence(s, LITHIUM_FIELD, "LithiumBattery flag clear"))
     for name in ("absorption_V", "float_V"):
