@@ -8,7 +8,7 @@ would then decode the wrong bytes as settings without any error.  The file carri
 u16 values fall inside their own ranges.  ``score`` counts that; ``find_offset`` tries candidates.
 
 Bitfield registers (whose "max" is a mask) and unused entries are excluded from the count, so a
-perfect score on our corpus is 186 of 186 scorable settings.  A wrong offset scores far lower: shifting
+perfect score on our corpus is 138 of 138 scorable settings (190 minus 47 unused minus 5 bitfields).  A wrong offset scores far lower: shifting
 by two bytes turns voltages into flag words and durations into capacities.
 
 Method after talas9/rvsc-tools, which locates the array this way on every file rather than assuming.

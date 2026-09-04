@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.7.0 (2026-09-04)
+
+* `show` prints the alignment self-check under each inverter and marks any physical setting sitting at the minimum or maximum of its own schema range when that limit is not the default (`mk2vsc.limits`). On the fixture corpus this marks exactly the blocks commissioned with absorption = float = 48.00 V.
+* `check` fails a block whose settings array does not align with the device schema and warns on at-limit settings.
+
 ## 0.6.0 (2026-09-04)
 
 * Fixture serials are pseudonyms (`HQ0000A0001` style); every other byte unchanged, checksums recomputed. The leak scan refuses real-format serials.

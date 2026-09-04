@@ -87,7 +87,9 @@ mk2vsc show download.rvms
 ```
 download.rvms: 5055 bytes, 2 inverter(s), form=device, checksums OK
   HQ0000A0002: firmware 2729560, saved 2026-07-20T18:41:22+00:00, assistant: no assistant
+    alignment OK (+0x059, 138/138 in range)
   HQ0000A0001: firmware 2729560, saved 2026-07-20T18:41:28+00:00, assistant: no assistant
+    alignment OK (+0x059, 138/138 in range)
   Charger
     absorption_V        Absorption voltage       57.6 V    56 V   <- inverters differ
     float_V             Float voltage            55.2 V    54 V   <- inverters differ
