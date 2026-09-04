@@ -123,7 +123,7 @@ def test_refuses_fractional_value_for_integer_field(good_files):
 def test_grid_code_block_and_words_are_locked_with_no_override(good_files, field):
     """Settings 81, 128, 129-189, 190, 191 are never edited one at a time: not with allow_unverified,
     not with allow_out_of_range.  Live evidence 2026-09-04 (System A): a file that changed only
-    setting 191 (0x0101 -> 0xff00) was accepted, reset the VE.Bus, and the GX went offline."""
+    setting 191 (0x0101 -> 0xff00) was not refused before the reset began, and the GX went offline."""
     data = good_files[BARE]
     with pytest.raises(WriteRefused, match="grid-code"):
         set_settings(data, [(None, field, 1)], allow_unverified=True, allow_out_of_range=True)
@@ -134,4 +134,4 @@ def test_grid_code_block_and_words_are_locked_with_no_override(good_files, field
 def test_grid_code_lock_covers_the_assistant_words_and_is_not_editable():
     assert set(GRID_CODE_WORDS) <= GRID_CODE_LOCKED
     assert GRID_CODE_LOCKED == {81, 128, 190, 191} | set(range(129, 190))
-    assert not {BY_NAME_ID for BY_NAME_ID in EDITABLE if BY_NAME[BY_NAME_ID].id in GRID_CODE_LOCKED}
+    assert not any(BY_NAME[n].id in GRID_CODE_LOCKED for n in EDITABLE)

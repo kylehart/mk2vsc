@@ -58,9 +58,11 @@ was not refused that day. (b) A transient state of the device in the minutes aft
 interrupted install: both refusals of archived files happened within the same session as an install
 attempt that ended at commit or in error 10, and the 08-14 acceptance came a day later. Reading (a) was
 tested on 2026-09-04: a fresh System A device-form file with only setting 191 changed (0x0101 -> 0xff00,
-both inverters) was accepted, not refused (it ran "Resetting VE.Bus products" and the GX then went offline;
-docs/HISTORY.md). A 191-only mismatch is therefore not a pre-write gate, which counts against (a). Reading
-(b) is untested (an archived file uploaded long after any install attempt).
+both inverters) was not refused before the reset began: the dialog ran "Resetting VE.Bus products" and
+ended in Error 1303 when the GX went offline (docs/HISTORY.md). Whether the device refused it at commit,
+as it did System A's v4 on 08-12, is Unknown until that system's next download. A 191-only mismatch is
+therefore not a pre-write gate, which rules out (a) as an up-front check; (a) as a commit-time check is
+untested. Reading (b) is untested (an archived file uploaded long after any install attempt).
 
 What to do: download fresh, rebuild your edit on that file, upload; a fresh download carries the device's
 current grid-code words. The writer refuses settings 81, 128, 129-189, 190 and 191 (`fields.GRID_CODE_LOCKED`). If the system is

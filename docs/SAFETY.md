@@ -78,20 +78,22 @@ attempt to reproduce, derive, or bypass it, and will not accept contributions th
 
 In the file the grid code is setting 81, a settings block 129 to 189, and three words the firmware keeps
 with it: 128 and 191, which VEConfigure names `GridSettingsValidCheckerA/B` and which are equal on each
-inverter of every GUI-authored download in the corpus, and 190. `set_settings` and `set_bits` refuse all
+inverter of every GUI-authored ESS download in the corpus and unequal on every never-started graft
+(`tests/test_claims.py`), and 190. `set_settings` refuses all
 of them (`fields.GRID_CODE_LOCKED`) and there is no override flag. Observed: on 2026-09-04 a live
-System A, ESS running, grid code set, accepted a device-form file that changed only setting 191 from
-0x0101 to 0xff00 on both inverters, ran "Resetting VE.Bus products", and within ten seconds every data
-source on its GX went silent and stayed off VRM; three other systems on the same network path were
-unaffected. Whether the word caused the outage is Unknown until that system's next download is read
-(docs/HISTORY.md, 2026-09-04 evening). The lock does not wait for the answer.
+System A, ESS running, grid code set, took a device-form file that changed only setting 191 from
+0x0101 to 0xff00 on both inverters; the file was not refused before the reset began, the dialog ran
+"Resetting VE.Bus products", and within ten seconds every data source on its GX went silent and stayed
+off VRM; three other systems on the same network path were unaffected. Whether the device refused the
+file at commit, and whether the word caused the outage, are Unknown until that system's next download
+is read (docs/HISTORY.md, 2026-09-04 evening). The lock does not wait for the answers.
 
 A grid code reaches a device through VEConfigure with the password, or by file only as a complete
 device-authored block: a fresh download of the same system, or `mk2vsc assistant remove/reinstall`,
 which write 81/128/190/191 as a set exactly as the device or the GUI last wrote them. That path has
 never needed the password (docs/ASSISTANTS.md §8). `mk2vsc experimental graft` copies 190/191 from its
-template while leaving 81/128 as the baseline had them; it is gated, has never started a system, and is
-the one path in the package that writes these words piecemeal.
+template and, with `--install-state`, sets 81 = 1 and 128 = 1 as well; it is gated, has never started a
+system, and is the one path in the package that writes these words piecemeal.
 
 ## Recovery playbook
 
@@ -137,7 +139,6 @@ In the order we have found to work:
   intended values outside the file and check every upload against them.
 - We compared downloads by file position and saw dozens of spurious differences. Block order is not
   stable. Compare by serial.
-
 - We treated a word named "valid checker" as bookkeeping and changed one of the pair on a live system
   to see whether the device would refuse the file. It did not refuse; it reset the bus and the GX went
   dark. A test whose expected outcome is a refusal is still a write.
