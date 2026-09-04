@@ -22,9 +22,9 @@ def test_show_default_and_all_and_json(capsys):
     assert main(["show", BARE]) == 0
     out = capsys.readouterr().out
     assert "Absorption voltage" in out and "inverters differ" in out and "Charger" in out
-    assert "vs_load_above_for" not in out
+    assert "param85" not in out
     assert main(["show", BARE, "--all"]) == 0
-    assert "vs_load_above_for" in capsys.readouterr().out
+    assert "param85" in capsys.readouterr().out
     assert main(["show", BARE, "--json"]) == 0
     d = json.loads(capsys.readouterr().out)
     assert d["all_checksums_ok"] and len(d["units"]) == 2
@@ -54,8 +54,9 @@ def test_edit_refusals(tmp_path, capsys):
     assert main(["edit", str(src), "absorbtion=56.8"]) == 2          # typo: unknown field
     assert "unknown field" in capsys.readouterr().err
     assert main(["edit", str(src), "absorption=5.68"]) == 1           # implausible
-    assert "plausible" in capsys.readouterr().err
-    assert main(["edit", str(src), "vs_load_above_for=4"]) == 1           # low confidence
+    err = capsys.readouterr().err
+    assert "plausible" in err or "outside the device" in err
+    assert main(["edit", str(src), "vs_load_above_for_s=3"]) == 1           # low confidence
     assert "allow_unverified" in capsys.readouterr().err
     assert main(["edit", str(src), "absorption=abc"]) == 2
     assert main(["edit", str(src), "absorption"]) == 2
@@ -96,8 +97,8 @@ def test_diff_validate_fields_census_history(capsys):
     assert main(["validate", BAD]) == 1
     assert main(["fields"]) == 0
     out = capsys.readouterr().out
-    assert "absorption" in out and "vs_load_above_for" not in out
+    assert "absorption" in out and "param85" not in out
     assert main(["fields", "--all"]) == 0
-    assert "vs_load_above_for" in capsys.readouterr().out
+    assert "param85" in capsys.readouterr().out
     assert main(["census", BARE, BAD]) == 0
     assert main(["history", A, B]) == 0

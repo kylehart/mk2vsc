@@ -23,7 +23,7 @@ What it does (the "v3 + v7" recipe, the last one we tried):
        setting 10 = 1               (charge characteristic: fixed)
        setting 15 = 0               (unknown toggle)
        setting 60 = 48              (solar & wind priority flags)
-       setting 62 low byte = 0xc3   (unknown; 41667)
+       setting 62 low byte = 0xc3   (output frequency period word 41666 -> 41667, both 60.00 Hz)
        setting 64 = 300             (battery capacity, Ah -- the template system's value!)
        setting 81 = 1               (grid code active)
        setting 128 = 1              (LOM configuration A)
@@ -55,7 +55,7 @@ INSTALL_STATE = [
     ("charge_characteristic", None, 1),
     ("unknown_toggle_15", None, 0),
     ("solar_wind_priority_flags", None, 48),
-    ("param62", 0x00FF, 0x00C3),
+    ("output_frequency_Hz", 0x00FF, 0x00C3),   # low byte of the period word: 41666 -> 41667
     ("battery_capacity_Ah", None, 300),
     ("grid_code_active", None, 1),
     ("lom_config_a", None, 1),
