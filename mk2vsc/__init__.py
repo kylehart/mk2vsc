@@ -25,7 +25,7 @@ from .writer import set_settings, WriteRefused
 from .diff import diff_files, diff_bytes
 from .qualify import qualify_file, Intent
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 __all__ = [
     "RvmsFile", "Section", "RvmsParseError", "sum32_le", "scan_unit_blocks",
     "UnitBlock", "unit_blocks", "units_by_serial",
