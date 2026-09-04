@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-* The +0x4f timestamp is a file-generation stamp, not an acceptance gate: four System B fixtures from 2026-09-04 (three downloads of unchanged content with increasing stamps, and a back-stamped file the device accepted) and a test. mk2vsc-36 rewritten around the observed rejections; the fixtures show the device had written its grid-code words (190/191) during the August attempts, and the archived files it refused carried the earlier words; the mechanism is stated as a hypothesis. Rule 2 kept as practice. 92 fixtures.
+* The +0x4f timestamp is a file-generation stamp, not an acceptance gate: four System B fixtures from 2026-09-04 (three downloads of unchanged content with increasing stamps, and a back-stamped file the device accepted) and a test. mk2vsc-36 rewritten around the observed rejections; the fixtures show the device had written its grid-code words (190/191) during the August attempts and the archived files it refused carried the earlier words, but a device-form file with differing words was accepted on 2026-08-14, so the cause is recorded as unknown with both readings. Rule 2 kept as practice. 92 fixtures.
 
 ## 0.10.0 (2026-09-04)
 

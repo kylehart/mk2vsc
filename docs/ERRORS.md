@@ -44,11 +44,16 @@ three increasing stamps), and on 2026-09-04 System B accepted the three-hour-old
 taken, and then `system_b_2026-09-04_prepared_ess_deviceform_1` (the `_2` content stamped 16:00, before a
 file it had just accepted). Neither was refused.
 
-**Hypothesis.** The first half of the message is literal: a device-form file whose grid-code words
-(settings 81, 128, 190, 191) disagree with what the device holds is refused without the dealer password.
-Every refused archived file above carried words that differed from the device's; every accepted file
-carried the device's current words or was in upload form (the install procedure). Not yet tested as a
-controlled experiment (a current file with only those words changed).
+**Cause: Unknown.** Two readings fit part of the record and neither fits all of it. (a) The first half of
+the message is literal and a device-form file whose grid-code words (81, 128, 190, 191) disagree with the
+device's is refused: every refused archived file above carried words that differed from the device's. But
+on 2026-08-14 System A accepted a device-form bare file (`system_a_2026-08-14_prepared_bare_deviceform_1`,
+128 = 0xffff, 191 = 0xff00) while it held an ESS install with 128 = 191 = 1: a device-form file with
+differing words that was not refused. (b) A transient state of the device in the minutes after an
+interrupted install: both refusals of archived files happened within the same session as an install
+attempt that ended at commit or in error 10, and the 08-14 acceptance came a day later. Neither reading
+has been tested as a controlled experiment (a current file with only those words changed; an archived file
+uploaded long after any install attempt).
 
 What to do: download fresh, rebuild your edit on that file, upload; a fresh download carries the device's
 current grid-code words. Do not edit settings 81, 128, 190 or 191 in a device-form file. If the system is
