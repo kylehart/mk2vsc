@@ -11,7 +11,8 @@ body:
     validations: {required: true}
   - type: textarea
     id: census
-    attributes: {label: Output of `mk2vsc census` and `mk2vsc validate` on the file(s)}
+    attributes: {label: Output of `mk2vsc census` on the file(s), render: text}
+    validations: {required: true}
   - type: checkboxes
     id: file
     attributes:

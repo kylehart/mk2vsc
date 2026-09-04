@@ -1,0 +1,35 @@
+name: Census report from your system
+description: The primary contribution. Run `mk2vsc census` on your own downloads and tell us what the values should be.
+labels: [report]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Install (`pip install mk2vsc`), download your system's file from VRM > Device list > Remote VEConfigure, then run
+        `mk2vsc census <file>` and paste the output below. No file transfer is needed; the report contains no credentials.
+  - type: input
+    id: system
+    attributes: {label: Inverter model, firmware, topology, placeholder: "e.g. MultiPlus-II 48/3000 GX, firmware 5xx, single unit"}
+    validations: {required: true}
+  - type: textarea
+    id: census
+    attributes: {label: Output of `mk2vsc census`, render: text}
+    validations: {required: true}
+  - type: textarea
+    id: expected
+    attributes:
+      label: What the values should be
+      description: For the key values printed (absorption, float, charge current, output voltage, AC limit, low shutdown, VS thresholds, frequency, capacity), what VEConfigure or VRM shows for your system. Note every disagreement.
+    validations: {required: true}
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: "Output of `mk2vsc show --all` for a setting you know the meaning of, a pair of downloads with one setting changed between them (say which), a mismatch you cannot explain."
+  - type: checkboxes
+    id: files
+    attributes:
+      label: Files (optional)
+      options:
+        - label: I can attach the .rvms file(s) if asked (they carry inverter serials and save timestamps, nothing else identifying)
+        - label: If attached, I am entitled to publish them and they may join the fixture corpus under MIT

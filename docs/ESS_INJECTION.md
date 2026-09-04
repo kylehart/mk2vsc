@@ -305,9 +305,8 @@ None of this touches hardware.
 - **Another GUI export.** A second export from another system would settle whether BLOB12 and the tail
   words are constants.
 
-To contribute: add the file under `fixtures/` following CONTRIBUTING.md, run `pytest` (a failing claim
-test on your file is itself the finding), and open an issue with `mk2vsc census` and `mk2vsc show --json`
-output.
+To contribute: open an issue with `mk2vsc census` output and what you observed on the GX; attach files only
+if asked. A failing claim test on your file is itself the finding.
 
 ## 7. Do not, and how to recover
 

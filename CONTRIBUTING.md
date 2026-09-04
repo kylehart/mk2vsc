@@ -4,6 +4,29 @@ This project advances one controlled experiment at a time. The most valuable con
 files and observations, not code. Everything below is about making those contributions safe for
 you, for the systems involved, and for the people who rely on the field table.
 
+
+## What we ask for
+
+This project is for people who run a command line and reason about a report. The contribution that
+moves it forward is a **census report from your own system**:
+
+```
+pip install mk2vsc
+mk2vsc census <your download>.rvms
+```
+
+Open a "Census report" issue with that output and, for each value it prints, what VEConfigure or VRM
+says the value should be. That single report tells us whether the section grammar, the checksum, the
+settings schema and the field table hold on your hardware, without transferring a file. If a value is
+wrong, or a claim test would fail on your file, that is the finding.
+
+Second: a pair of downloads with exactly one setting changed between them, and a note saying which.
+That names a field. Screenshots of a VEConfigure tab serve the same purpose.
+
+Files themselves are welcome only after a report shows something worth chasing, and only with your
+statement that you may publish them. We do not accept files by email.
+
+
 ## AI assistance, disclosed
 
 This project is developed with AI assistance (Claude). Commits produced that way carry a

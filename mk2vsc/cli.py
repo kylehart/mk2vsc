@@ -14,6 +14,7 @@ More:
 
     mk2vsc diff      A B                 what differs between any two files, by inverter serial
     mk2vsc history   FILE...             dated change log mined from a folder of old downloads
+    mk2vsc census    FILE...             the report to paste into an issue: does the format model hold on your file?
     mk2vsc validate  FILE...             structure and checksums only
     mk2vsc fields                        the settings table with confidence levels and aliases
     mk2vsc experimental ...              assistant (ESS) injection experiments; read docs/ESS_INJECTION.md first
@@ -206,18 +207,58 @@ def cmd_history(a):
 
 
 def cmd_census(a):
+    """The report we ask contributors for: everything needed to judge whether the format model holds on
+    a file, without the file itself.  One block per file; safe to paste into an issue."""
+    from .schema import schema_of, firmware_of_schema
+    from .fields import BY_ID
+    from .units import N_SETTINGS
+    rc = 0
     for p in a.files:
         try:
             f = RvmsFile.load(p)
         except (RvmsParseError, OSError) as e:
-            print(f"   BAD {p}: {e}")
+            rc = 1
+            print(f"{os.path.basename(p)}: PARSE FAILED: {e}")
             continue
-        cells = []
-        for u in unit_blocks(f):
+        cks = "OK" if f.all_checksums_ok else "INVALID"
+        try:
+            mk = f.section(b"Mk2vscInfo").payload
+            version = mk[6: 6 + int.from_bytes(mk[4:6], "little")].decode()
+        except Exception:  # noqa: BLE001
+            version = "?"
+        try:
+            sch = schema_of(f)
+            info_fw = firmware_of_schema(f.section(b"BareSettingInfo").payload)
+            schema_txt = f"parsed ({len(sch)} records, firmware {info_fw})"
+        except Exception as e:  # noqa: BLE001
+            sch = None
+            schema_txt = f"NOT PARSED ({e})"
+        units = unit_blocks(f)
+        print(f"{os.path.basename(p)}: {f.length} bytes, {len(f.sections)} sections, checksums {cks}, "
+              f"format {version}, schema {schema_txt}, {len(units)} inverter(s)")
+        for u in units:
             asst = parse_assistant_area(u)
-            cells.append(f"{u.serial}:{len(u.raw)}:{u.assistant_flag:02x}:{'U' if u.is_upload_form else 'd'}:{asst['kind']}")
-        print(f"{f.length:6d} {'ok ' if f.all_checksums_ok else 'BAD'} | {' '.join(cells)} | {p}")
-    return 0
+            in_range = ""
+            if sch is not None:
+                vals = u.settings()
+                bad = [r.id for r in sch[:N_SETTINGS] if not r.unused and not (BY_ID.get(r.id) and BY_ID[r.id].bits is not None) and not r.in_range(vals[r.id])]
+                in_range = f", settings in schema range {N_SETTINGS - len(bad)}/{N_SETTINGS}" + (f" (out: {bad[:6]})" if bad else "")
+            when = u.save_datetime.isoformat() if u.save_datetime else "?"
+            print(f"  {u.serial}: block {len(u.raw)} B, flag {u.assistant_flag:02x}, form {'upload' if u.is_upload_form else 'device'}, "
+                  f"firmware {u.firmware_version}, saved {when}, assistant: {asst['summary']}{in_range}")
+            keys = [2, 3, 4, 5, 6, 11, 54, 58, 62, 64, 65]
+            cells = []
+            for k in keys:
+                fld = BY_ID[k]
+                v = fld.decode(u.setting(k))
+                cells.append(f"{fld.name}={v:g}{fld.unit}" if isinstance(v, float) else f"{fld.name}={v}{fld.unit}")
+            print("    " + "  ".join(cells))
+        if not f.all_checksums_ok or sch is None or len(units) == 0:
+            rc = 1
+    if rc == 0 and not a.quiet:
+        print("\nTo report: paste this output into a GitHub issue together with what the values SHOULD be "
+              "(as VEConfigure or VRM shows them). https://github.com/kylehart/mk2vsc/issues/new/choose")
+    return rc
 
 
 def cmd_experimental(a):
@@ -292,8 +333,8 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--all", action="store_true", help="include MEDIUM/LOW/UNKNOWN entries")
     s.set_defaults(fn=cmd_fields)
 
-    s = sub.add_parser("census", help="one line per file: blocks, flags, form, assistant (for corpora)")
-    s.add_argument("files", nargs="+", metavar="FILE")
+    s = sub.add_parser("census", help="the self-check report to paste into an issue: structure, schema, inverters, key values")
+    s.add_argument("files", nargs="+", metavar="FILE"); s.add_argument("-q", "--quiet", action="store_true", help="omit the reporting hint")
     s.set_defaults(fn=cmd_census)
 
     x = sub.add_parser("experimental", help="assistant-injection experiments (docs/ESS_INJECTION.md)")
