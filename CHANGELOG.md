@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0 (2026-09-04)
+
+* Every setting index 0 to 191 now carries VEConfigure's own identifier (`Field.eprom`, `EPROM_NAMES`), from the identifier table published by talas9/rvsc-tools (MIT). Settings above 65 renamed from those identifiers: `fs_ubat_start_V` .. `fs_ubat_stop_delay_s`, `vs_dont_ignore_soc_below_pct` (= vs2StartOnSOC), `inverter_current_limit_during_assist_A` (73 was mislabelled a voltage), `abs_to_float_soc_reset_pct`, `ubat_dont_charge_V`, `grid_settings_valid_checker_a`, reserved and grid-code slots.
+* `vs_usage` and `charge_characteristic` enum option text from VEConfigure.
+* README: related projects; the "no prior art" statement corrected.
+
 ## 0.4.1 (2026-09-04)
 
 * `mk2vsc census` is now the self-check report contributors are asked for: structure, checksum status, schema parse, settings-in-range count, key values per inverter, and the reporting hint. Contribution docs and issue forms lead with it; the fixture form is replaced by a census-report form.

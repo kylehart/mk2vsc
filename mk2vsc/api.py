@@ -41,8 +41,8 @@ GROUPS: List[Tuple[str, List[str]]] = [
                                           "vs_load_below_for_min", "vs_ignore_ac_below_V", "vs_udc_below_for_s",
                                           "vs_dont_ignore_soc_below_pct", "vs_accept_battery_above_V", "vs_udc_above_for_min",
                                           "aes_low_current_limit_A", "aes_current_hysteresis_A"]),
-    ("Grid / ESS related", ["grid_code", "lom_config_a", "flags2", "solar_wind_priority_V",
-                            "voltage_threshold_73_V"]),
+    ("Grid / ESS related", ["grid_code", "grid_settings_valid_checker_a", "flags2", "ubat_dont_charge_V",
+                            "inverter_current_limit_during_assist_A"]),
     ("Flag registers", ["flags0", "flags1", "flags2"]),
 ]
 _GROUPED = {n for _, names in GROUPS for n in names}
@@ -83,6 +83,8 @@ class Unit:
     def as_dict(self, include_unknown: bool = False) -> Dict[str, object]:
         out: Dict[str, object] = {}
         for f in FIELDS:
+            if f.id >= 190:
+                continue
             if f.confidence in (CONFIRMED, HIGH, MEDIUM) or include_unknown:
                 out[f.name] = f.decode(self._b.setting(f.id))
         return out
@@ -238,8 +240,8 @@ def render_summary(cfg: Config, include_unknown: bool = False) -> str:
             lines.append(f"  {title}")
             lines.extend(rows)
     if include_unknown:
-        rest = [x for x in FIELDS if x.name not in _GROUPED]
-        lines.append("  Other named settings (low confidence)")
+        rest = [x for x in FIELDS if x.name not in _GROUPED and x.id < 190 and x.confidence != "UNKNOWN"]
+        lines.append("  Other named settings (below HIGH confidence; reserved and grid-code slots omitted)")
         for fld in rest:
             vals = [_fmt(fld, units[s].setting(fld.id)) for s in serials]
             lines.append(f"    {fld.name:28s} {('id ' + str(fld.id)):34s} " + "  ".join(f"{v:>{max(width, 14)}}" for v in vals)

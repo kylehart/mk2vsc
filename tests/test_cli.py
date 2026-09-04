@@ -22,9 +22,9 @@ def test_show_default_and_all_and_json(capsys):
     assert main(["show", BARE]) == 0
     out = capsys.readouterr().out
     assert "UBatAbsorption" in out and "inverters differ" in out and "Charger" in out
-    assert "param85" not in out
+    assert "info_id0" not in out
     assert main(["show", BARE, "--all"]) == 0
-    assert "param85" in capsys.readouterr().out
+    assert "info_id0" in capsys.readouterr().out
     assert main(["show", BARE, "--json"]) == 0
     d = json.loads(capsys.readouterr().out)
     assert d["all_checksums_ok"] and len(d["units"]) == 2
@@ -56,7 +56,7 @@ def test_edit_refusals(tmp_path, capsys):
     assert main(["edit", str(src), "absorption=5.68"]) == 1           # implausible
     err = capsys.readouterr().err
     assert "plausible" in err or "outside the device" in err
-    assert main(["edit", str(src), "param66_V=57.72"]) == 1           # low confidence
+    assert main(["edit", str(src), "fs_ubat_start_V=57.72"]) == 1           # low confidence
     assert "allow_unverified" in capsys.readouterr().err
     assert main(["edit", str(src), "absorption=abc"]) == 2
     assert main(["edit", str(src), "absorption"]) == 2
@@ -97,9 +97,9 @@ def test_diff_validate_fields_census_history(capsys):
     assert main(["validate", BAD]) == 1
     assert main(["fields"]) == 0
     out = capsys.readouterr().out
-    assert "absorption" in out and "param85" not in out
+    assert "absorption" in out and "info_id0" not in out
     assert main(["fields", "--all"]) == 0
-    assert "param85" in capsys.readouterr().out
+    assert "info_id0" in capsys.readouterr().out
     assert main(["census", BARE]) == 0
     out = capsys.readouterr().out
     assert "schema parsed" in out and "settings in schema range 190/190" in out and "absorption_V=" in out and "To report" in out

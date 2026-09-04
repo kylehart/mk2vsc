@@ -196,6 +196,14 @@ The SoC threshold's true location is not known.
 - Read the monitor. A configuration-change detector that nobody reviews is not a control.
 - Write the intended values down before uploading anything, and check the file against them.
 
+## September 2026: neighbours
+
+After release we found talas9/rvsc-tools, a read-only `.rvsc` viewer published in July 2026 whose author
+had decoded the same per-setting schema independently and extracted VEConfigure's internal setting
+identifiers from the application binary. Our "no prior art" statement was wrong by two months. We
+adopted the identifier table with attribution; it named the settings above 65 that Victron's document
+does not, and corrected two of ours (73 is a current limit, not a voltage; 70 is `vs2StartOnSOC`).
+
 ## What remains open
 
 The open questions are tracked as GitHub issues, in priority order, at

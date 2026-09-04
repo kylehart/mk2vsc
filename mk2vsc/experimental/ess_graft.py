@@ -58,7 +58,7 @@ INSTALL_STATE = [
     ("output_frequency_Hz", 0x00FF, 0x00C3),   # low byte of the period word: 41666 -> 41667
     ("battery_capacity_Ah", None, 300),
     ("grid_code", None, 1),
-    ("lom_config_a", None, 1),
+    ("grid_settings_valid_checker_a", None, 1),
 ]
 
 
