@@ -28,7 +28,7 @@ python -m venv .venv
 .venv/bin/pytest
 ```
 
-459 tests, under a second.
+468 tests, under a second.
 
 ## The corpus and its limits
 
@@ -106,5 +106,5 @@ matching GUI screenshot.
 | By-serial diff and bookkeeping model | proven | real consecutive downloads, including the swapped-order pair |
 | Qualifier | proven against its motivating incident | catches the 2026-08-14 rollback file (fixture); the 2026-08-21 one-inverter GUI write is the case the agreement check was written for, but we hold no fixture from that day |
 | Assistant records | read-only, structure only | record framing, sizes and the stub signature; the record body and the 72-byte ESS tail are not understood |
-| Upload-form transform | partial | reproduced a GUI export byte-for-byte once; the device accepted one such file; the resulting install never started; not shipped as a command |
+| ESS injection (graft, upload-form transform) | experimental, gated | shipped under `mk2vsc.experimental` behind `--i-accept-the-risk`; reproduces every August 2026 attempt file byte-for-byte; the device accepted and stored them; no system ever started (docs/ESS_INJECTION.md) |
 | Grid code | not touched | flag read only; the dealer password is out of scope by policy |

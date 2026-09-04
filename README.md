@@ -28,13 +28,15 @@ built to do that, together with everything we learned about the file along the w
   * qualifies a file against the values you intended before you upload and after you re-download,
   * mines a library of archived downloads into a dated, per-inverter change log (`mk2vsc history`).
 * A corpus of 84 real device files with a manifest, and a test suite that checks every documented
-  claim against that corpus (459 tests).
+  claim against that corpus (468 tests).
 * A written account of the format as we understand it, and of what we do not understand.
 
 ## What this is not
 
 * It does not upload anything. You upload through VRM, exactly as before.
-* It does not add, remove or modify assistants (ESS and others). We tried; see docs/ASSISTANTS.md.
+* It does not install assistants (ESS and others) as a supported operation. The experimental graft and
+  upload-form transform are included under `mk2vsc.experimental`, gated, and have never produced a running
+  system; docs/ESS_INJECTION.md is the complete record for anyone who wants to pick that up.
 * It does not touch grid codes or the dealer password that protects them.
 * It is not affiliated with or endorsed by Victron Energy.
 
@@ -49,7 +51,8 @@ built to do that, together with everything we learned about the file along the w
 | By-serial diff (`mk2vsc diff`) | Proven | Consecutive downloads, including a pair whose blocks swapped position, classify as bookkeeping only |
 | Qualifier (`mk2vsc qualify`) | Proven | Reproduces the incident that motivated it (a rollback that reverted a charge-voltage fix) |
 | Assistant area | Read only | Record structure and stub signature recognised; record bodies not understood |
-| Upload-form (GUI export) files | Read only, experimental | Detected and decoded; the writer refuses them |
+| Upload-form (GUI export) files | Read only | Detected and decoded; the writer refuses them |
+| ESS injection (`mk2vsc experimental`) | Experimental, never ran | Graft and device-to-upload-form transform reproduce the August 2026 files byte-for-byte; the device stored them, the system never started |
 
 The confidence vocabulary (CONFIRMED, HIGH, MEDIUM, LOW, UNKNOWN) is defined in `mk2vsc/fields.py` and
 docs/FIELDS.md. The writer edits CONFIRMED and HIGH fields; anything lower needs an explicit override.
@@ -60,7 +63,7 @@ docs/FIELDS.md. The writer edits CONFIRMED and HIGH fields; anything lower needs
 git clone <this repository>
 cd mk2vsc
 python3 -m venv .venv && .venv/bin/pip install -e ".[test]"
-.venv/bin/pytest          # 459 tests against the fixture corpus
+.venv/bin/pytest          # 468 tests against the fixture corpus
 ```
 
 Or run without installing: `PYTHONPATH=. python3 -m mk2vsc.cli ...`.
@@ -167,6 +170,7 @@ things on your own system before trusting the tool with it.
 | docs/ASSISTANTS.md | What we know and do not know about ESS and other assistants in the file |
 | docs/ERRORS.md | What mk2vsc-36, mk2vsc-47, mk2vsc-49, Error 1303 and the VE.Bus errors mean |
 | docs/HISTORY.md | How this came to be, in order, including the things we got wrong |
+| docs/ESS_INJECTION.md | The ESS-by-file experiment in full: what a GUI install writes, every attempt, hypotheses, the next test |
 | docs/FIXTURES.md | What every file in the corpus is |
 
 ## Limits and unknowns

@@ -54,7 +54,8 @@ The GUI writes the assistant records compact (no 0xff padding runs, shorter bloc
 blob at +0x45). The device stores them padded and returns zeros at +0x45. A transform between the two
 forms exists and round-trips the installer's real export from the device's own download, byte-for-byte
 per block. The device accepted such a file on Guava on 2026-08-13. The system stored the configuration
-and did not start (section 4, mode D). The transform is not part of this toolkit.
+and did not start (section 4, mode D). The transform ships as `mk2vsc.experimental.upload_form`, gated behind
+`--i-accept-the-risk`; docs/ESS_INJECTION.md records every attempt made with it.
 
 ## 4. The four failure modes we observed
 
@@ -121,9 +122,11 @@ transformed file to a healthy-BMS system, and we have not done it.
 
 ## 8. What this toolkit will not do
 
-- Add, remove or transplant an assistant by file. `set_settings` refuses any edit that changes block
-  length, and there is no API for the assistant area beyond reading it.
-- Convert device form to upload form for upload. The writer refuses upload-form input.
+- Author, remove or transplant an assistant as a supported operation. `set_settings` refuses any edit that
+  changes block length. The graft and the upload-form transform exist only under `mk2vsc.experimental`,
+  gated behind `--i-accept-the-risk`, because no file they produced has ever run; docs/ESS_INJECTION.md
+  is the full record and the hand-off to whoever tries next.
+- Treat upload-form files as an input for settings edits. The writer refuses them.
 - Anything involving the grid-code password.
 
 If you are tempted anyway: a file the device *accepts* is a higher-risk event than one it rejects. Modes

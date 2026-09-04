@@ -15,7 +15,9 @@ MultiPlus systems between June and September 2026.
   that byte is the high byte of setting 88.
 * Decoder, by-serial diff with bookkeeping classification, guarded length-preserving writer,
   intent-based qualifier, read-only assistant-area parser, and the `mk2vsc` CLI.
-* Corpus of 84 unique fixture files with manifest, and 459 tests that check every documented claim
+* Experimental package `mk2vsc.experimental` (ESS graft, device-to-upload-form transform), gated behind
+  `--i-accept-the-risk`, with regression tests against the August 2026 attempt files; docs/ESS_INJECTION.md
+* Corpus of 84 unique fixture files with manifest, and 468 tests that check every documented claim
   against it.
 * Documentation: FORMAT, FIELDS, CHANGE_CONTROL, WORKFLOW, SAFETY, QA, ASSISTANTS, ERRORS, HISTORY,
   FIXTURES.

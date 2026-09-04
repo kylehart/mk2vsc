@@ -143,7 +143,8 @@ not a finding.
 its CAN bus repaired and a third battery module installed, now runs ESS on both inverters with the
 charge profile corrected in the same session. That is consistent with the BMS hypothesis but does not
 test it: the assistant was GUI-authored. Whether a file built by our transform would have started on a
-healthy-BMS system remains untested, and this toolkit does not include the transform.
+healthy-BMS system remains untested. The transform and the graft ship under `mk2vsc.experimental`, gated
+and documented in docs/ESS_INJECTION.md, so that someone can run that test.
 
 ## 2026-08-19: the month-long regression
 
