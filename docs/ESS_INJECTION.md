@@ -234,7 +234,7 @@ discriminator standing, untested. Test: section 5.
 with the 704 record) on every system including the GUI export, so they are not per-inverter identity.
 What remains unexplained is the u16 immediately after the record (`40 00` device, `0a 00` GUI export)
 and the final byte (`ff` device, `00` GUI export), which our upload-form v2 carried in the GUI form and
-our device-form grafts carried in the device form. Neither started. (`mk2vsc experimental to-upload-form`
+our device-form grafts carried in the device form. Neither started. (`mk2vsc assistant` and `mk2vsc.upload_form`
 writes the GUI form.) Status: open, low prior. Test: a
 second GUI export from a different system to see whether `0a 00` is constant.
 

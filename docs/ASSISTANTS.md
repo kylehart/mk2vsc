@@ -65,7 +65,7 @@ forms exists and round-trips the installer's real export from the device's own d
 per block. The form decides what the device does with the file: a device-form upload is a settings write
 (no reset, the assistant area is not acted on); an upload-form upload runs the install procedure
 ("Resetting VE.Bus products", inverters off for its duration). `mk2vsc assistant` builds upload-form
-files; the transform lives in `mk2vsc.experimental.upload_form` and is imported from there.
+files; the transform lives in `mk2vsc.upload_form`.
 
 ## 4. The outcomes we observed
 
