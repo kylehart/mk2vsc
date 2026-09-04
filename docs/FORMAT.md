@@ -221,7 +221,7 @@ Every block in the corpus fits one of these shapes (settings 190/191 shown first
 | bare, grid code removed | `f5 ff 00 00`, `f5 ff 00 ff` or `ff ff 00 00` \| `00 00` + `ff 00 0b` | bare blocks on which a grid code was once applied: some words stay (residual) |
 | 6-byte container | `ff ff ff ff` \| `06 00` + `a7 fe 00 00 57 01` + `ff fa 0a` | two files written by an older tool build (see docs/FIXTURES.md) |
 | stub | `ff ff ff ff` \| `40 00` + `a7 fe 00 00 57 01` + 56 × `ff` + `c0 0a`, then `ff 40 0a` | what VEConfigure wrote on both inverters after accepting a transplanted assistant and discarding it |
-| GUI-installed ESS | `f5 ff 01 01` or `f5 ff 01 00` \| `c0 02` + 704-byte body, or `80 04` + 1152-byte body, then a 72-byte tail | every working ESS install (one record per inverter; the pair holds one of each). Settings 128 and 191 read 1 or 0x0101, equal to each other on every GUI-authored block, set per inverter |
+| GUI-installed ESS | `f5 ff` + a word with low byte 1 and high byte 0 to 3 (settings 190/191) \| `c0 02` + 704-byte body, or `80 04` + 1152-byte body, then a 72-byte tail | every working ESS install (one record per inverter; the pair holds one of each). Settings 128 and 191 read 1 or 0x0101, equal to each other on every GUI-authored block, set per inverter |
 
 **Observed.** On bare, container and stub blocks the tail is `ff` + u16, and that u16 plus the body length
 is always 2816. **Inferred.** The u16 is a remaining-space counter over a 2816-byte assistant budget.
@@ -266,7 +266,7 @@ it does not author record bodies; it removes records and reinstalls the system's
 * header bytes +0x1f..+0x34 and the `0x0180` word at +0x57
 * the 12 constant blob bytes of the upload form and whether they gate an install
 * the ESS record body encoding and the 13-byte ESS trailer
-* settings 128..189 (0xffff on bare blocks; the GUI ESS install writes 1 or 0x0101 into 128 and 129)
+* settings 128..189 (0xffff on bare blocks; the GUI ESS install writes a value with low byte 1 and high byte 0 to 3 into 128, equal to 191; 129 to 189 stay 0xffff on every block we hold)
 * whether `.rvsc` single-unit files share this layout: we have none
 * three-phase or 3+ unit files: we have none
 * any other firmware version or format version: we have none
