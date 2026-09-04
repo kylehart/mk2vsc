@@ -141,7 +141,7 @@ The same System A file, first unit block:
 | +0x37 | u8 | slot byte B: `00` or `01` | Observed |
 | +0x3a | 11 + pad | ASCII inverter serial `HQ...`, zero padded | Observed |
 | +0x45 | 10 | zeros (device form); see §4 for the upload form | Observed |
-| +0x4f | u32 | Unix timestamp of the last save; rewritten on every save. This is the "nonce" that makes an archived file "old" to the device | Observed |
+| +0x4f | u32 | Unix timestamp stamped when the file was generated (each download of unchanged content carries a new value; the GUI stamps its export). Not an acceptance gate: the device accepted older-stamped files with current content | Observed |
 | +0x53 | u32 | zero | Observed |
 | +0x57 | u16 | `0x0180` in every block | Observed; Unknown |
 | +0x59 | u16[192] | the settings array; entry *n* is VE.Bus setting ID *n* (see `docs/FIELDS.md`). Entries 190 and 191 are the grid-code / loss-of-mains words (`ff ff ff ff` with no grid code, `f5 ff 01 00` or `f5 ff 01 01` with one) | Observed |
@@ -162,11 +162,12 @@ shows dozens of differences; compared by serial there are exactly six bookkeepin
 
 **Observed.** The u32 at +0x4f decodes to a plausible UTC time on every device-form block (2026-06 to
 2026-09 in our corpus) and the two blocks of one download differ by a few seconds. Two same-hour re-saves
-of an unchanged system differ only here (and in the checksum). **Inferred.** The device compares this
-against its own record and rejects an upload whose stamp is older than its current state with
-`mk2vsc-36` ("Incorrect grid code password or old configuration file"). Uploading a freshly downloaded
-file back unchanged is always accepted; uploading a weeks-old archived file of the same system is
-rejected. Build every edit on a fresh download.
+of an unchanged system differ only here (and in the checksum), and three downloads of unchanged content
+minutes apart carry three increasing values: the stamp is the time the file was generated. **Observed.**
+The device does not use it as an acceptance gate: on 2026-09-04 System B accepted a three-hour-old
+download after a newer one, and then current content stamped an hour before a file it had just accepted.
+The `mk2vsc-36` rejections of archived files have another cause (docs/ERRORS.md). Build every edit on a
+fresh download anyway: it carries the device's current settings and grid-code words.
 
 ## 4. Device form and upload form
 

@@ -21,27 +21,29 @@ inverter side, not from the VEConfigure program. They are verdicts on the bytes.
 
 ### mk2vsc-36  "Incorrect grid code password or old configuration file"
 
-Two meanings, and the text does not tell you which.
+The device rejects the file before writing anything. What it objects to is not fully known.
 
-**Meaning 1 (common): the file is stale.** The device compares the save timestamp at block offset +0x4f
-(or +0x59 in upload form) with what it holds and rejects anything older. Any archived file, including
-a known-good baseline that loaded fine last week, triggers this after the device has been saved since.
-*Observed* on System A 2026-08-12: the archived bare baseline was rejected repeatedly across two GX reboots;
-a fresh download compared byte-for-byte to that baseline showed the device had written nothing and
-was not corrupt; uploading the fresh download unmodified was accepted immediately.
+**Observed rejections.** System A 2026-08-12: an archived bare baseline (grid code 0, words 128/190/191 at
+0xffff) was rejected repeatedly across two GX reboots right after a hand-built file carrying assistant
+records and grid-code words had been uploaded; a fresh download compared byte-for-byte to that baseline
+showed the device had written nothing and was not corrupt, and uploading the fresh download unmodified
+was accepted at once. System C 2026-07-20 and System A 2026-08-12: the same error after the "Resetting
+VE.Bus products" dialog of a hand-built assistant install; on System C the VE.Bus was left half-configured
+(error 10), on System A nothing had been written.
 
-**Meaning 2 (rare): the grid-code step of a real assistant install failed.** *Observed* on System C
-2026-07-20 and System A 2026-08-12, both times after the "Resetting VE.Bus products" dialog, both times
-with a file we had built by hand that carried assistant records. On System C the VE.Bus was left
-half-configured (error 10); on System A the fresh download proved nothing had been written.
+**What it is not.** It is not a timestamp check. The u32 at block offset +0x4f (+0x59 in upload form) is
+stamped when the file is generated (each download of unchanged content carries a new value), and on
+2026-09-04 System B accepted a download three hours older than a newer one, and then the newest content
+with those stamps set to an hour before the file it had just accepted. Neither was refused.
 
-How to tell them apart: if you never saw "Resetting VE.Bus products" and the file was not freshly
-downloaded, it is meaning 1. If you are uploading a hand-built file with an assistant, assume meaning 2
-and stop.
+**Working hypothesis.** The first half of the message is literal: a device-form file whose grid-code words
+(settings 81, 128, 190, 191) disagree with what the device holds is refused without the dealer password.
+That fits every rejection above and every acceptance (files that carried the device's current words, or
+upload-form files, which run the install procedure). Untested as a controlled experiment.
 
-Device state: nothing written (meaning 1, and meaning 2 on System A); possibly half-applied (meaning 2 on
-System C). What to do: download fresh, rebuild your edit on that file, upload. If the system is in error
-10, see below.
+What to do: download fresh, rebuild your edit on that file, upload; a fresh download carries the device's
+current grid-code words. Do not edit settings 81, 128, 190 or 191 in a device-form file. If the system is
+in error 10, see below.
 
 ### mk2vsc-47  "More than one unknown unit detected"
 
