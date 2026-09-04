@@ -47,9 +47,13 @@ file it had just accepted). Neither was refused.
 **Cause: Unknown.** Two readings fit part of the record and neither fits all of it. (a) The first half of
 the message is literal and a device-form file whose grid-code words (81, 128, 190, 191) disagree with the
 device's is refused: every refused archived file above carried words that differed from the device's. But
-on 2026-08-14 System A accepted a device-form bare file (`system_a_2026-08-14_prepared_bare_deviceform_1`,
-128 = 0xffff, 191 = 0xff00) while it held an ESS install with 128 = 191 = 1: a device-form file with
-differing words that was not refused. (b) A transient state of the device in the minutes after an
+on 2026-08-14 System A accepted a device-form bare rollback while it held an ESS install
+(`system_a_2026-08-14_download_ess_deviceform_1`: 128 = 1 on both inverters, 191 = 1 and 257). The two
+candidate rollback files are in the corpus (`system_a_2026-08-14_prepared_bare_deviceform_1`, words
+0xffff/0xff00, and `_2`, words 1/0xff00); which one was uploaded, and that it was accepted, come from the
+operator's incident notes rather than from a re-download in the corpus (the next download, 08-19, follows
+an installer session and matches neither file). **Inferred**, then: a device-form file with differing words
+was not refused that day. (b) A transient state of the device in the minutes after an
 interrupted install: both refusals of archived files happened within the same session as an install
 attempt that ended at commit or in error 10, and the 08-14 acceptance came a day later. Neither reading
 has been tested as a controlled experiment (a current file with only those words changed; an archived file
