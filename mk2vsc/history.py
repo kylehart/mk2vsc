@@ -50,22 +50,35 @@ class Change:
 
 
 def load_snapshots(paths: List[str]) -> Tuple[List[Snapshot], List[Tuple[str, str]]]:
-    snaps, skipped = [], []
+    items, skipped = [], []
     for p in paths:
         try:
-            f = RvmsFile.load(p)
-        except (RvmsParseError, OSError) as e:
+            items.append((p, open(p, "rb").read()))
+        except OSError as e:
             skipped.append((p, str(e)))
+    snaps, more = snapshots_from_bytes(items)
+    return snaps, skipped + more
+
+
+def snapshots_from_bytes(items: List[Tuple[str, bytes]]) -> Tuple[List[Snapshot], List[Tuple[str, str]]]:
+    """Snapshots from ``[(name, bytes)]``; ``name`` stands in for the path.  The order is the save timestamp
+    inside each file, not the name."""
+    snaps, skipped = [], []
+    for name, data in items:
+        try:
+            f = RvmsFile.parse(data)
+        except RvmsParseError as e:
+            skipped.append((name, str(e)))
             continue
         units = unit_blocks(f)
         if not units:
-            skipped.append((p, "no unit blocks"))
+            skipped.append((name, "no unit blocks"))
             continue
         if not f.all_checksums_ok:
-            skipped.append((p, "invalid checksum(s); not a device file"))
+            skipped.append((name, "invalid checksum(s); not a device file"))
             continue
         ts = max(u.save_timestamp for u in units)
-        snaps.append(Snapshot(p, ts, tuple(sorted(u.serial for u in units)), f))
+        snaps.append(Snapshot(name, ts, tuple(sorted(u.serial for u in units)), f))
     return snaps, skipped
 
 
