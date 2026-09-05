@@ -50,8 +50,8 @@ and D) or the same (Systems A and B).
 
 Aligned by role, the 1152-byte body is byte-identical across System C, System B and System A. The 704-byte body
 differs by one byte across systems (a primary/secondary flag near the record start). So the payload is a
-fixed template chosen by role, not a program compiled per inverter. That observation was correct and
-still did not make transplanting work; see section 4.
+fixed template chosen by role, not a program compiled per inverter. A template payload does not by itself
+make a transplant start; see section 4.
 
 What the body is: entropy about 6.2 bits per byte, 8 % zero bytes, recurring two and three byte
 sequences at regular strides, and embedded parameter values (the bytes for 48.00 V and 10 % appear

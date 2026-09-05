@@ -17,6 +17,7 @@ More:
     mk2vsc history   FILE...             dated change log mined from a folder of old downloads
     mk2vsc census    FILE...             the report to paste into an issue: does the format model hold on your file?
     mk2vsc validate  FILE...             structure and checksums only
+    mk2vsc assistant remove|reinstall    take an assistant off, or put a device-authored one back (docs/ASSISTANTS.md)
     mk2vsc fields                        the settings table with confidence levels and aliases
     mk2vsc experimental ...              assistant (ESS) injection experiments; read docs/ESS_INJECTION.md first
 

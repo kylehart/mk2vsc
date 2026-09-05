@@ -72,7 +72,8 @@ No single line is proof; the pattern is. `tests/test_claims.py` re-checks each r
 | UNKNOWN | observed values recorded, meaning unknown | read |
 
 Flag registers (IDs 0 and 1) are never edited by the writer regardless of level; we have not toggled a bit
-on hardware.
+on hardware. `set_bits` (and `diagnose --fix`) writes single bits of other flag registers only when the bit
+is qualified by a device- or GUI-authored flip (`writer.QUALIFIED_BITS`; today setting 60 bit 4, LithiumBattery).
 
 ## The device's own schema
 
@@ -92,8 +93,8 @@ not name it.
 
 ## The Virtual Switch relay mode (IDs 15 to 43)
 
-Setting 15 (`vsUsage`) selects what the Virtual Switch does: 0 not used, 1 controls the relay, 2 ignores
-the AC input. Settings 16 to 43 are the relay-mode conditions: on-levels (16 to 18), on-times (19 to
+Setting 15 (`vsUsage`) selects what the Virtual Switch does: 0 not used, 1 drives the aux relay, 2 to 6 the
+ignore-AC-input and generator-control modes listed in the generated row below (our systems read 3). Settings 16 to 43 are the relay-mode conditions: on-levels (16 to 18), on-times (19 to
 27), off-levels (28 to 30), off-times (31 to 42) and a minimum on time (43), all named by Victron. Our
 systems use the ignore-AC mode, so these hold defaults.
 

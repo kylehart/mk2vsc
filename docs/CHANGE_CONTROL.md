@@ -42,9 +42,8 @@ changes/
 
 Two folders are filled by a person at the VRM portal (baseline, downloaded). One is filled by the
 tool (prepared). There is deliberately no `uploaded/` folder: the file that was uploaded is always
-`01_prepared/`, and what the device actually stored is proven by `02_downloaded/`. We had an
-`uploaded/` folder once. It was ambiguous, it got pre-filled with a copy, and it made it easy to
-grab the wrong file.
+`01_prepared/`, and what the device actually stored is proven by `02_downloaded/`. An `uploaded/`
+folder would be ambiguous: it invites a copy that may not be the file that went up.
 
 Prepared files live only in `01_prepared/`. Upload from there. Never stage a copy in `~/Downloads`
 or on the desktop.

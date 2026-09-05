@@ -1,4 +1,4 @@
-"""Report records: the contract between the engine, the CLI text, and the web page (``report_version`` 1)."""
+"""Report records: the contract between the engine, the CLI text, and any consumer of ``--json`` (``report_version`` 1)."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field, asdict
