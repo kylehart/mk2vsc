@@ -9,6 +9,7 @@ Start here (one file downloaded from VRM > Device list > Remote VEConfigure):
     mk2vsc verify   download.edited.rvms redownload.rvms  after the upload: did the device take exactly your change?
     mk2vsc check    redownload.rvms --expect absorption=56.8 float=54.0
                                                          values as intended, and equal on both inverters
+    mk2vsc diagnose download.rvms                        what is wrong in the settings, with the evidence and a fix to take or leave
 
 More:
 
@@ -160,6 +161,67 @@ def cmd_diff(a):
         return _fail(f"cannot diff: {e}")
     print(json.dumps(d.as_dict(), indent=1) if a.json else render_diff(d))
     return 0 if (d.identical or d.only_bookkeeping) else 2
+
+
+def cmd_diagnose(a):
+    """Findings from the settings themselves; optionally a corrected file (through the writer's guards) and the
+    manual change sheet for typing the same change into VEConfigure."""
+    from .diagnose import diagnose_files, render, apply_fixes, dry_run, intent_for_check, sheet_rows, render_sheet, FixRefused
+    try:
+        assume = dict(kv.split("=", 1) for kv in (a.assume or []))
+        values = _assignments(a.set or [])
+    except (KeyError, ValueError) as e:
+        return _fail(f"error: {e}", 2)
+    rep = diagnose_files(a.files, assume=assume or None)
+    wants_edit = a.fix or a.sheet
+    if wants_edit:
+        if len(a.files) != 1:
+            return _fail("--fix and --sheet take exactly one file", 2)
+        fr = rep.files[0]
+        if fr.status != "ok":
+            return _fail(f"{fr.name}: status {fr.status}; {fr.message}", 1)
+        fixable = [f.id for f in fr.findings if f.fix and f.fix["kind"] != "gui"]
+        if not a.accept:
+            return _fail("nothing accepted. Findings are never applied silently: name the ones to take with --accept ID ... "
+                         f"(by-file fixes available: {', '.join(fixable) or 'none'})", 2)
+        data = fr._ctx.data
+        try:
+            if a.fix:
+                out, intent = apply_fixes(data, fr, accept=a.accept, values=values, copy_from=a.copy_from)
+            else:
+                intent = dry_run(data, fr, a.accept, values, a.copy_from)   # same guards as --fix; the sheet never asks for a refused value
+        except FixRefused as e:
+            return _fail(f"REFUSED: {e}", 1)
+        rep.intent = intent
+        if a.fix:
+            root, ext = os.path.splitext(a.files[0])
+            out_path = a.output or f"{root}.corrected{ext or '.rvms'}"
+            side_path = out_path + ".intent.json"
+            for p in (out_path, side_path):
+                if os.path.abspath(p) == os.path.abspath(a.files[0]) or (os.path.exists(p) and os.path.samefile(p, a.files[0])):
+                    return _fail(f"refusing to write {p}: it is the input file, or a link to it; keep the download as your rollback", 1)
+            mode = "wb" if a.overwrite else "xb"
+            try:
+                with open(out_path, mode) as fh:
+                    fh.write(out)
+                with open(side_path, mode) as fh:
+                    fh.write(json.dumps(intent_for_check(intent, out), indent=1).encode())
+            except FileExistsError as e:
+                return _fail(f"{e.filename} exists; pass --overwrite or -o", 1)
+    if a.json:
+        print(json.dumps(rep.as_dict(), indent=1, default=str))
+    else:
+        print(render(rep))
+        if wants_edit:
+            print("\nManual change sheet (the same change, typed into VEConfigure):")
+            print(render_sheet(sheet_rows(rep.files[0], rep.intent)))
+    if a.fix and not a.json:                 # under --json stdout is exactly one report document
+        print(f"\nwrote {out_path} and {out_path}.intent.json")
+        print("verified: only the intended words and their section checksums changed; the input file is untouched.")
+        print("Next: upload through VRM > Remote VEConfigure, download again, then")
+        print(f"  mk2vsc verify {out_path} <the new download>")
+        print(f"  mk2vsc check  <the new download> --intent {out_path}.intent.json")
+    return 0 if all(fr.status == "ok" for fr in rep.files) else 1
 
 
 # ----------------------------------------------------------------------------- tools
@@ -378,6 +440,19 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--intent", help="JSON intent file (advanced; see docs/CHANGE_CONTROL.md)")
     s.add_argument("--no-agreement", action="store_true", help="do not require the inverters to agree")
     s.set_defaults(fn=cmd_check)
+
+    s = sub.add_parser("diagnose", help="what is wrong in the settings: findings with evidence, a fix to take or leave, the change sheet")
+    s.add_argument("files", nargs="+", metavar="FILE")
+    s.add_argument("--json", action="store_true", help="report_version 1 JSON (docs/DIAGNOSE.md)")
+    s.add_argument("--assume", nargs="+", metavar="KEY=VALUE", help="answer a question the file cannot: chemistry=lithium|lead-acid, shared_battery=yes|no, ess_intended=yes|no; a conditional fix is refused until its question is answered")
+    s.add_argument("--accept", nargs="+", metavar="ID", help="finding ids whose fixes to take (nothing is applied silently)")
+    s.add_argument("--set", nargs="+", metavar="FIELD=VALUE", help="values for fixes that need one (no generic template is offered)")
+    s.add_argument("--copy-from", metavar="SERIAL", help="source inverter for a copy fix when the rule cannot choose")
+    s.add_argument("--fix", action="store_true", help="write <FILE>.corrected.rvms through the writer's guards, plus .intent.json")
+    s.add_argument("--sheet", action="store_true", help="print the manual change sheet for the accepted fixes without writing a file")
+    s.add_argument("-o", "--output", help="output path for --fix (default: <FILE>.corrected.rvms)")
+    s.add_argument("--overwrite", action="store_true", help="allow replacing an existing output file")
+    s.set_defaults(fn=cmd_diagnose)
 
     s = sub.add_parser("diff", help="what differs between two files, compared by inverter serial")
     s.add_argument("a"); s.add_argument("b"); s.add_argument("--json", action="store_true")

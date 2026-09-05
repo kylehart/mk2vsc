@@ -105,3 +105,97 @@ def test_diff_validate_fields_census_history(capsys):
     assert "schema parsed" in out and "alignment OK" in out and "absorption_V=" in out and "To report" in out
     assert main(["census", BAD]) == 1
     assert main(["history", A, B]) == 0
+
+
+# ---------------------------------------------------------------- diagnose
+C0618 = os.path.join(FIXTURES, "system_c", "system_c_2026-06-18_download_bare_deviceform_1.rvms")
+
+
+def test_diagnose_text_and_json(capsys):
+    assert main(["diagnose", BARE]) == 0
+    out = capsys.readouterr().out
+    assert "[DEGRADES] D1" in out and "[DEGRADES] D2" in out and "evidence device-confirmed" in out
+    assert "Questions the file cannot answer" in out and "shared_battery" in out
+    assert main(["diagnose", BARE, "--json"]) == 0
+    d = json.loads(capsys.readouterr().out)
+    assert d["report_version"] == 1 and d["files"][0]["status"] == "ok" and any(f["rule"] == "D1" for f in d["findings"])
+
+
+def test_diagnose_assume_resolves_conditionals(capsys):
+    assert main(["diagnose", C0618]) == 0
+    assert "conditional on: chemistry" in capsys.readouterr().out
+    assert main(["diagnose", C0618, "--assume", "chemistry=lithium"]) == 0
+    assert "conditional on: chemistry" not in capsys.readouterr().out
+
+
+def test_diagnose_fix_requires_accept_then_writes_corrected_file_and_sheet(tmp_path, capsys):
+    src = tmp_path / "download.rvms"
+    shutil.copyfile(BARE, src)
+    assert main(["diagnose", str(src), "--fix"]) == 2
+    assert "--accept" in capsys.readouterr().err
+    assert main(["diagnose", str(src), "--fix", "--accept", "D1:HQ0000A0002"]) == 0
+    out = capsys.readouterr().out
+    assert "Manual change sheet" in out and "Charger" in out and "wrote" in out and "download.corrected.rvms" in out
+    corrected = tmp_path / "download.corrected.rvms"
+    assert corrected.exists() and (tmp_path / "download.corrected.rvms.intent.json").exists()
+    assert src.read_bytes() == open(BARE, "rb").read()
+    intent = json.loads((tmp_path / "download.corrected.rvms.intent.json").read_text())
+    assert any(e["field"] == "absorption_V" for e in intent["edits"]) and intent["bit_edits"]
+    # the corrected file diagnoses clean of D1 on that unit, and verify against itself is trivially fine
+    assert main(["diagnose", str(corrected)]) == 0
+    assert "D1" not in capsys.readouterr().out.split("Questions")[0].replace("Phase 0 rules (D1", "")
+    assert main(["diagnose", str(src), "--fix", "--accept", "D1:HQ0000A0002"]) == 1      # exists, no --overwrite
+    assert "exists" in capsys.readouterr().err
+    # the intent sidecar is what `check --intent` reads
+    assert main(["check", str(corrected), "--intent", str(corrected) + ".intent.json"]) == 0
+    out = capsys.readouterr().out
+    assert "QUALIFIED" in out and "absorption_V = 56.0" in out
+
+
+def test_diagnose_json_with_fix_is_one_json_document(tmp_path, capsys):
+    src = tmp_path / "download.rvms"
+    shutil.copyfile(BARE, src)
+    assert main(["diagnose", str(src), "--json", "--fix", "--accept", "D1:HQ0000A0002"]) == 0
+    d = json.loads(capsys.readouterr().out)          # no trailing prose
+    assert d["report_version"] == 1 and d["intent"]["edits"] and (tmp_path / "download.corrected.rvms").exists()
+
+
+def test_diagnose_refuses_an_output_that_aliases_the_input(tmp_path, capsys):
+    src = tmp_path / "download.rvms"
+    shutil.copyfile(BARE, src)
+    link = tmp_path / "alias.rvms"
+    link.symlink_to(src)
+    before = src.read_bytes()
+    assert main(["diagnose", str(src), "--fix", "--accept", "D1:HQ0000A0002", "-o", str(link), "--overwrite"]) == 1
+    assert "refusing to write" in capsys.readouterr().err and src.read_bytes() == before
+    # the intent sidecar gets the same protection: an alias at <out>.intent.json must not truncate the input
+    side = tmp_path / "x.rvms.intent.json"
+    side.symlink_to(src)
+    assert main(["diagnose", str(src), "--fix", "--accept", "D1:HQ0000A0002", "-o", str(tmp_path / "x.rvms"), "--overwrite"]) == 1
+    assert "refusing to write" in capsys.readouterr().err and src.read_bytes() == before and not (tmp_path / "x.rvms").exists()
+
+
+def test_diagnose_values_fix_and_sheet_only(tmp_path, capsys):
+    src = tmp_path / "c.rvms"
+    shutil.copyfile(C0618, src)
+    assert main(["diagnose", str(src), "--fix", "--accept", "D1:HQ0000C0001", "--assume", "chemistry=lithium"]) == 1
+    assert "enter a value" in capsys.readouterr().err
+    assert main(["diagnose", str(src), "--sheet", "--accept", "D1:HQ0000C0001", "--assume", "chemistry=lithium",
+                 "--set", "absorption=56.8", "float=54.0", "low_shutdown=48.0"]) == 0
+    out = capsys.readouterr().out
+    assert "Manual change sheet" in out and "56.8 V" in out and "ticked" in out
+    assert not (tmp_path / "c.corrected.rvms").exists()
+    # the sheet goes through the writer's guards: a value the writer refuses is never printed for a human to type
+    assert main(["diagnose", str(src), "--sheet", "--accept", "D1:HQ0000C0001", "--assume", "chemistry=lithium",
+                 "--set", "absorption=56.8", "float=54.0", "low_shutdown=5"]) == 1
+    assert "REFUSED" in capsys.readouterr().err
+
+
+def test_diagnose_upload_form_and_junk(tmp_path, capsys):
+    up = os.path.join(FIXTURES, "system_c", "system_c_2026-07-21_gui-export_ess_uploadform_1.rvms")
+    assert main(["diagnose", up]) == 1
+    assert "status upload_form" in capsys.readouterr().out
+    junk = tmp_path / "x.rvsc"
+    junk.write_bytes(b"\x00" * 50)
+    assert main(["diagnose", str(junk)]) == 1
+    assert ".rvsc" in capsys.readouterr().out

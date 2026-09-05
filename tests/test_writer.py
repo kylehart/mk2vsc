@@ -119,6 +119,109 @@ def test_refuses_fractional_value_for_integer_field(good_files):
         set_settings(good_files[BARE], [(None, "charge_current_A", 35.7)])
 
 
+# ---------------------------------------------------------------- plausibility bounds scale with nominal voltage
+VOLT_IDS = (2, 3, 11, 12, 17, 18, 54, 58, 68, 88)   # every /100 V setting the writer or rules read
+
+
+def make_twin(data: bytes, divisor: int) -> bytes:
+    """A synthetic 24 V (divisor 2) or 12 V (divisor 4) file: divide the schema range and the stored value of every DC
+    /100 V setting, keep everything else (AC settings included), recompute checksums.  Alignment still passes because
+    value and range move together."""
+    import struct
+    from mk2vsc.schema import HEADER_LEN, RECORD_LEN
+    from mk2vsc.sections import SECTION_INFO, SECTION_DATA
+    f = RvmsFile.parse(data)
+    payloads = []
+    for s in f.sections:
+        pl = bytearray(s.payload)
+        if s.name == SECTION_INFO:
+            for sid in VOLT_IDS:
+                o = HEADER_LEN + RECORD_LEN * sid
+                sc, off, d, mn, mx = struct.unpack_from("<hhHHH", pl, o)
+                struct.pack_into("<hhHHH", pl, o, sc, off, d // divisor, mn // divisor, mx // divisor)
+        elif s.name == SECTION_DATA:
+            u = [x for x in units_by_serial(f).values() if x.section is s][0]
+            for sid in VOLT_IDS:
+                o = u.setting_offset(sid) - (len(s.name) + 4)
+                v = struct.unpack_from("<H", pl, o)[0]
+                struct.pack_into("<H", pl, o, v // divisor)
+        payloads.append(bytes(pl))
+    return f.rebuild(payloads).to_bytes()
+
+
+def make_24v_twin(data: bytes) -> bytes:
+    return make_twin(data, 2)
+
+
+def test_ac_output_bound_does_not_scale_with_nominal(good_files):
+    """inverter_output_V is an AC setting: 126 V is valid on a 24 V and a 12 V system alike."""
+    for divisor in (2, 4):
+        twin = make_twin(good_files[BARE], divisor)
+        out, edits = set_settings(twin, [(None, "inverter_output_V", 126)])
+        assert {e.new_raw for e in edits} == {126}
+
+
+def test_24v_twin_accepts_24v_absorption_and_refuses_48v_values(good_files):
+    twin = make_24v_twin(good_files[BARE])
+    out, edits = set_settings(twin, [(None, "absorption_V", 28.4), (None, "float_V", 27.0)])
+    assert {e.new_raw for e in edits} == {2840, 2700}
+    with pytest.raises(WriteRefused) as ei:
+        set_settings(twin, [(None, "absorption_V", 57.6)])
+    # the schema range (24.00 to 32.00 V on the twin) refuses first; the scaled plausibility bound is the backstop
+    assert "24.0..32.0 V" in str(ei.value) or "24 V system" in str(ei.value)
+
+
+def test_48v_file_still_refuses_a_24v_absorption(good_files):
+    with pytest.raises(WriteRefused) as ei:
+        set_settings(good_files[BARE], [(None, "absorption_V", 28.4)], allow_out_of_range=False)
+    assert "48 V system" in str(ei.value) or "outside the device's own range" in str(ei.value)
+
+
+# ---------------------------------------------------------------- bit-level writes (decision 2: qualified bits only)
+def test_set_lithium_bit_changes_exactly_one_bit_on_the_target_block(good_files):
+    from mk2vsc.writer import set_bits
+    data = good_files[BARE]
+    units = units_by_serial(RvmsFile.parse(data))
+    off = [s for s, u in units.items() if not (u.setting(60) >> 4) & 1]
+    assert off == ["HQ0000A0002"], "the 2026-07-20 System A download has the lithium flag clear on unit 2 only"
+    out, edits = set_bits(data, [("HQ0000A0002", "flags2", 4, True)])
+    assert len(edits) == 1 and edits[0].bit == 4
+    assert edits[0].new_raw == edits[0].old_raw | 0x10
+    new_units = units_by_serial(RvmsFile.parse(out))
+    assert new_units["HQ0000A0002"].setting(60) == units["HQ0000A0002"].setting(60) | 0x10
+    assert new_units["HQ0000A0001"].setting(60) == units["HQ0000A0001"].setting(60)
+    d = diff_bytes(data, out)
+    for u in d.units:
+        assert {s["id"] for s in u.settings} <= {60}
+    # clearing it again reproduces the input byte for byte
+    back, _ = set_bits(out, [("HQ0000A0002", "flags2", 4, False)])
+    assert back == data
+
+
+def test_set_bits_on_every_inverter_is_a_no_op_where_already_set(good_files):
+    from mk2vsc.writer import set_bits
+    data = good_files[BARE]
+    out, edits = set_bits(data, [(None, "flags2", 4, True)])
+    assert len(edits) == 2
+    changed = [e for e in edits if e.old_raw != e.new_raw]
+    assert [e.serial for e in changed] == ["HQ0000A0002"]
+
+
+def test_set_bits_refuses_unqualified_bits_non_flag_fields_and_unsettable_bits(good_files):
+    from mk2vsc.writer import set_bits
+    data = good_files[BARE]
+    with pytest.raises(WriteRefused) as ei:
+        set_bits(data, [(None, "flags0", 11, False)])          # storage mode / adaptive: three published meanings
+    assert "qualif" in str(ei.value)
+    with pytest.raises(WriteRefused):
+        set_bits(data, [(None, "absorption_V", 0, True)])       # not a flag register
+    with pytest.raises(WriteRefused) as ei:
+        set_bits(data, [(None, "flags0", 15, False)], allow_unqualified=True)   # bit 15 is outside the 0x6ffc settable mask
+    assert "settable" in str(ei.value)
+    out, edits = set_bits(data, [(None, "flags0", 11, False)], allow_unqualified=True)
+    assert all(not (e.new_raw >> 11) & 1 for e in edits)
+
+
 @pytest.mark.parametrize("field", ["grid_code", 81, 128, 150, 190, 191, "grid_settings_valid_checker_b"])
 def test_grid_code_block_and_words_are_locked_with_no_override(good_files, field):
     """Settings 81, 128, 129-189, 190, 191 are never edited one at a time: not with allow_unverified,
@@ -129,6 +232,13 @@ def test_grid_code_block_and_words_are_locked_with_no_override(good_files, field
         set_settings(data, [(None, field, 1)], allow_unverified=True, allow_out_of_range=True)
     with pytest.raises(WriteRefused, match="grid-code"):
         set_settings(data, [(None, field, 1)])
+
+
+def test_set_bits_refuses_the_grid_code_block_too(good_files):
+    from mk2vsc.writer import set_bits
+    for field in ("grid_code", 128, 191):
+        with pytest.raises(WriteRefused, match="grid-code"):
+            set_bits(good_files[BARE], [(None, field, 0, True)], allow_unqualified=True)
 
 
 def test_grid_code_lock_covers_the_assistant_words_and_is_not_editable():

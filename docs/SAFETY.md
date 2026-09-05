@@ -28,6 +28,11 @@ What we have done repeatedly on live systems without incident:
   HIGH fields are read correctly on every block we hold but have not been written by us.
 - Both inverters of a pair edited together for anything that must match on a shared battery. The
   writer edits every inverter by default; use `--serial` only when you mean a per-inverter value.
+- `mk2vsc diagnose --fix` builds its corrected file through exactly these guards, plus one more: it writes
+  only the findings named with `--accept`, never a default. A value the file cannot supply is yours to
+  enter; the tool proposes no chemistry numbers of its own. The change sheet it prints is the same change
+  for VEConfigure, so declining the file costs nothing but typing. Bit-level writes touch one qualified
+  flag bit (the LithiumBattery bit); docs/DIAGNOSE.md says what qualifies a bit.
 
 Settings-only uploads did not reset the VE.Bus or interrupt loads on any of our uploads.
 

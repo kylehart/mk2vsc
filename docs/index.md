@@ -14,6 +14,7 @@ pip install mk2vsc
 mk2vsc show download.rvms
 mk2vsc edit download.rvms absorption=56.8 float=54.0
 mk2vsc verify download.edited.rvms redownload.rvms
+mk2vsc diagnose download.rvms
 ```
 
 Source and issues: [github.com/kylehart/mk2vsc](https://github.com/kylehart/mk2vsc).
@@ -29,6 +30,8 @@ Source and issues: [github.com/kylehart/mk2vsc](https://github.com/kylehart/mk2v
 ## Working with the device
 
 - [Error codes: mk2vsc-36, mk2vsc-47, mk2vsc-49, Error 1303, VE.Bus errors](ERRORS.md).
+- [Diagnose](DIAGNOSE.md): configuration problems read from the settings, with evidence, a fix to take or
+  leave, and a manual change sheet.
 - [Workflow with VRM Remote VEConfigure](WORKFLOW.md), including assistant removal and reinstall and what still needs Windows.
 - [Change control](CHANGE_CONTROL.md): the loop that keeps a fleet's configuration auditable.
 - [Safety](SAFETY.md) and [how to decide whether to trust this](QA.md).

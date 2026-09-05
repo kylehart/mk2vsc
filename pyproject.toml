@@ -35,7 +35,7 @@ Changelog = "https://github.com/kylehart/mk2vsc/blob/main/CHANGELOG.md"
 Issues = "https://github.com/kylehart/mk2vsc/issues"
 
 [tool.setuptools]
-packages = ["mk2vsc", "mk2vsc.experimental"]
+packages = ["mk2vsc", "mk2vsc.experimental", "mk2vsc.diagnose", "mk2vsc.diagnose.rules"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
