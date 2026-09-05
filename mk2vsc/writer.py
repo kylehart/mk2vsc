@@ -7,6 +7,8 @@ checksum recomputed.  ``set_settings`` does exactly that and nothing else:
 
 * it edits by inverter **serial** (block order is not stable across downloads);
 * it refuses fields below HIGH confidence unless ``allow_unverified=True``;
+* it refuses the grid-code block and its validity words (settings 81, 128, 129-189, 190, 191) with no
+  override at all (``fields.GRID_CODE_LOCKED``);
 * it refuses to change file length or any byte outside the target settings + the touched checksums;
 * it re-parses its own output and proves the diff is limited to the intended bytes before returning;
 * it never uploads.  You upload through VRM's Remote VEConfigure, then re-download and ``diff``.
@@ -22,7 +24,7 @@ from typing import Dict, Iterable, List, Optional, Tuple
 
 from .sections import RvmsFile
 from .units import units_by_serial, unit_blocks
-from .fields import lookup, CONFIRMED, HIGH, Field, BY_NAME, DC_VOLT_IDS
+from .fields import lookup, CONFIRMED, HIGH, Field, BY_NAME, DC_VOLT_IDS, GRID_CODE_LOCKED
 from .assistants import parse_assistant_area
 from .schema import schema_of, nominal_voltage
 
@@ -67,6 +69,7 @@ def set_settings(data: bytes, changes: Iterable[Tuple[Optional[str], object, obj
     touched_sections = set()
     for serial, name, value in changes:
         fld = lookup(name)
+        _refuse_locked(fld)
         if fld.confidence not in (CONFIRMED, HIGH) and not allow_unverified:
             raise WriteRefused(f"{fld.name} is {fld.confidence}; pass allow_unverified=True to edit it anyway")
         if fld.bits is not None:
@@ -102,6 +105,16 @@ def set_settings(data: bytes, changes: Iterable[Tuple[Optional[str], object, obj
             if fl > a + 0.005 and a > 0:
                 raise WriteRefused(f"{u.serial}: float {fl} V would exceed absorption {a} V; refusing")
     return _verified(f, data, new_file, edits, touched_sections), edits
+
+
+def _refuse_locked(fld: Field) -> None:
+    """The grid-code block and its validity words are never edited one at a time, by value or by bit, with no
+    override (fields.GRID_CODE_LOCKED; docs/SAFETY.md, docs/HISTORY.md 2026-09-04)."""
+    if fld.id in GRID_CODE_LOCKED:
+        raise WriteRefused(f"{fld.name} (setting {fld.id}) is part of the grid-code block or its validity words "
+                           f"(81, 128, 129-189, 190, 191); mk2vsc never edits these one at a time and there is no "
+                           f"override. A grid code reaches a device through VEConfigure, or by file only as a complete "
+                           f"device-authored block (fresh download, or `mk2vsc assistant reinstall`)")
 
 
 def _prepare(data: bytes):
@@ -202,6 +215,7 @@ def set_bits(data: bytes, changes: Iterable[Tuple[Optional[str], object, int, bo
     touched: set = set()
     for serial, name, bit, on in changes:
         fld = lookup(name)
+        _refuse_locked(fld)
         if fld.bits is None:
             raise WriteRefused(f"{fld.name} is not a flag register; use set_settings for values")
         if not 0 <= int(bit) <= 15:

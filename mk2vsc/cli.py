@@ -196,17 +196,18 @@ def cmd_diagnose(a):
         if a.fix:
             root, ext = os.path.splitext(a.files[0])
             out_path = a.output or f"{root}.corrected{ext or '.rvms'}"
-            same = os.path.abspath(out_path) == os.path.abspath(a.files[0]) or (
-                os.path.exists(out_path) and os.path.samefile(out_path, a.files[0]))
-            if same:
-                return _fail("refusing to overwrite the input file (same file, or a link to it); keep the download as your rollback", 1)
+            side_path = out_path + ".intent.json"
+            for p in (out_path, side_path):
+                if os.path.abspath(p) == os.path.abspath(a.files[0]) or (os.path.exists(p) and os.path.samefile(p, a.files[0])):
+                    return _fail(f"refusing to write {p}: it is the input file, or a link to it; keep the download as your rollback", 1)
+            mode = "wb" if a.overwrite else "xb"
             try:
-                with open(out_path, "wb" if a.overwrite else "xb") as fh:
+                with open(out_path, mode) as fh:
                     fh.write(out)
-            except FileExistsError:
-                return _fail(f"{out_path} exists; pass --overwrite or -o", 1)
-            with open(out_path + ".intent.json", "w") as fh:
-                json.dump(intent_for_check(intent, fr.serials), fh, indent=1)
+                with open(side_path, mode) as fh:
+                    fh.write(json.dumps(intent_for_check(intent, out), indent=1).encode())
+            except FileExistsError as e:
+                return _fail(f"{e.filename} exists; pass --overwrite or -o", 1)
     if a.json:
         print(json.dumps(rep.as_dict(), indent=1, default=str))
     else:

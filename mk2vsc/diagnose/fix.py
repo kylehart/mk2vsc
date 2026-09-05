@@ -96,15 +96,21 @@ def dry_run(data: bytes, report: FileReport, accept: List[str], values: Optional
     return intent
 
 
-def intent_for_check(intent: dict, serials: List[str]) -> dict:
+def intent_for_check(intent: dict, corrected: bytes) -> dict:
     """The same intent in the form ``mk2vsc check --intent`` reads (mk2vsc.qualify.Intent): expected values per
-    field, and the serials.  Values that differ between inverters after the fix are not expressible there and are
-    left out; bit edits are not expressible and are listed under ``bit_edits`` for the reader."""
-    per_field: Dict[str, set] = {}
-    for e in intent.get("edits", []):
-        per_field.setdefault(e["field"], set()).add(e["value"])
-    settings = {f: next(iter(v)) for f, v in per_field.items() if len(v) == 1}
-    return {"settings": settings, "serials": list(serials), "require_agreement": True,
+    field, and the serials, read from the corrected file's final state.  A field is listed only when every inverter
+    holds the same value after the fix (a per-inverter edit that leaves a peer different is not expressible there);
+    bit edits are not expressible and are listed under ``bit_edits`` for the reader."""
+    from ..sections import RvmsFile
+    from ..units import units_by_serial
+    units = units_by_serial(RvmsFile.parse(corrected))
+    settings = {}
+    for name in sorted({e["field"] for e in intent.get("edits", [])}):
+        f = lookup(name)
+        finals = {f.decode(u.setting(f.id)) for u in units.values()}
+        if len(finals) == 1:
+            settings[name] = finals.pop()
+    return {"settings": settings, "serials": sorted(units), "require_agreement": True,
             "edits": intent.get("edits", []), "bit_edits": intent.get("bit_edits", [])}
 
 

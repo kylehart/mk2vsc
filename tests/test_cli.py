@@ -167,7 +167,12 @@ def test_diagnose_refuses_an_output_that_aliases_the_input(tmp_path, capsys):
     link.symlink_to(src)
     before = src.read_bytes()
     assert main(["diagnose", str(src), "--fix", "--accept", "D1:HQ0000A0002", "-o", str(link), "--overwrite"]) == 1
-    assert "refusing to overwrite the input" in capsys.readouterr().err and src.read_bytes() == before
+    assert "refusing to write" in capsys.readouterr().err and src.read_bytes() == before
+    # the intent sidecar gets the same protection: an alias at <out>.intent.json must not truncate the input
+    side = tmp_path / "x.rvms.intent.json"
+    side.symlink_to(src)
+    assert main(["diagnose", str(src), "--fix", "--accept", "D1:HQ0000A0002", "-o", str(tmp_path / "x.rvms"), "--overwrite"]) == 1
+    assert "refusing to write" in capsys.readouterr().err and src.read_bytes() == before and not (tmp_path / "x.rvms").exists()
 
 
 def test_diagnose_values_fix_and_sheet_only(tmp_path, capsys):

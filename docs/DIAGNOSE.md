@@ -32,7 +32,10 @@ accepted findings that want different values for one setting are refused rather 
 
 **A conditional finding's fix is refused until its question is answered.** D1 and V1 need the chemistry, D2
 needs `shared_battery=yes`, E2 needs `ess_intended`; `--assume` answers them and the report's `assumptions`
-records what was stated. Under `--assume chemistry=lead-acid` D1 and V1 do not run and D2 proposes no source.
+records what was stated. Under `--assume chemistry=lead-acid` D1 and V1 do not run and D2 proposes no source;
+under `shared_battery=no` D2 does not run; under `ess_intended=no` E2 recommends completing the removal
+(`mk2vsc assistant remove`) instead of a reinstall. Bit writes refuse the grid-code block exactly as value
+writes do (`fields.GRID_CODE_LOCKED`).
 
 ## Two confidences per finding
 

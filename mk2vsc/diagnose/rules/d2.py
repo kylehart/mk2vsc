@@ -13,7 +13,7 @@ CHARGER_FIELDS = [f.name for f in FIELDS if f.confidence == CONFIRMED and f.bits
 
 
 def run(ctx: FileContext) -> List[Finding]:
-    if len(ctx.serials) < 2:
+    if len(ctx.serials) < 2 or ctx.shared_battery is False:      # separate batteries: nothing has to match
         return []
     ev = []
     for name in CHARGER_FIELDS:

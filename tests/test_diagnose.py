@@ -138,6 +138,30 @@ def test_e2_names_the_inverter_that_lacks_the_assistant(good_files):
     assert len(e2) == 1 and e2[0].conditional == ["ess_intended"]
     assert len(e2[0].fix["lacks"]) == 1 and e2[0].fix["lacks"][0] in ("HQ0000C0001", "HQ0000C0002")
     assert by_rule(run(good_files, B_CLEAN), "E2") == []
+    # the answer changes the remedy: reinstall when ESS is intended, complete the removal when it is not
+    yes = by_rule(run(good_files, C_HALF, ess_intended="yes"), "E2")[0]
+    no = by_rule(run(good_files, C_HALF, ess_intended="no"), "E2")[0]
+    assert yes.conditional == [] and yes.fix["remedy"] == "reinstall" and "reinstall" in yes.fix["text"]
+    assert no.conditional == [] and no.fix["remedy"] == "remove" and "assistant remove" in no.fix["text"] and no.fix["has"]
+
+
+def test_d2_is_silent_when_the_batteries_are_stated_separate(good_files):
+    assert by_rule(run(good_files, A_0720), "D2")
+    assert by_rule(run(good_files, A_0720, shared_battery="no"), "D2") == []
+
+
+def test_intent_for_check_lists_only_fields_every_inverter_agrees_on(good_files):
+    """A per-inverter values fix (one C1 finding) must not become a global expectation the untouched peer fails."""
+    from mk2vsc.diagnose import diagnose_bytes, apply_fixes, intent_for_check
+    from mk2vsc.qualify import Intent, qualify_bytes
+    data = good_files[C_MIS]
+    rep = diagnose_bytes(data, name="c.rvms")
+    c1 = [f for f in by_rule(rep, "C1") if f.evidence[0]["field"] == "absorption_V"][0]
+    out, intent = apply_fixes(data, rep, accept=[c1.id], values={"absorption_V": 50.0})
+    chk = intent_for_check(intent, out)
+    assert "absorption_V" not in chk["settings"], "the peer still holds another absorption; not a global expectation"
+    ok, res = qualify_bytes(out, Intent(settings=chk["settings"], serials=chk["serials"], require_agreement=False))
+    assert ok
 
 
 def test_p3_upload_form_is_refused_as_device_state(good_files):
@@ -300,7 +324,7 @@ def test_intent_for_check_is_what_check_intent_reads(good_files, tmp_path):
     rep = diagnose_bytes(data, name="a.rvms")
     d1 = by_rule(rep, "D1")[0]
     out, intent = apply_fixes(data, rep, accept=[d1.id])
-    chk = intent_for_check(intent, rep.serials)
+    chk = intent_for_check(intent, out)
     assert chk["settings"] == {"absorption_V": 56.0, "float_V": 54.0, "charge_characteristic": 1} and chk["serials"] == rep.serials
     p = tmp_path / "i.json"
     p.write_text(json.dumps(chk))
