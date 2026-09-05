@@ -91,8 +91,7 @@ def test_reproduces_the_archived_prepared_files(good_files, manifest):
          [(None, "absorption_V", 56.8), (None, "float_V", 54.0)]),
     ]
     for base, prepared, changes in pairs:
-        if base not in good_files or prepared not in good_files:
-            pytest.skip("fixture missing")
+        assert base in good_files and prepared in good_files, "fixture missing"
         out, _ = set_settings(good_files[base], changes)
         assert out == good_files[prepared], f"{prepared} is not baseline+edits"
 

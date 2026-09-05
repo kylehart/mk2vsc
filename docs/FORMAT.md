@@ -37,7 +37,7 @@ The sections always appear in this order:
 | Section | Payload | Count |
 |---|---|---|
 | `Mk2vscInfo` | 10 bytes: `u32 1`, `u16 4`, `"1.33"` | 1 |
-| `BareSettingInfo` | 4001 bytes, byte-identical across all 88 files: the settings schema (scale, offset, default, min, max per setting) | 1 |
+| `BareSettingInfo` | 4001 bytes, byte-identical across all 92 files: the settings schema (scale, offset, default, min, max per setting) | 1 |
 | `BareSettingData` | one inverter's configuration | one per inverter (2 in every corpus file) |
 
 A real header, from `fixtures/system_a/system_a_2026-07-20_download_bare_deviceform_1.rvms`:

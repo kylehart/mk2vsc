@@ -97,14 +97,14 @@ findings[]:  id (stable: RULE or RULE:SERIAL[:FIELD]), rule, title, severity (BL
                 | {kind: "copy",   source | null, candidates[], targets[], fields[], bit_edits[]}
                 | {kind: "values", needs_value[]: {serial, field, unit, current, schema_min, schema_max, schema_default},
                                    edits[]: {serial, field, value}, bit_edits[]: {serial, field, bit, set}}
-                | {kind: "gui",    text, lacks[]}
+                | {kind: "gui",    text, lacks[]}                       (E2 adds has[], remedy: "remove" | "reinstall")
 questions[]: id, text, affects[] (finding ids)
 assumptions: on each file, the answers stated with --assume (chemistry, shared_battery, ess_intended)
 intent:      {edits[], bit_edits[]}   only after --fix or --sheet. <out>.intent.json holds the same edits plus the
              form `mk2vsc check --intent` reads (settings per field, serials); bit edits are listed but not checkable there
 ```
 
-A page or script refuses a `report_version` it does not know.
+A consumer refuses a `report_version` it does not know.
 
 ## The manual change sheet
 
@@ -118,7 +118,7 @@ honouring boxes that are ticked when the bit is clear.
 `mk2vsc.schema.nominal_voltage()` reads 12, 24 or 48 V from the absorption record's minimum in the file's
 own schema and refuses anything else. The writer scales the plausibility bounds of the DC battery settings
 (`fields.DC_VOLT_IDS`: absorption, float, low shutdown and restart, the VS thresholds, sustain) by nominal/48, so a
-24 V correction is accepted where it was refused before; AC settings such as the inverter output voltage keep
+24 V correction is in range; AC settings such as the inverter output voltage keep
 their fixed bounds. Observed: 48 V on every corpus file. Inferred: 24
 and 12 V from the schema convention (talas9's 24 V unit reads absorption 24.00 to 32.00 V).
 
