@@ -55,7 +55,7 @@ across all 178 blocks of the well-formed corpus gave values that only make sense
 | 4 | 35 | charge current, A | one deliberate installer limit on all eight inverters |
 | 11, 12 | 4850, 200 | DC low shutdown 48.50 V, restart offset 2.00 V | a sane LFP floor and a 2 V restart band, fleet-wide |
 | 64, 65 | 200/300, 190/196 | battery capacity Ah; SoC at bulk end × 0.5 % | 2 and 3 battery modules of 100 Ah; the reference says "190 = 95 % for LiFePO4" |
-| 73 | 6300 | a voltage threshold | 63.00 V is the DC over-voltage protection level in our alarm history |
+| 73 | 6300 | inverter current limit during PowerAssist, A | 63.00 A on every block; once misread as a 63 V DC threshold |
 | 81 | 0 or 1 | grid code active | 0 on every bare download, 1 on every GUI-authored ESS block |
 | 88 | 5200 | solar & wind priority voltage | its high byte, 0x14 = 20, sits at +0x10a; see the Virtual Switch section |
 
