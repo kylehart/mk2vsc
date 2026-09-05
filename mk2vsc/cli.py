@@ -314,54 +314,18 @@ def cmd_history(a):
 def cmd_census(a):
     """The report we ask contributors for: everything needed to judge whether the format model holds on
     a file, without the file itself.  One block per file; safe to paste into an issue."""
-    from .schema import schema_of, firmware_of_schema
-    from .fields import BY_ID
+    from .census import census_text
     rc = 0
     for p in a.files:
         try:
-            f = RvmsFile.load(p)
-        except (RvmsParseError, OSError) as e:
+            data = open(p, "rb").read()
+        except OSError as e:
             rc = 1
             print(f"{os.path.basename(p)}: PARSE FAILED: {e}")
             continue
-        cks = "OK" if f.all_checksums_ok else "INVALID"
-        try:
-            mk = f.section(b"Mk2vscInfo").payload
-            version = mk[6: 6 + int.from_bytes(mk[4:6], "little")].decode()
-        except Exception:  # noqa: BLE001
-            version = "?"
-        try:
-            sch = schema_of(f)
-            info_fw = firmware_of_schema(f.section(b"BareSettingInfo").payload)
-            schema_txt = f"parsed ({len(sch)} records, firmware {info_fw})"
-        except Exception as e:  # noqa: BLE001
-            sch = None
-            schema_txt = f"NOT PARSED ({e})"
-        units = unit_blocks(f)
-        print(f"{os.path.basename(p)}: {f.length} bytes, {len(f.sections)} sections, checksums {cks}, "
-              f"format {version}, schema {schema_txt}, {len(units)} inverter(s)")
-        for u in units:
-            asst = parse_assistant_area(u)
-            gcw = grid_code_words(u)
-            in_range = ""
-            if sch is not None:
-                from .align import check as align_check
-                al = align_check(u, sch)
-                in_range = ", " + al.summary
-                if not al.ok:
-                    rc = 1
-            when = u.save_datetime.isoformat() if u.save_datetime else "?"
-            print(f"  {u.serial}: block {len(u.raw)} B, flag {u.assistant_flag:02x}, form {'upload' if u.is_upload_form else 'device'}, "
-                  f"firmware {u.firmware_version}, saved {when}, assistant: {asst['summary']}; {gcw['summary']}{in_range}")
-            keys = [2, 3, 4, 5, 6, 11, 54, 58, 62, 64, 65]
-            cells = []
-            for k in keys:
-                fld = BY_ID[k]
-                v = fld.decode(u.setting(k))
-                cells.append(f"{fld.name}={v:g}{fld.unit}" if isinstance(v, float) else f"{fld.name}={v}{fld.unit}")
-            print("    " + "  ".join(cells))
-        if not f.all_checksums_ok or sch is None or len(units) == 0:
-            rc = 1
+        text, ok = census_text(data, os.path.basename(p))
+        print(text)
+        rc |= 0 if ok else 1
     if rc == 0 and not a.quiet:
         print("\nTo report: paste this output into a GitHub issue together with what the values SHOULD be "
               "(as VEConfigure or VRM shows them). https://github.com/kylehart/mk2vsc/issues/new/choose")

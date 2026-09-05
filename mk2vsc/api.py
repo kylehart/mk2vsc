@@ -195,7 +195,12 @@ def loads(data: bytes) -> Config:
 
 def verify(prepared: str, redownload: str) -> Tuple[bool, str]:
     """After an upload: does the device's re-download match what you uploaded, apart from bookkeeping?"""
-    d = diff_bytes(load(prepared).data, load(redownload).data)
+    return verify_bytes(load(prepared).data, load(redownload).data)
+
+
+def verify_bytes(prepared: bytes, redownload: bytes) -> Tuple[bool, str]:
+    """``verify`` on bytes already in hand (the web page holds files, not paths)."""
+    d = diff_bytes(prepared, redownload)
     ok = d.identical or d.only_bookkeeping
     text = render_diff(d)
     if ok:
