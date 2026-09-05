@@ -55,7 +55,7 @@ across all 178 blocks of the well-formed corpus gave values that only make sense
 | 4 | 35 | charge current, A | one deliberate installer limit on all eight inverters |
 | 11, 12 | 4850, 200 | DC low shutdown 48.50 V, restart offset 2.00 V | a sane LFP floor and a 2 V restart band, fleet-wide |
 | 64, 65 | 200/300, 190/196 | battery capacity Ah; SoC at bulk end × 0.5 % | 2 and 3 battery modules of 100 Ah; the reference says "190 = 95 % for LiFePO4" |
-| 73 | 6300 | a voltage threshold | 63.00 V is the DC over-voltage protection level in our alarm history |
+| 73 | 6300 | inverter current limit during PowerAssist, A | 63.00 A on every block; once misread as a 63 V DC threshold |
 | 81 | 0 or 1 | grid code active | 0 on every bare download, 1 on every GUI-authored ESS block |
 | 88 | 5200 | solar & wind priority voltage | its high byte, 0x14 = 20, sits at +0x10a; see the Virtual Switch section |
 
@@ -72,7 +72,8 @@ No single line is proof; the pattern is. `tests/test_claims.py` re-checks each r
 | UNKNOWN | observed values recorded, meaning unknown | read |
 
 Flag registers (IDs 0 and 1) are never edited by the writer regardless of level; we have not toggled a bit
-on hardware.
+on hardware. `set_bits` (and `diagnose --fix`) writes single bits of other flag registers only when the bit
+is qualified by a device- or GUI-authored flip (`writer.QUALIFIED_BITS`; today setting 60 bit 4, LithiumBattery).
 
 ## The device's own schema
 
@@ -92,8 +93,8 @@ not name it.
 
 ## The Virtual Switch relay mode (IDs 15 to 43)
 
-Setting 15 (`vsUsage`) selects what the Virtual Switch does: 0 not used, 1 controls the relay, 2 ignores
-the AC input. Settings 16 to 43 are the relay-mode conditions: on-levels (16 to 18), on-times (19 to
+Setting 15 (`vsUsage`) selects what the Virtual Switch does: 0 not used, 1 drives the aux relay, 2 to 6 the
+ignore-AC-input and generator-control modes listed in the generated row below (our systems read 3). Settings 16 to 43 are the relay-mode conditions: on-levels (16 to 18), on-times (19 to
 27), off-levels (28 to 30), off-times (31 to 42) and a minimum on time (43), all named by Victron. Our
 systems use the ignore-AC mode, so these hold defaults.
 

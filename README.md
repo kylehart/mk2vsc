@@ -16,9 +16,8 @@ assistants (ESS, AC PV and the rest), so anyone maintaining a real installation 
 machine or a virtual machine. The configuration itself travels as a small binary file: `.rvsc` for a
 single unit, `.rvms` for parallel and multi-phase systems, downloaded and uploaded through VRM's Remote
 VEConfigure. A Victron Community thread titled "RVSC File Format Specification" asked Victron to publish
-the format so people could write their own editors; it received no answer. When we started (June 2026) we
-found no open-source parser, specification or editor for these files; one has since appeared for the
-single-unit `.rvsc` format (see Related projects below), and the two agree where they overlap.
+the format so people could write their own editors; it received no answer. An open-source parser exists for
+the single-unit `.rvsc` format (see Related projects below); the two agree where they overlap.
 
 We operate four two-inverter systems and needed to change charge voltages and Virtual Switch
 thresholds on them remotely, repeatably, and with a record of what changed. This repository is what we
@@ -34,7 +33,7 @@ built to do that, together with everything we learned about the file along the w
   * qualifies a file against the values you intended before you upload and after you re-download,
   * mines a library of archived downloads into a dated, per-inverter change log (`mk2vsc history`).
 * A corpus of 92 real device files with a manifest, and a test suite that checks every documented
-  claim against that corpus (582 tests).
+  claim against that corpus (607 tests).
 * A written account of the format as we understand it, and of what we do not understand.
 
 ## What this is not
@@ -58,7 +57,7 @@ built to do that, together with everything we learned about the file along the w
 | Checker (`mk2vsc check`) | Proven | Reproduces the incident that motivated it (a rollback that reverted a charge-voltage fix) |
 | Assistant area | Read; remove and reinstall | Record structure and stub signature recognised; record bodies not understood. `mk2vsc assistant remove` and `reinstall` removed and re-installed ESS on one live system (2026-09-04), re-downloads matching byte for byte apart from bookkeeping |
 | Upload-form (GUI export) files | Read only | Detected and decoded; the writer refuses them |
-| First-time ESS install (`mk2vsc experimental graft`) | Experimental, never ran | Grafts of another system's records stored but never started; the upload-form transform they rely on is now proven by `mk2vsc assistant` |
+| First-time ESS install (`mk2vsc experimental graft`) | Experimental, never ran | Grafts of another system's records stored but never started; the upload-form transform they rely on is proven by `mk2vsc assistant` |
 
 The confidence vocabulary (CONFIRMED, HIGH, MEDIUM, LOW, UNKNOWN) is defined in `mk2vsc/fields.py` and
 docs/FIELDS.md. The writer edits CONFIRMED and HIGH fields; anything lower needs an explicit override.
@@ -74,7 +73,7 @@ Or from source, with the fixture corpus and tests:
 ```
 git clone https://github.com/kylehart/mk2vsc.git && cd mk2vsc
 python3 -m venv .venv && .venv/bin/pip install -e ".[test]"
-.venv/bin/pytest          # 582 tests against the fixture corpus
+.venv/bin/pytest          # 607 tests against the fixture corpus
 ```
 
 ## Quickstart: one download, one change
@@ -126,7 +125,8 @@ mk2vsc check  redownload.rvms --expect absorption=56.8 float=54.0
 ```
 
 That is the whole loop. `show`, `edit`, `verify`, `check`; plus `diagnose` (below), `diff` for any two files,
-`history` for a folder of old downloads, `validate`, `fields`, and `experimental` (read docs/ESS_INJECTION.md first).
+`history` for a folder of old downloads, `census` (the report to paste into an issue), `assistant` (remove or
+reinstall an assistant; docs/ASSISTANTS.md), `validate`, `fields`, and `experimental` (read docs/ESS_INJECTION.md first).
 Field names take aliases (`absorption`, `float`, `charge_current`, `ac_limit`, `low_shutdown`,
 `vs_entry`, `vs_return`, `capacity`), full names from `mk2vsc fields`, or VE.Bus setting IDs.
 

@@ -16,14 +16,26 @@ synthetic fixtures for the format itself.
 
 | file | what it proves |
 |---|---|
-| `tests/test_sections.py` | Every good fixture parses, every section checksum validates, the pointer chain is contiguous and ends at EOF, parse then serialize is byte-exact, rebuilding pointers and checksums from payloads reproduces the input byte-for-byte, the historical formula (`sum32(block[2:]) + 0x6142000F`) equals the plain word sum, the header sections are identical across the corpus, and the three deliberately broken files are detected. |
-| `tests/test_claims.py` | Every checkable claim in docs/FIELDS.md and `mk2vsc/units.py`, checked on all 178 inverter blocks of the 89 well-formed fixtures: serial position, firmware word, slot bytes, assistant-flag encoding, the +10 upload-form shift (setting 5 reads 120 V on every block under the offset model), timestamps are plausible unix times, CONFIRMED/HIGH fields decode to physically sensible values, grid-code flag tracks GUI-authored installs, the retracted SOC field is the high byte of setting 88, region 128 to 189 is unprogrammed on bare blocks, and the field table itself is internally consistent (every CONFIRMED/HIGH entry states evidence). |
+| `tests/test_sections.py` | Every good fixture parses, every section checksum validates, the pointer chain is contiguous and ends at EOF, parse then serialize is byte-exact, rebuilding pointers and checksums from payloads reproduces the input byte-for-byte, a sum started at the section name must add the first word (`0x6142000F`) to equal the plain word sum, the header sections are identical across the corpus, and the three deliberately broken files are detected. |
+| `tests/test_claims.py` | Every checkable claim in docs/FIELDS.md and `mk2vsc/units.py`, checked on all 178 inverter blocks of the 89 well-formed fixtures: serial position, firmware word, slot bytes, assistant-flag encoding, the +10 upload-form shift (setting 5 reads 120 V on every block under the offset model), timestamps are plausible unix times, CONFIRMED/HIGH fields decode to physically sensible values, grid-code flag tracks GUI-authored installs, the byte at +0x10a is the high byte of setting 88, not a field of its own, region 128 to 189 is unprogrammed on bare blocks, and the field table itself is internally consistent (every CONFIRMED/HIGH entry states evidence). |
 | `tests/test_writer.py` | Edit then revert reproduces the original file byte-for-byte; an edit to all inverters changes only the intended bytes plus checksums; edits on ESS blocks leave the assistant area untouched; unverified fields, flag registers, unknown serials, out-of-range values, upload-form input and corrupt input are refused; the archived prepared files from the 2026-07-20 charge-profile corrections are reproduced exactly from their baselines. |
 | `tests/test_diff.py` | Two real consecutive downloads differ only in bookkeeping; the pair whose blocks swapped file position is invisible when compared by serial while a positional diff shows dozens of differences; a stub download is reported as a content change; a GUI export and the device's re-download of it agree on every setting. |
 | `tests/test_qualify.py` | Inverter disagreement fails; intended values pass on the corrected file and fail on the mismatched one; wrong-system serials fail; the stub fails; the rollback file that caused the month-long regression is caught. |
 | `tests/test_assistants.py` | Bare blocks have the empty header and the free-space counter relation holds; GUI-installed ESS has exactly one 704 and one 1152 byte record per system; the 1152 byte body is identical across systems; the stub is detected on all six stub blocks. |
 | `tests/test_manifest.py` | Every fixture is in the manifest with a matching sha256 and size, and no two fixtures have the same content. |
 | `tests/test_cli.py` | Exit codes and output of every subcommand. |
+| `tests/test_api.py` | The `mk2vsc.load` / `Config` facade: values by alias, `set`/`save` never overwrite the input, `verify` and `check` agree with the CLI. |
+| `tests/test_schema.py` | The `BareSettingInfo` section is the device's own settings schema (scale, offset, default, min, max per setting); nominal voltage (12/24/48 V) from the absorption record. |
+| `tests/test_align.py` | Settings-array alignment scoring: every good fixture aligns; a shifted block is refused by the writer. |
+| `tests/test_limits.py` | The at-the-edge-of-range check and the alignment line in `show` / `check`. |
+| `tests/test_ui.py` | The VEConfigure placement layer (`mk2vsc.ui`) is consistent with the field table. |
+| `tests/test_history.py` | Change mining over dated downloads: ordering by save timestamp, per-serial changes, assistant-state changes, skipped files. |
+| `tests/test_gridcode_words.py` | Settings 190/191 are grid-code words in the settings array, not an assistant-record header. |
+| `tests/test_timestamp_not_a_gate.py` | The +0x4f stamp is a file-generation time and not an acceptance gate (System B, 2026-09-04). |
+| `tests/test_assistant.py` | Assistant removal and reinstall by file (`mk2vsc.assistant`), against the System D cycle of 2026-09-04. |
+| `tests/test_experimental.py` | The experimental ESS-injection code reproduces byte-for-byte the archived files it produced in August 2026, none of which produced a running system. |
+| `tests/test_diagnose.py` | `mk2vsc diagnose`: every rule has a corpus fixture that triggers it and one that does not; corpus hit counts per rule; the `report_version` 1 contract; fixes, refusals and the change sheet. |
+| `tests/test_bytes_entry_points.py` | `census_text`, `verify_bytes` and `history.snapshots_from_bytes` give the same answers as the path-taking verbs. |
 
 Run it:
 
@@ -33,14 +45,15 @@ python -m venv .venv
 .venv/bin/pytest
 ```
 
-528 tests, under two seconds.
+607 tests, under three seconds.
 
 ## The corpus and its limits
 
 92 unique files (89 well-formed, 178 inverter blocks, plus 3 negative controls), 8 inverters in 4 two-inverter split-phase systems, one
 firmware version (2729560), one format version (1.33), downloads spanning June to September 2026.
-Three files are deliberately broken and listed in `tests/conftest.py` `KNOWN_BAD` with the reason:
-a file with deliberately stale checksums (a negative control for the validator).
+Three files are deliberately broken and listed in `tests/conftest.py` `KNOWN_BAD` with the reason: a file with
+deliberately stale checksums (a negative control for the validator), a v1 graft with a broken pointer chain
+(never uploaded), and a v4 graft whose last pointer points inside the file (rejected by the device).
 
 What the corpus does not cover, and therefore what the tests cannot promise:
 
@@ -114,10 +127,10 @@ matching GUI screenshot.
 
 | area | status | evidence |
 |---|---|---|
-| Section grammar and checksum | proven | every section of all 92 unique files (115 counting archive duplicates); four live uploads accepted; byte-exact round trip on every fixture |
+| Section grammar and checksum | proven | every section of all 92 unique files (115 counting archive duplicates); every live upload accepted (docs/HISTORY.md); byte-exact round trip on every fixture |
 | Settings array as VE.Bus setting IDs 0 to 191 | strong | absorption/float anchor IDs 2/3; IDs 5, 6, 65, 73, 81, 88 corroborate on every block; one firmware only |
 | Individual fields | mixed | all 192 IDs carry VEConfigure's identifier; decode confidence 4 CONFIRMED (written and read back live), 68 HIGH, 9 MEDIUM, 12 LOW, 99 UNKNOWN (reserved and grid-code slots, mostly 0 or 0xffff); docs/FIELDS.md lists each with its evidence |
-| Guarded writer | proven for its surface | edit-and-revert byte identity on every fixture; reproduces the archived prepared files; 4 live uploads |
+| Guarded writer | proven for its surface | edit-and-revert byte identity on every fixture; reproduces the archived prepared files; live uploads in July and September 2026 (docs/HISTORY.md) |
 | By-serial diff and bookkeeping model | proven | real consecutive downloads, including the swapped-order pair |
 | Qualifier | proven against its motivating incident | catches the 2026-08-14 rollback file (fixture); the 2026-08-21 one-inverter GUI write is the case the agreement check was written for, but we hold no fixture from that day |
 | Assistant records | read; remove and reinstall | record framing, sizes and the stub signature; `mk2vsc assistant` removed and reinstalled ESS on one live system (2026-09-04) with re-downloads verified; the record body and the 72-byte ESS tail are not understood |

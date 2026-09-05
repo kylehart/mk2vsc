@@ -36,10 +36,9 @@ docs/PRACTICES.md for the rules we follow.
 
 ## A note on what the fixtures disclose
 
-The fixtures carry the eight inverter serial numbers of our systems and their save timestamps. Victron
-and its dealers can resolve a serial to an installation; we chose to publish them because the files are
-useless as evidence without them. Nothing else identifying is in the files: no VRM identifiers, no
-credentials, no names.
+The fixtures carry pseudonymous inverter serials (`HQ0000A0001` = System A, first inverter; docs/FIXTURES.md)
+and the real save timestamps. Nothing else identifying is in the files: no VRM identifiers, no credentials,
+no names.
 
 ## The three contributions we need most
 

@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+* `python -m mk2vsc` runs the CLI; `mk2vsc.verify_bytes` and `mk2vsc.census_text` are exported from the package; the top-level help and the README list every verb (`census`, `assistant`); `tools/leakscan.sh` also scans `fixtures/manifest.json`; docs state current facts only (counts regenerated, narrative moved out of reference pages).
 * `mk2vsc.census.census_text(data, name)`, `mk2vsc.api.verify_bytes(prepared, redownload)` and `mk2vsc.history.snapshots_from_bytes([(name, data)])`: the `census`, `verify` and `history` verbs on bytes already in hand, for callers that hold files in memory; the CLI runs through them, so the two cannot disagree.
 * `mk2vsc diagnose`: configuration problems read from the settings themselves, with evidence, a fix to take or leave, a corrected file through the writer's guards (`--fix --accept ID`, `--set FIELD=VALUE`, `--copy-from SERIAL`) and a manual change sheet (`--sheet`); `--json` is the `report_version` 1 contract. Eight rules: D1 lead-acid profile on a lithium bank, D2 pair disagreement, C1 range edge (over `limits`), V1 low-voltage shutdown at the lead-acid default, V2 unreachable Virtual Switch return, E1 stub, E2 half-loaded assistant, P3 upload form. Every finding carries decode confidence and an evidence class (device-confirmed / vendor-documented / inferred). A conditional finding's fix is refused until its question is answered (`--assume chemistry=`, `shared_battery=`, `ess_intended=`); a copy source is proposed only from a clean lithium block; conflicting values for one setting are refused; `--sheet` runs the writer's guards; an output that is the input or a link to it is refused; `--json` stays one document under `--fix`; the intent sidecar is readable by `check --intent`. Corpus hit counts are asserted by the tests (82 device-form files, 164 blocks). docs/DIAGNOSE.md.
 * `mk2vsc.schema.nominal_voltage()`: 12, 24 or 48 V from the absorption record's minimum; the writer's DC voltage plausibility bounds (`fields.DC_VOLT_IDS`) scale with it instead of assuming a 48 V system (synthetic 24 V and 12 V twins accept absorption 28.4 V and the AC output voltage unchanged).
@@ -66,13 +67,10 @@
 
 ## 0.2.1 (2026-09-04)
 
-* Virtual Switch block decoded from the VEConfigure tab and the same-period download (issue #8): load thresholds are current in 0.01 A (`vs_load_high`, `vs_load_low`, HIGH, editable), SoC-lower is setting 51 at x0.5 % (MEDIUM), SoC-higher 50 (LOW), durations 53/55/57/59 located but encoding unknown. Settings 16 to 18 and 28 to 30 identified as a second copy of the same conditions.
-
-## Unreleased
-
 * Installations are referred to by public aliases System A to D. Fixture directories and files are
   `system_a` ... `system_d`; the manifest key `site` is now `system` with values `A` ... `D`.
   `tools/leakscan.sh` refuses the former names.
+* Virtual Switch block decoded from the VEConfigure tab and the same-period download (issue #8): load thresholds are current in 0.01 A (`vs_load_high`, `vs_load_low`, HIGH, editable), SoC-lower is setting 51 at x0.5 % (MEDIUM), SoC-higher 50 (LOW), durations 53/55/57/59 located but encoding unknown. Settings 16 to 18 and 28 to 30 identified as a second copy of the same conditions.
 
 ## 0.2.0 (2026-09-04)
 

@@ -53,9 +53,9 @@ of these rules is docs/PRACTICES.md; this file is the operational checklist.
 ## 5. Releases
 
 - Semantic versioning. `0.x` while the field table is mostly unnamed.
-- A release is: CHANGELOG entry, version bump in `pyproject.toml` and `mk2vsc/__init__.py`, green CI on
-  three OSes, a git tag `vX.Y.Z`, a GitHub Release with notes, and (once set up) a PyPI publish from
-  the release workflow using trusted publishing.
+- A release is: CHANGELOG entry, version bump in `pyproject.toml`, `mk2vsc/__init__.py` and `CITATION.cff`
+  (version and date-released), green CI on three OSes, a git tag `vX.Y.Z`, a GitHub Release with notes, and
+  the PyPI publish the release workflow performs through trusted publishing.
 
 ## 6. Issue labels
 

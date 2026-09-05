@@ -199,7 +199,7 @@ def verify(prepared: str, redownload: str) -> Tuple[bool, str]:
 
 
 def verify_bytes(prepared: bytes, redownload: bytes) -> Tuple[bool, str]:
-    """``verify`` on bytes already in hand (the web page holds files, not paths)."""
+    """``verify`` on bytes already in hand (for callers that hold files in memory)."""
     d = diff_bytes(prepared, redownload)
     ok = d.identical or d.only_bookkeeping
     text = render_diff(d)

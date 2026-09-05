@@ -116,7 +116,7 @@ def intent_for_check(intent: dict, corrected: bytes) -> dict:
 
 def apply_fixes(data: bytes, report: FileReport, accept: List[str], values: Optional[Dict[str, object]] = None,
                 copy_from: Optional[str] = None) -> Tuple[bytes, dict]:
-    """The corrected bytes and the intent ``{"edits": [...], "bit_edits": [...]}`` the page's verify tab compares against.
+    """The corrected bytes and the intent ``{"edits": [...], "bit_edits": [...]}`` a verify step compares against.
     ``intent_for_check`` turns it into the file ``mk2vsc check --intent`` reads."""
     if not report.editable:
         raise FixRefused(f"the writer refuses this file: {report.refusal_reason}")
