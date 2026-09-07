@@ -199,3 +199,42 @@ def test_diagnose_upload_form_and_junk(tmp_path, capsys):
     junk.write_bytes(b"\x00" * 50)
     assert main(["diagnose", str(junk)]) == 1
     assert ".rvsc" in capsys.readouterr().out
+
+
+ESS_B = os.path.join(FIXTURES, "system_b", "system_b_2026-09-04_download_ess_deviceform_1.rvms")
+
+
+def test_set_bits_qualified_unqualified_locked_and_syntax(tmp_path, capsys):
+    """The set-bits verb: a qualified bit writes, an unqualified one is refused, the override flips
+    exactly one bit, a grid-code register is refused outright, and bad syntax fails before any file work."""
+    out = str(tmp_path / "bits.rvms")
+
+    # syntax: FIELD:BIT=0|1, checked before the file is opened
+    assert main(["set-bits", ESS_B, "flags1=12", "-o", out]) == 2
+    assert "is not FIELD:BIT=0|1" in capsys.readouterr().err
+
+    # unqualified bit: refused with the reason and the way forward
+    assert main(["set-bits", ESS_B, "flags1:12=1", "-o", out]) == 1
+    err = capsys.readouterr().err
+    assert "not a qualified bit" in err and "allow_unqualified" in err
+    assert not os.path.exists(out)
+
+    # with the override: exactly one bit of exactly one register moves
+    assert main(["set-bits", ESS_B, "flags1:12=1", "--allow-unqualified", "-o", out]) == 0
+    text = capsys.readouterr().out
+    assert "0x4dfe -> 0x5dfe" in text and "wrote" in text
+    assert main(["diff", ESS_B, out]) == 2          # 2 = content changed, the documented diff exit code
+    d = capsys.readouterr().out
+    assert d.count("setting   1 flags1") == 2 and "setting   0" not in d
+
+    # a grid-code register is locked, with no override
+    assert main(["set-bits", ESS_B, "grid_code:0=1", "-o", str(tmp_path / "no.rvms")]) == 1
+    assert "grid-code" in capsys.readouterr().err
+
+
+def test_set_bits_one_inverter_only(tmp_path, capsys):
+    out = str(tmp_path / "one.rvms")
+    assert main(["set-bits", ESS_B, "flags1:12=1", "--allow-unqualified", "--serial", "HQ0000B0001",
+                 "-o", out]) == 0
+    assert main(["diff", ESS_B, out]) == 2
+    assert capsys.readouterr().out.count("setting   1 flags1") == 1

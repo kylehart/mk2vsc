@@ -25,7 +25,7 @@ from typing import Dict, Iterable, List, Optional, Tuple
 from .sections import RvmsFile
 from .units import UnitBlock, units_by_serial
 from .fields import lookup, FIELDS, Field, CONFIRMED, HIGH, MEDIUM, ALIASES, format_value
-from .writer import set_settings, WriteRefused, Edit
+from .writer import set_settings, set_bits, WriteRefused, Edit
 from .diff import diff_bytes, FileDiff, render as render_diff
 from .qualify import Intent, qualify_bytes
 from .assistants import parse_assistant_area
@@ -147,6 +147,17 @@ class Config:
 
     def set_many(self, changes: Dict[str, object], serial: Optional[str] = None, **kw) -> List[Edit]:
         out, edits = set_settings(self.data, [(serial, lookup(k).name, v) for k, v in changes.items()], **kw)
+        self.data = out
+        self.edits.extend(edits)
+        return edits
+
+    def set_bit(self, key, bit: int, on: bool, serial: Optional[str] = None, **kw) -> List[Edit]:
+        """Set or clear ONE bit of a flag register (settings 0, 1, 60, 61) on every inverter or on one.
+
+        The rest of the register is read-modify-written unchanged.  Raises WriteRefused unless the bit is
+        inside the register's settable mask and is a qualified bit (``writer.QUALIFIED_BITS``); pass
+        ``allow_unqualified=True`` to be the first to try one.  See docs/SAFETY.md."""
+        out, edits = set_bits(self.data, [(serial, lookup(key).name, int(bit), bool(on))], **kw)
         self.data = out
         self.edits.extend(edits)
         return edits

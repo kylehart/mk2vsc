@@ -6,6 +6,7 @@ Start here (one file downloaded from VRM > Device list > Remote VEConfigure):
     mk2vsc show     download.rvms                        what is in it, per inverter, in plain labels
     mk2vsc edit     download.rvms absorption=56.8 float=54.0
                                                          writes download.edited.rvms; upload THAT through VRM
+    mk2vsc set-bits download.rvms flags1:12=1             one bit of a flag register (the GUI's checkboxes)
     mk2vsc verify   download.edited.rvms redownload.rvms  after the upload: did the device take exactly your change?
     mk2vsc check    redownload.rvms --expect absorption=56.8 float=54.0
                                                          values as intended, and equal on both inverters
@@ -28,6 +29,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 
 from . import __version__
@@ -115,6 +117,42 @@ def cmd_edit(a):
     print(f"  1. VRM > Device list > Remote VEConfigure > Upload: {os.path.basename(out)}")
     print("  2. Download again from the same page.")
     print(f"  3. mk2vsc verify {out} <the new download>")
+    return 0
+
+
+def cmd_set_bits(a):
+    """mk2vsc set-bits FILE flags1:12=1 [flags2:4=0 ...]"""
+    changes = []
+    for spec in a.assignments:
+        m = re.fullmatch(r"\s*([A-Za-z0-9_]+)\s*:\s*(\d+)\s*=\s*([01]|on|off|set|clear)\s*", spec)
+        if not m:
+            return _fail(f"error: {spec!r} is not FIELD:BIT=0|1 (for example flags1:12=1)", 2)
+        field, bit, val = m.group(1), int(m.group(2)), m.group(3)
+        changes.append((field, bit, val in ("1", "on", "set")))
+    try:
+        cfg = api.load(a.file)
+    except (RvmsParseError, OSError) as e:
+        return _fail(f"{a.file}: {e}")
+    try:
+        edits = []
+        for field, bit, on in changes:
+            edits += cfg.set_bit(field, bit, on, serial=a.serial, allow_unqualified=a.allow_unqualified)
+        out = cfg.save(a.output, overwrite=a.overwrite)
+    except (WriteRefused, KeyError, ValueError) as e:
+        return _fail(f"REFUSED: {e}")
+    for e in edits:
+        d = e.as_dict()
+        same = " (unchanged)" if d["old"] == d["new"] else ""
+        print(f"  {d['serial']}  {d['field']:28s} {d['old']} -> {d['new']}{same}")
+    print(f"\nwrote {out}")
+    print("verified: only that bit and its section checksums changed; the input file is untouched.\n")
+    print("Next:")
+    print(f"  1. VRM > Device list > Remote VEConfigure > Upload: {os.path.basename(out)}")
+    print("  2. Download again from the same page.")
+    print(f"  3. mk2vsc verify {out} <the new download>")
+    print("\nA flag-register write has never been measured on a live system: watch the dialog. "
+          "\"Success\" in about ten seconds means the inverters kept running; \"Resetting VE.Bus products\" "
+          "means they restart and the site is dark for some minutes (docs/SAFETY.md).")
     return 0
 
 
@@ -392,6 +430,16 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--allow-unverified", action="store_true", help="edit MEDIUM/LOW/UNKNOWN fields (you are the first to try)")
     s.add_argument("--allow-out-of-range", action="store_true", help="skip the plausibility and float<=absorption checks")
     s.set_defaults(fn=cmd_edit)
+
+    s = sub.add_parser("set-bits", help="set or clear one bit of a flag register (FIELD:BIT=0|1)")
+    s.add_argument("file", metavar="FILE")
+    s.add_argument("assignments", nargs="+", metavar="FIELD:BIT=0|1")
+    s.add_argument("-o", "--output", help="output path (default: <FILE>.edited.rvms)")
+    s.add_argument("--serial", help="edit one inverter only (default: all)")
+    s.add_argument("--overwrite", action="store_true", help="allow replacing an existing output file")
+    s.add_argument("--allow-unqualified", action="store_true",
+                   help="write a bit with no recorded VEConfigure- or device-authored flip (you are the first to try it)")
+    s.set_defaults(fn=cmd_set_bits)
 
     s = sub.add_parser("verify", help="after uploading: does the re-download carry exactly your change?")
     s.add_argument("prepared", metavar="PREPARED")

@@ -33,8 +33,17 @@ What we have done repeatedly on live systems without incident:
   enter; the tool proposes no chemistry numbers of its own. The change sheet it prints is the same change
   for VEConfigure, so declining the file costs nothing but typing. Bit-level writes touch one qualified
   flag bit (the LithiumBattery bit); docs/DIAGNOSE.md says what qualifies a bit.
+- `mk2vsc set-bits FILE flags1:12=1` sets or clears ONE bit of a flag register (settings 0, 1, 60, 61), which
+  is how VEConfigure's checkboxes are stored. The rest of the register is read-modify-written unchanged, the
+  bit must sit inside the register's settable mask, and an unqualified bit needs `--allow-unqualified`.
 
-Settings-only uploads did not reset the VE.Bus or interrupt loads on any of our uploads.
+Most settings-only uploads complete in about ten seconds with the dialog reading "Success. The system has been
+configured", and the inverters keep running. Two exceptions are measured: an out-of-range value, and the
+low-voltage protection settings 11 and 63, both of which make the device run "Resetting VE.Bus products" instead,
+taking the inverters down for some minutes. **No flag-register write has been measured on a live system**, so
+treat the first one as a commissioning act: watch the dialog and expect either outcome. Setting 0 is the one to
+be most careful with: every block in the corpus reads 0x81f4, whose bit 15 sits above the register's own settable
+mask, so a write there may be dropped the way an out-of-range value is.
 
 ## Assistant changes: what works, what is unproven, what has broken live systems
 
