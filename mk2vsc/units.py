@@ -41,7 +41,8 @@ import struct
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
-from .sections import RvmsFile, Section, SECTION_DATA
+from .sections import RvmsFile, Section, SECTION_DATA, SECTION_INFO, SectionTooShort
+from .schema import check_payload as _check_schema_payload
 
 SERIAL_RE = re.compile(rb"HQ[0-9A-Z]{8,12}")
 
@@ -58,6 +59,9 @@ OFF_SAVE_TS_DEVICE = 0x4F
 OFF_SETTINGS_DEVICE = 0x59
 UPLOAD_SHIFT = 10
 N_SETTINGS = 192          # settings 0..191 precede the assistant area; the schema has 192 records too
+PREFIX_LEN = 15 + 4       # name + next pointer: the bytes of ``raw`` before the payload
+SETTINGS_END_DEVICE = OFF_SETTINGS_DEVICE + 2 * N_SETTINGS          # 0x1d9: first byte after the settings array
+MIN_PAYLOAD_DEVICE = SETTINGS_END_DEVICE - PREFIX_LEN               # 454: payload bytes the fixed layout reads
 
 ASSISTANT_FLAGS = {0xE4, 0xE5}
 BARE_FLAGS = {0xF4, 0xF5}
@@ -73,6 +77,16 @@ class UnitBlock:
 
     section: Section
     index: int  # position in the file (0-based); NOT stable across downloads, use serial
+
+    def __post_init__(self):
+        # Every fixed-offset read below ends at the settings array; refuse a block that cannot hold it, by name,
+        # instead of failing inside ``struct`` (see docs/ERRORS.md, SectionTooShort).
+        need = MIN_PAYLOAD_DEVICE + self.shift
+        have = len(self.section.payload)
+        if have < need:
+            raise SectionTooShort(SECTION_DATA.decode() + f" (inverter block {self.index})", have, need,
+                                  f"the {N_SETTINGS}-entry settings array at +0x{self.settings_offset:x} from the name start, "
+                                  f"then the assistant area and the checksum")
 
     # ------------------------------------------------------------- raw helpers
     @property
@@ -195,6 +209,16 @@ class UnitBlock:
             "assistant_area_bytes": len(self.assistant_area),
             "checksum_ok": self.section.checksum_ok,
         }
+
+
+def check_layout(f: RvmsFile) -> None:
+    """Raise ``SectionTooShort`` if any section that parsed is too short for the layout mk2vsc reads:
+    the ``BareSettingInfo`` schema (192 records) and every ``BareSettingData`` block (the settings array).
+    A file with no ``BareSettingInfo`` at all is left to the callers' existing no-schema handling."""
+    for s in f.sections:
+        if s.name == SECTION_INFO:
+            _check_schema_payload(s.payload)
+    unit_blocks(f)
 
 
 def unit_blocks(f: RvmsFile) -> List[UnitBlock]:

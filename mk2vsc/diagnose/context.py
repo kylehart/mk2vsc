@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
 from ..sections import RvmsFile, RvmsParseError
-from ..units import UnitBlock, units_by_serial
+from ..units import UnitBlock, units_by_serial, check_layout
 from ..schema import schema_of, nominal_voltage, SettingInfo
 from ..fields import lookup, Field, BY_NAME
 from ..assistants import parse_assistant_area
@@ -103,6 +103,7 @@ def build_context(data: bytes, name: str = "<bytes>", assume: Optional[Dict[str,
     ctx.unverified_format = is_rvsc(name)
     try:
         f = RvmsFile.parse(data)
+        check_layout(f)
     except RvmsParseError as e:
         ctx.status, ctx.message = "unparseable", f"not a readable .rvms: {e}"
         if ctx.unverified_format or b"VEConfig" in data[:64]:

@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Tuple
 
 from .sections import RvmsFile, RvmsParseError
-from .units import unit_blocks
+from .units import unit_blocks, check_layout
 from .assistants import parse_assistant_area, grid_code_words
 from .schema import schema_of, firmware_of_schema
 from .fields import BY_ID
@@ -17,6 +17,7 @@ def census_text(data: bytes, name: str) -> Tuple[str, bool]:
     parse, a checksum fails, the schema is unusable, a block is misaligned, or there is no inverter block."""
     try:
         f = RvmsFile.parse(data)
+        check_layout(f)
     except RvmsParseError as e:
         return f"{name}: PARSE FAILED: {e}", False
     lines = []

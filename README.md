@@ -217,6 +217,9 @@ things on your own system before trusting the tool with it.
 * We hold files from one firmware (2729560), one format version (1.33), one product family, one
   topology (two inverters, split phase). Other hardware may differ; the tests will tell you.
 * We have no `.rvsc` single-unit files and no three-phase or three-plus-unit files.
+* A file whose `BareSettingInfo` or `BareSettingData` payload is shorter than the layout we read (another
+  firmware or tool build) is refused as `SectionTooShort`, naming the section and the byte counts
+  (docs/ERRORS.md); the 192-record schema length is not generalised beyond our firmware.
 * About two thirds of the settings array is unnamed or named with low confidence. docs/FIELDS.md
   lists what each value looks like even where we cannot say what it does.
 * The assistant record bodies, the 4001-byte BareSettingInfo section and parts of the block header
