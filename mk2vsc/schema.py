@@ -23,6 +23,16 @@ exception is that flags mask.
 
 The 2070 bytes after the records (a per-setting attribute byte table and an offset-indexed set of
 variable-length ``f5 ff 3e 0f`` records) are not decoded; see issue #6.
+
+TODO (other firmware): ``HEADER_LEN``, ``RECORD_LEN`` and ``N_RECORDS`` are the values Observed on the one
+firmware in the corpus (2729560) and are not generalised.  A payload shorter than they imply is refused as
+``SectionTooShort`` with the observed length and the record count it would hold.  Evidence that other
+firmware differs: talas9/rvsc-tools (MIT) reads its reference file, a 4562-byte single-unit save from a
+MultiPlus 24/1200 on firmware 2667558 with VEConfigure 1.33, by searching the ``BareSettingInfo`` header
+length (``info_header_search_range``) and treating ``BareSettingInfo`` as a master table of which
+``BareSettingData`` covers a window (its rvsc.py, ``find_alignment``; its FORMAT.md section 2).  We hold no
+such file; generalising the header or record count waits for one (issues #14 single-unit .rvsc, #16 other
+firmware, #36 schema signature per firmware; CONTRIBUTING.md, "Files from hardware we do not have").
 """
 from __future__ import annotations
 
@@ -30,11 +40,12 @@ import struct
 from dataclasses import dataclass
 from typing import List, Optional
 
-from .sections import RvmsFile, SECTION_INFO
+from .sections import RvmsFile, SECTION_INFO, SectionTooShort
 
 HEADER_LEN = 11
 RECORD_LEN = 10
 N_RECORDS = 192
+SCHEMA_LEN = HEADER_LEN + N_RECORDS * RECORD_LEN     # 1931: the payload length the 192-record schema needs
 
 
 @dataclass(frozen=True)
@@ -70,9 +81,17 @@ class SettingInfo:
         return self.scale == 0 and self.max == 0
 
 
+def check_payload(info_payload: bytes) -> None:
+    """Raise ``SectionTooShort`` unless the payload holds the 11-byte header and 192 records."""
+    if len(info_payload) < SCHEMA_LEN:
+        implied = max(0, (len(info_payload) - HEADER_LEN) // RECORD_LEN)
+        raise SectionTooShort(SECTION_INFO.decode(), len(info_payload), SCHEMA_LEN,
+                              f"room for {implied} whole {RECORD_LEN}-byte records after the {HEADER_LEN}-byte header; "
+                              f"the schema mk2vsc reads has {N_RECORDS}")
+
+
 def parse_schema(info_payload: bytes) -> List[SettingInfo]:
-    if len(info_payload) < HEADER_LEN + N_RECORDS * RECORD_LEN:
-        raise ValueError("BareSettingInfo payload too short for the settings schema")
+    check_payload(info_payload)
     out = []
     for n in range(N_RECORDS):
         o = HEADER_LEN + RECORD_LEN * n

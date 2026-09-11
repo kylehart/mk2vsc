@@ -25,7 +25,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
 from .sections import RvmsFile
-from .units import units_by_serial
+from .units import units_by_serial, check_layout
 from .fields import lookup, FIELDS, CONFIRMED, HIGH
 from .schema import schema_of
 from .align import check as align_check
@@ -55,6 +55,7 @@ def qualify_bytes(data: bytes, intent: Intent) -> Tuple[bool, List[Tuple[str, st
     ok = True
     try:
         f = RvmsFile.parse(data)
+        check_layout(f)
     except Exception as e:  # noqa: BLE001
         return False, [("FAIL", f"not parseable: {e}")]
     for name, start, stored, computed, valid in f.checksum_report():

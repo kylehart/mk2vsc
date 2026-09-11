@@ -270,7 +270,7 @@ it does not author record bodies; it removes records and reinstalls the system's
 * the 12 constant blob bytes of the upload form and whether they gate an install
 * the ESS record body encoding and the 13-byte ESS trailer
 * settings 128..189 (0xffff on bare blocks; the GUI ESS install writes a value with low byte 1 and high byte 0 to 3 into 128, equal to 191; 129 to 189 stay 0xffff on every block we hold)
-* whether `.rvsc` single-unit files share this layout: we have none
+* whether `.rvsc` single-unit files share this layout: we have none. The container code reads a one-block file (a corpus file with its second block removed parses, validates, aligns and round-trips; tests/test_short_files.py); a file whose `BareSettingInfo` or `BareSettingData` payload is shorter than this layout is refused as `SectionTooShort` (docs/ERRORS.md). Schema lengths on other firmware are Unknown: talas9/rvsc-tools reads its 4562-byte single-unit file from a MultiPlus 24/1200 on firmware 2667558 by searching the `BareSettingInfo` header length and treating that section as a master table of which `BareSettingData` covers a window (its rvsc.py `find_alignment`, FORMAT.md section 2)
 * three-phase or 3+ unit files: we have none
 * any other firmware version or format version: we have none
 

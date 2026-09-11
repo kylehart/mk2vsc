@@ -188,6 +188,25 @@ The upload was accepted. It is not proof the settings are right: download fresh 
 against what you uploaded, and `mk2vsc check` against your intent file. On 2026-08-14 a file with this
 dialog reintroduced an out-of-spec charge voltage (docs/HISTORY.md).
 
+## Messages from mk2vsc itself
+
+### SectionTooShort  "... payload is N bytes; the layout mk2vsc reads needs at least M"
+
+The file's sections and checksums are fine, but a `BareSettingInfo` or `BareSettingData` payload is shorter
+than the fixed layout mk2vsc reads from it (the 11-byte header plus 192 ten-byte records of the schema;
+the 192-entry settings array at +0x59 of a device-form block). The message names the section, the bytes
+found, the bytes needed and, for the schema, how many whole records the payload holds. `show`, `census`,
+`check`, `verify`, `diagnose` (status `unparseable`) and `mk2vsc.load` refuse the file with it; `history`
+skips the file with the reason; `validate` still reports the container and checksums, which is what it is for.
+The class is `mk2vsc.SectionTooShort`, a `RvmsParseError`.
+
+Device state: nothing written; mk2vsc only read the file. What it means: the file is probably from a
+firmware, product or tool build outside the corpus (every file we hold is a 48 V MultiPlus pair on firmware
+2729560 with a 4001-byte schema). What to do: run `mk2vsc validate` on it, then open a "fixture wanted"
+issue with the message and the `validate` output; if you can share the file, it names the layout for
+everyone (CONTRIBUTING.md, "Files from hardware we do not have"). Confidence: the layout is Observed on
+our corpus only; other layouts are Unknown (docs/FORMAT.md section 6).
+
 ## Quick table
 
 | Message | Written? | First action | Confidence |
@@ -204,3 +223,4 @@ dialog reintroduced an out-of-spec charge voltage (docs/HISTORY.md).
 | "Resetting VE.Bus products" | in progress | do not interrupt | observed |
 | "switch as group" | n/a | set grid code first | observed + documented |
 | "not all assistants configured" | n/a | finish the wizard | observed |
+| SectionTooShort (mk2vsc) | no (read only) | `mk2vsc validate`; open a fixture-wanted issue with the message | layout observed on our corpus only |

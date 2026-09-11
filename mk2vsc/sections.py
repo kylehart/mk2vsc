@@ -38,6 +38,26 @@ class RvmsParseError(ValueError):
     """The bytes do not follow the observed section grammar."""
 
 
+class SectionTooShort(RvmsParseError):
+    """A section parsed, but its payload is shorter than the fixed layout mk2vsc reads from it.
+
+    Raised by ``schema.parse_schema`` (``BareSettingInfo``) and by ``units.UnitBlock`` (``BareSettingData``),
+    and by ``units.check_layout`` on a whole file.  ``section`` names the section, ``found`` is the payload
+    length in bytes, ``needed`` the payload length the layout requires.  A subclass of ``RvmsParseError`` so
+    every reader that refuses unparseable files refuses these the same way.
+    """
+
+    def __init__(self, section: str, found: int, needed: int, detail: str = ""):
+        self.section, self.found, self.needed, self.detail = section, found, needed, detail
+        msg = (f"{section} payload is {found} bytes; the layout mk2vsc reads needs at least {needed}"
+               + (f" ({detail})" if detail else "")
+               + ". The file may be from a tool or firmware version mk2vsc has not seen; see docs/ERRORS.md, SectionTooShort.")
+        super().__init__(msg)
+
+    def __reduce__(self):
+        return (SectionTooShort, (self.section, self.found, self.needed, self.detail))
+
+
 def sum32_le(data: bytes, start: int = 0, end: Optional[int] = None) -> int:
     """Sum ``data[start:end]`` as 32-bit little-endian words modulo 2**32.
 

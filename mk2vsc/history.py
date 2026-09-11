@@ -16,7 +16,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Tuple
 
 from .sections import RvmsFile, RvmsParseError
-from .units import unit_blocks, units_by_serial
+from .units import unit_blocks, units_by_serial, check_layout
 from .fields import BY_ID
 from .assistants import parse_assistant_area
 
@@ -67,6 +67,7 @@ def snapshots_from_bytes(items: List[Tuple[str, bytes]]) -> Tuple[List[Snapshot]
     for name, data in items:
         try:
             f = RvmsFile.parse(data)
+            check_layout(f)
         except RvmsParseError as e:
             skipped.append((name, str(e)))
             continue

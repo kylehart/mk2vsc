@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 from typing import Dict, Iterable, List, Optional, Tuple
 
 from .sections import RvmsFile
-from .units import UnitBlock, units_by_serial
+from .units import UnitBlock, units_by_serial, check_layout
 from .fields import lookup, FIELDS, Field, CONFIRMED, HIGH, MEDIUM, ALIASES, format_value
 from .writer import set_settings, WriteRefused, Edit
 from .diff import diff_bytes, FileDiff, render as render_diff
@@ -184,12 +184,12 @@ class Config:
 def load(path: str) -> Config:
     with open(path, "rb") as fh:
         data = fh.read()
-    RvmsFile.parse(data)   # fail early with a clear parse error
+    check_layout(RvmsFile.parse(data))   # fail early with a clear parse error (RvmsParseError / SectionTooShort)
     return Config(path=path, data=data)
 
 
 def loads(data: bytes) -> Config:
-    RvmsFile.parse(data)
+    check_layout(RvmsFile.parse(data))
     return Config(path=None, data=data)
 
 
