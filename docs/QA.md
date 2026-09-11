@@ -35,7 +35,7 @@ python -m venv .venv
 .venv/bin/pytest
 ```
 
-647 tests, under three seconds.
+650 tests, under three seconds.
 
 ## The corpus and its limits
 
@@ -62,7 +62,9 @@ Files from other people's systems are not committed (docs/donate.md says what we
 They are run through `tools/validate_dir.py`, which prints counts only: no file name, serial, timestamp or
 full firmware number. The table below is that output for the set held on 2026-09-11: ten files posted
 publicly by their owners on the Victron Community, used here for testing only. "phase_model" is the
-per-slot byte pattern in docs/FORMAT.md 3.1.1 (not scored on two-unit files); the one alignment failure is a
+per-slot byte pattern in docs/FORMAT.md 3.1.1 (not scored on two-unit files); "records_imply_assistant_flag"
+is the one direction of the flag/area relation that holds on our corpus (a block carrying assistant records
+always has flag high nibble `e`; the converse is false); the one alignment failure is a
 GUI-saved three-unit file with setting 85 at 0xffff, above its schema maximum (docs/FORMAT.md 3.3), reported
 by `census` as ALIGNMENT SUSPECT and by `diagnose` as `upload_form`.
 
@@ -122,42 +124,10 @@ Checks (pass / fail / not applicable)
 | alignment | 9 | 1 | 0 |
 | census | 9 | 1 | 0 |
 | diagnose_ok_or_upload_form | 10 | 0 | 0 |
-| flag_nibble_vs_records | 10 | 0 | 0 |
+| records_imply_assistant_flag | 10 | 0 | 0 |
 | phase_model | 9 | 0 | 1 |
 
 note: alignment failed on 1 file(s): a value outside its schema range; `mk2vsc census` on that file names the setting
-
-## Verify it yourself before writing anything
-
-The short form is one command: `mk2vsc census <download>` prints structure, checksum status, whether the
-device schema parsed, whether every setting lies inside the schema's range, and the key values per
-inverter. Compare the key values with VEConfigure or VRM. If everything agrees, the model holds on your
-hardware; if not, you have a finding worth an issue. The longer form:
-
-1. Download your system's file twice, a minute apart. `mk2vsc diff a.rvms b.rvms` should say
-   ONLY BOOKKEEPING and exit 0. This checks that the parser, the by-serial comparison, and the
-   bookkeeping model (pointer, save timestamp, checksum) hold on your firmware.
-2. `mk2vsc validate a.rvms`. All checksums OK means the checksum model is exactly what your device
-   and your VEConfigure version compute. If any section reads BAD on a genuine download, stop: the
-   integrity model does not hold for your files, and nothing else here should be trusted until it
-   is understood.
-3. `mk2vsc show a.rvms`. Compare absorption, float, charge current and the AC input current limit
-   with VEConfigure's Charger and General tabs or the VRM device page. If they match, the
-   settings-array mapping holds for your block layout. The line under each inverter is the same
-   self-check `census` runs: `alignment OK (+0x059, 138/138 in range)` means every scorable setting
-   lies inside the range the file's own schema declares for it; `ALIGNMENT SUSPECT` means the
-   numbers on that block are not to be trusted. A row marked `at minimum of allowed range` or
-   `at maximum of allowed range` is a physical setting (V, A, Ah, Hz) typed as the extreme value
-   VEConfigure accepts, where that extreme is not the default; on our corpus that marks exactly the
-   inverters commissioned with absorption = float = 48.00 V.
-4. Run the test suite with your file added to `fixtures/` (and to the manifest, see
-   docs/FIXTURES.md). Claim tests that fail are findings, not bugs in your file.
-5. Only then the first live edit: one innocuous 0.1 V step on a watched system, following
-   docs/SAFETY.md and docs/CHANGE_CONTROL.md.
-
-When a claim test fails on your file, open an issue with the file (device downloads contain
-inverter serials and nothing else identifying) and the output of `mk2vsc census` and
-`mk2vsc show --all --json`.
 
 ## Two offline checks for hardware classes with no upload history
 
@@ -167,8 +137,8 @@ of your own, two checks that need no target hardware and touch no VE.Bus:
 1. **VEConfigure 3 in a Windows VM.** It opens any `.rvsc` or `.rvms` from disk and shows the values on its
    tabs; open the edited file, read the tabs, close without saving. Evidence that this works on files from
    systems the PC is not connected to: Victron's Remote VEConfigure manual describes editing the downloaded
-   file offline, and Victron Community threads show staff editing a stranger's downloaded `.rvsc` on their own
-   PC for the owner to upload (R12 desk research, 2026-09-11). What it proves: the file is well formed for
+   file offline, and Victron Community threads show Victron staff editing a stranger's downloaded `.rvsc` on
+   their own PC for the owner to upload (observed 2026-09-11). What it proves: the file is well formed for
    Victron's own reader and the values decode as this tool says. What it does not prove: that the device
    accepts it.
 2. **`mk2vsc -L -f <file>` on a GX you own.** The GX-side program that serves Remote VEConfigure and the

@@ -9,7 +9,7 @@ site name, timestamp or full firmware number, into an issue or docs/QA.md.  Noth
 
 Per file: parse, checksums, byte-exact round trip, layout (SectionTooShort), schema (192 records), alignment
 of every block against the file's own schema, census verdict, diagnose status, the assistant flag's high nibble
-against the presence of assistant records, and the phase/unit byte model (+0x35 = 4 * (+0x37 mod 3) and flag
+against the assistant area (see ``ASSISTANT_FLAG_RULE``), and the phase/unit byte model (+0x35 = 4 * (+0x37 mod 3) and flag
 low nibble = 8 + +0x35 / 4 on files with three or more units; all zero on one unit).  Firmware is reported by
 family (the first two digits of the block's seven-digit number: 19/20 old microcontroller, 26/27 new), whether
 the word's high byte is set, and whether the schema header's firmware number differs from the blocks'.
@@ -34,7 +34,13 @@ from mk2vsc.census import census_text                                    # noqa:
 from mk2vsc.diagnose import diagnose_bytes                               # noqa: E402
 
 CHECKS = ["parse", "checksums", "round_trip", "layout", "schema_192", "alignment", "census", "diagnose_ok_or_upload_form",
-          "flag_nibble_vs_records", "phase_model"]
+          "records_imply_assistant_flag", "phase_model"]
+
+# The only direction of the flag/area relation that holds on all 180 corpus blocks: a block carrying assistant
+# RECORDS always has flag high nibble ``e``.  The converse is false and must not be scored -- an ``e`` block may
+# carry records, a failed-install stub, an empty container or nothing (the 2026-08 stub downloads and two
+# prepared half-ess files), and two 2026-06 downloads carry a 6-byte empty container behind an ``f`` nibble.
+ASSISTANT_FLAG_RULE = "records present => flag high nibble e (the converse does not hold; see mk2vsc/assistants.py)"
 
 
 def check_file(data: bytes) -> dict:
@@ -76,7 +82,7 @@ def check_file(data: bytes) -> dict:
     areas = [parse_assistant_area(u) for u in units]
     r["assistant_records"] = any(a["kind"] == "records" for a in areas)
     r["grid_code_set"] = any(u.setting(81) != 0 for u in units)
-    r["flag_nibble_vs_records"] = all(u.has_assistant_flag == (a["kind"] == "records") for u, a in zip(units, areas))
+    r["records_imply_assistant_flag"] = all(u.has_assistant_flag for u, a in zip(units, areas) if a["kind"] == "records")
     if len(units) == 1:
         u = units[0]
         r["phase_model"] = u.slot == (0, 0) and (u.assistant_flag & 0x0F) == 0
@@ -144,7 +150,7 @@ def main(argv=None) -> int:
         vals = [r[c] for r in results]
         rows.append([c, sum(v is True for v in vals), sum(v is False for v in vals), sum(v is None for v in vals)])
     print(_table("Checks (pass / fail / not applicable)", rows, markdown))
-    failed = any(r[c] is False for r in results for c in CHECKS if c not in ("alignment", "census"))
+    failed = any(r[c] is False for r in results for c in CHECKS if c not in ("alignment", "census"))  # value findings, not tool failures
     align_fail = sum(r["alignment"] is False for r in results)
     if align_fail:
         print(f"\nnote: alignment failed on {align_fail} file(s): a value outside its schema range; `mk2vsc census` on that file names the setting")

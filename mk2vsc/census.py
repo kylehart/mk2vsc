@@ -4,17 +4,12 @@ from __future__ import annotations
 from typing import Tuple
 
 from .sections import RvmsFile, RvmsParseError
-from .units import unit_blocks, check_layout
+from .units import unit_blocks, check_layout, high_byte_note
 from .assistants import parse_assistant_area, grid_code_words
 from .schema import schema_of, firmware_of_schema, firmware_word_of_schema
 from .fields import BY_ID
 
 KEY_SETTINGS = [2, 3, 4, 5, 6, 11, 54, 58, 62, 64, 65]
-
-
-def _high_byte_note(high: int) -> str:
-    """Appended to a firmware number when the stored word carries a non-zero high byte (docs/FORMAT.md 3.3)."""
-    return f" (word high byte 0x{high:02x})" if high else ""
 
 
 def census_text(data: bytes, name: str) -> Tuple[str, bool]:
@@ -37,7 +32,7 @@ def census_text(data: bytes, name: str) -> Tuple[str, bool]:
         sch = schema_of(f)
         info = f.section(b"BareSettingInfo").payload
         info_fw = firmware_of_schema(info)
-        schema_txt = f"parsed ({len(sch)} records, firmware {info_fw}{_high_byte_note(firmware_word_of_schema(info) >> 24)})"
+        schema_txt = f"parsed ({len(sch)} records, firmware {info_fw}{high_byte_note(firmware_word_of_schema(info) >> 24)})"
     except Exception as e:  # noqa: BLE001
         sch = None
         schema_txt = f"NOT PARSED ({e})"
@@ -57,7 +52,7 @@ def census_text(data: bytes, name: str) -> Tuple[str, bool]:
         when = u.save_datetime.isoformat() if u.save_datetime else "?"
         lines.append(f"  {u.serial}: block {len(u.raw)} B, flag {u.assistant_flag:02x}, phase {u.phase_summary}, "
                      f"form {'upload' if u.is_upload_form else 'device'}, "
-                     f"firmware {u.firmware_version}{_high_byte_note(u.firmware_word_high_byte)}, saved {when}, "
+                     f"firmware {u.firmware_version}{high_byte_note(u.firmware_word_high_byte)}, saved {when}, "
                      f"assistant: {asst['summary']}; {gcw['summary']}{in_range}")
         cells = []
         for k in KEY_SETTINGS:

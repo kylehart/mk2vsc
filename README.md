@@ -34,7 +34,7 @@ built to do that, together with everything we learned about the file along the w
   * qualifies a file against the values you intended before you upload and after you re-download,
   * mines a library of archived downloads into a dated, per-inverter change log (`mk2vsc history`).
 * A corpus of 92 real device files with a manifest, three synthetic single-unit and three-phase files built
-  from them, and a test suite that checks every documented claim against the corpus (647 tests).
+  from them, and a test suite that checks every documented claim against the corpus (650 tests).
 * A written account of the format as we understand it, and of what we do not understand.
 
 ## What this is not
@@ -74,7 +74,7 @@ Or from source, with the fixture corpus and tests:
 ```
 git clone https://github.com/kylehart/mk2vsc.git && cd mk2vsc
 python3 -m venv .venv && .venv/bin/pip install -e ".[test]"
-.venv/bin/pytest          # 647 tests against the fixture corpus
+.venv/bin/pytest          # 650 tests against the fixture corpus
 ```
 
 ## Quickstart: one download, one change

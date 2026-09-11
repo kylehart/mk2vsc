@@ -215,6 +215,8 @@ def test_firmware_number_is_the_low_24_bits_of_the_word(good_files):
         assert u.summary()["firmware"] == 2729560 and u.summary()["firmware_word_high_byte"] == 0xC7
     text, ok = census_text(data, "hb.rvms")
     assert ok and "firmware 2729560 (word high byte 0xc7)" in text and "3341293528" not in text
+    assert "(word high byte 0xc7)" in mk2vsc.loads(data).summary(), "`show` carries the note too"
+    assert all(u.summary()["assistant_present"] is u.has_assistant_flag for u in unit_blocks(f))
     assert "schema parsed (192 records, firmware 2729560 (word high byte 0xc7))" in text
     # the corpus text is unchanged: no note when the high byte is zero
     plain, _ = census_text(src, "hb.rvms")
@@ -238,6 +240,31 @@ def test_assistant_flag_is_read_by_its_high_nibble(good_files):
             assert u.has_assistant_flag is expect and u.assistant_flag == flag
 
 
+def test_records_imply_the_assistant_flag_but_not_the_converse(good_files):
+    """The one direction of the flag/area relation that holds on the corpus, and the counterexamples that
+    kill the converse.  tools/validate_dir.py scores exactly this; `has_assistant_flag` is not evidence of
+    records (stub, container and empty areas sit behind an `e` nibble too)."""
+    from mk2vsc.assistants import parse_assistant_area
+    records = converse_counterexamples = 0
+    for name, data in good_files.items():
+        for u in unit_blocks(RvmsFile.parse(data)):
+            kind = parse_assistant_area(u)["kind"]
+            if kind == "records":
+                records += 1
+                assert u.has_assistant_flag, (name, u.serial, hex(u.assistant_flag))
+            elif u.has_assistant_flag:
+                converse_counterexamples += 1          # e nibble, no records: stub / container / none
+    assert records >= 40 and converse_counterexamples >= 6, (records, converse_counterexamples)
+
+
+def test_slot_is_the_phase_and_unit_bytes(good_files):
+    """`slot` keys the blocks in upload_form and the graft; it must stay the same two bytes the named
+    properties read, or those two representations drift."""
+    for name, data in good_files.items():
+        for u in unit_blocks(RvmsFile.parse(data)):
+            assert u.slot == (u.phase_byte, u.unit_index) == (u.raw[0x35], u.raw[0x37]), name
+
+
 def test_phase_labels_cover_the_observed_values_and_nothing_else():
     assert PHASE_LABELS == {0x00: "L1", 0x04: "L2", 0x08: "L3", 0x86: "L2 (split-phase)"}
     f = RvmsFile.parse(_read(SINGLE_SOURCE))
@@ -259,7 +286,7 @@ def test_validate_dir_prints_aggregates_and_nothing_identifying(capsys):
     rc, out = _validate_dir(SYN, capsys)
     assert "3 files, 10 inverter blocks" in out and "HQ0000" not in out and "system_a" not in out and "2026-" not in out
     assert "1      1" in out and "3      1" in out and "6      1" in out          # by unit count
-    for check in ("parse", "checksums", "round_trip", "layout", "schema_192", "alignment", "census", "flag_nibble_vs_records"):
+    for check in ("parse", "checksums", "round_trip", "layout", "schema_192", "alignment", "census", "records_imply_assistant_flag"):
         assert any(line.startswith(check) and line.split()[1:] == ["3", "0", "0"] for line in out.splitlines()), check
     # the single-unit fixture keeps the pair's flag byte f4 (it is a byte prefix); real single-unit files carry
     # low nibble 0, so the phase-model check fails on it by construction and the exit status says so
@@ -269,3 +296,45 @@ def test_validate_dir_prints_aggregates_and_nothing_identifying(capsys):
     assert rc == 0 and "20 files" in out and "HQ0000" not in out
     assert any(line.startswith("phase_model") and line.split()[1:] == ["0", "0", "20"] for line in out.splitlines()), "pairs are not scored"
     assert any(line.startswith("alignment") and line.split()[1:] == ["20", "0", "0"] for line in out.splitlines())
+    # every well-formed corpus block satisfies the records=>flag rule; only the KNOWN_BAD negatives fail, at parse
+    assert any(line.startswith("records_imply_assistant_flag") and line.split()[1:] == ["20", "0", "0"] for line in out.splitlines())
+
+
+def _vd_module():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("vd", os.path.join(os.path.dirname(FIXTURES), "tools", "validate_dir.py"))
+    vd = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(vd)
+    return vd
+
+
+def test_validate_dir_failure_paths_and_exit_codes(tmp_path, capsys):
+    vd = _vd_module()
+    # a deliberately broken fixture: the checks that depend on parsing report False, and the run exits 1
+    d = tmp_path / "bad"
+    d.mkdir()
+    shutil.copyfile(os.path.join(FIXTURES, "system_a", "system_a_2026-07-21_prepared_ess_uploadform_1.rvms"), d / "a.rvms")
+    assert vd.main([str(d)]) == 1
+    out = capsys.readouterr().out
+    assert "1 files" in out and "HQ0000" not in out and "a.rvms" not in out
+    for check in ("parse", "layout", "schema_192", "records_imply_assistant_flag"):
+        assert any(line.startswith(check) and line.split()[1:] == ["0", "1", "0"] for line in out.splitlines()), check
+    # a stale-checksum file parses: checksums fail, the container checks still pass
+    d2 = tmp_path / "stale"
+    d2.mkdir()
+    shutil.copyfile(os.path.join(FIXTURES, "system_a", "system_a_2026-06-18_experiment_bare_deviceform_1.rvms"), d2 / "b.rvms")
+    assert vd.main([str(d2)]) == 1
+    out = capsys.readouterr().out
+    assert any(line.startswith("checksums") and line.split()[1:] == ["0", "1", "0"] for line in out.splitlines())
+    assert any(line.startswith("parse") and line.split()[1:] == ["1", "0", "0"] for line in out.splitlines())
+    # no files, and a bad argument
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    assert vd.main([str(empty)]) == 1
+    assert "no .rvsc/.rvms files" in capsys.readouterr().out
+    assert vd.main([]) == 2 and vd.main([str(tmp_path / "nope")]) == 2
+    capsys.readouterr()
+    # --markdown renders the same counts as pipe tables
+    assert vd.main([os.path.join(FIXTURES, "synthetic"), "--markdown"]) == 1
+    md = capsys.readouterr().out
+    assert "| units | files |" in md and "| parse | 3 | 0 | 0 |" in md and "HQ0000" not in md

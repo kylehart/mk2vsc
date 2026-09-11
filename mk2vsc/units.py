@@ -76,6 +76,12 @@ BARE_FLAGS = {0xF4, 0xF5}
 # pair (corpus); 00 / 04 / 08 on three-phase files, cycling with the unit index.  Inferred: the L1/L2/L3 reading.
 PHASE_LABELS = {0x00: "L1", 0x04: "L2", 0x08: "L3", 0x86: "L2 (split-phase)"}
 
+
+def high_byte_note(high: int) -> str:
+    """The text `census` and `show` append to a firmware number when the stored word carries a non-zero high
+    byte (docs/FORMAT.md 3.3).  Empty when it is zero, so corpus output is unchanged."""
+    return f" (word high byte 0x{high:02x})" if high else ""
+
 # Byte offsets (device form) that change on a re-save with NO setting change.  Never treat as settings.
 VOLATILE_DEVICE = {OFF_NEXT_PTR, OFF_NEXT_PTR + 1, OFF_SAVE_TS_DEVICE, OFF_SAVE_TS_DEVICE + 1,
                    OFF_SAVE_TS_DEVICE + 2, OFF_SAVE_TS_DEVICE + 3}
@@ -155,14 +161,16 @@ class UnitBlock:
 
     @property
     def has_assistant_flag(self) -> bool:
-        """High nibble ``e`` of the flag byte.  Observed: ``e`` on every block that carries assistant records and
-        ``f`` on every block without, across the corpus (e4/e5, f4/f5) and the single-unit, parallel and
-        three-phase files run through tools/validate_dir.py (e0, f0, e8, e9, ea)."""
-        return (self.assistant_flag >> 4) == 0xE
+        """High nibble ``e`` of the flag byte: the block is configured for an assistant.
 
-    @property
-    def slot(self) -> tuple:
-        return (self.u8(OFF_SLOT_A), self.u8(OFF_SLOT_B))
+        Observed across the corpus (e4/e5, f4/f5) and the single-unit, parallel and three-phase files run
+        through tools/validate_dir.py (e0, f0, e8, e9, ea): ``f`` on every bare block, and ``e`` on every
+        block that carries assistant records.  ``e`` does NOT imply records: the corpus also holds ``e``
+        blocks whose area is a failed-install stub, an empty container, or empty (the 2026-08 stub downloads;
+        tests/test_claims.py).  For what the area actually holds, read
+        ``assistants.parse_assistant_area(u)["kind"]``; the diagnose rules and the writer's stub guard do.
+        """
+        return (self.assistant_flag >> 4) == 0xE
 
     @property
     def phase_byte(self) -> int:
@@ -171,6 +179,11 @@ class UnitBlock:
     @property
     def unit_index(self) -> int:
         return self.u8(OFF_SLOT_B)
+
+    @property
+    def slot(self) -> tuple:
+        """``(phase_byte, unit_index)``: the pair as the blocks are keyed by ``upload_form`` and the graft."""
+        return (self.phase_byte, self.unit_index)
 
     @property
     def phase_label(self) -> str:
