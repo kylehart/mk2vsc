@@ -104,8 +104,16 @@ def schema_of(f: RvmsFile) -> List[SettingInfo]:
     return parse_schema(f.section(SECTION_INFO).payload)
 
 
-def firmware_of_schema(info_payload: bytes) -> int:
+def firmware_word_of_schema(info_payload: bytes) -> int:
+    """The u32 at header offset 4 as stored."""
     return struct.unpack_from("<I", info_payload, 4)[0]
+
+
+def firmware_of_schema(info_payload: bytes) -> int:
+    """The seven-digit firmware number in the schema header: the low 24 bits of the word (``units.FIRMWARE_MASK``).
+    The high byte is 0 on every corpus file; one GUI-saved file outside the corpus carries 0xc7 there and in
+    every block's firmware word (docs/FORMAT.md 3.3)."""
+    return firmware_word_of_schema(info_payload) & 0xFFFFFF
 
 
 NOMINALS = (12, 24, 48)

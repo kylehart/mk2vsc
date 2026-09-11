@@ -14,8 +14,6 @@ REMOVE_TEXT = ("ESS not intended: complete the removal. `mk2vsc assistant remove
 
 
 def run(ctx: FileContext) -> List[Finding]:
-    if len(ctx.serials) < 2:
-        return []
     kinds = {s: ctx.assistant[s]["kind"] for s in ctx.serials}
     has = [s for s, k in kinds.items() if k == "records"]
     lacks = [s for s, k in kinds.items() if k != "records"]
@@ -38,4 +36,4 @@ def run(ctx: FileContext) -> List[Finding]:
 RULE = Rule("E2", "Assistant on one inverter of the pair", DEVICE_CONFIRMED,
             "Assistant records on one block and none on the other. Observed on System C from 2026-07-17 to 07-20. "
             "Conditional on whether ESS is intended.",
-            "system_c/system_c_2026-07-20_download_half-ess_deviceform_1.rvms", run)
+            "system_c/system_c_2026-07-20_download_half-ess_deviceform_1.rvms", run, min_units=2)

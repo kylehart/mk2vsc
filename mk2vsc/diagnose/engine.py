@@ -4,11 +4,9 @@ from __future__ import annotations
 import os
 from typing import Dict, List, Optional
 
-from .context import build_context, FileContext, is_rvsc
+from .context import build_context, FileContext
 from .report import Finding, Question, FileReport, Report, QUESTIONS, SEVERITIES
 from .rules import load_rules
-
-UNVERIFIED_NOTE = "unverified on single-unit .rvsc files: no such file is in the fixture corpus yet"
 
 
 def _p3(ctx: FileContext) -> Finding:
@@ -24,7 +22,7 @@ def diagnose_bytes(data: bytes, name: str = "<bytes>", assume: Optional[Dict[str
     ctx = build_context(data, name=name, assume=assume)
     fr = FileReport(name=name, status=ctx.status, message=ctx.message, serials=ctx.serials, editable=ctx.editable,
                     refusal_reason=ctx.refusal_reason, nominal_voltage=ctx.nominal, chemistry=ctx.chemistry,
-                    chemistry_source=ctx.chemistry_source, unverified_format=ctx.unverified_format,
+                    chemistry_source=ctx.chemistry_source,
                     assumptions={k: v for k, v in (("chemistry", ctx.chemistry if ctx.chemistry_source == "stated" else None),
                                                    ("shared_battery", ctx.shared_battery), ("ess_intended", ctx.ess_intended)) if v is not None},
                     _ctx=ctx)
@@ -32,13 +30,14 @@ def diagnose_bytes(data: bytes, name: str = "<bytes>", assume: Optional[Dict[str
         fr.findings = [_p3(ctx)]
     elif ctx.status == "ok":
         for rule in load_rules():
+            if len(ctx.serials) < rule.min_units:
+                fr.not_applicable[rule.id] = f"needs {rule.min_units} or more inverters; this file has {len(ctx.serials)}"
+                continue
             fr.findings.extend(rule.run(ctx))
     order = {s: i for i, s in enumerate(SEVERITIES)}
     fr.findings.sort(key=lambda f: (order.get(f.severity, 9), f.rule, f.serials))
     for f in fr.findings:
         f.file = name
-        if ctx.unverified_format:
-            f.note = UNVERIFIED_NOTE
     asked: Dict[str, List[str]] = {}
     for f in fr.findings:
         for q in f.conditional:
@@ -55,8 +54,7 @@ def diagnose_files(paths: List[str], assume: Optional[Dict[str, str]] = None) ->
                 data = fh.read()
         except OSError as e:
             files.append(FileReport(name=os.path.basename(p), status="unparseable", message=str(e), serials=[], editable=False,
-                                    refusal_reason=str(e), nominal_voltage=None, chemistry="unknown", chemistry_source="unknown",
-                                    unverified_format=is_rvsc(p)))
+                                    refusal_reason=str(e), nominal_voltage=None, chemistry="unknown", chemistry_source="unknown"))
             continue
         files.append(diagnose_bytes(data, name=os.path.basename(p), assume=assume))
     return Report(files=files)

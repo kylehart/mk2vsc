@@ -24,10 +24,6 @@ STATUSES = ("ok", "unparseable", "checksum_invalid", "duplicate_serial", "upload
 LITHIUM_FIELD, LITHIUM_BIT = "flags2", 4
 STORAGE_FIELD, STORAGE_BIT = "flags0", 11
 
-RVSC_NOTE = ("If this is a single-unit .rvsc saved by VEConfigure on a PC: that format is not supported yet. "
-             "mk2vsc reads the .rvms that VRM's Remote VEConfigure downloads; no .rvsc fixture is in hand "
-             "(github.com/kylehart/mk2vsc/issues/14). If you can share one, it names the layout for everyone.")
-
 
 @dataclass
 class FileContext:
@@ -46,7 +42,6 @@ class FileContext:
     assume: Dict[str, str] = field(default_factory=dict)
     editable: bool = False
     refusal_reason: str = ""
-    unverified_format: bool = False
     assistant: Dict[str, dict] = field(default_factory=dict)
     memo: Dict[object, object] = field(default_factory=dict)   # per-file cache for rules (D1 votes)
 
@@ -94,20 +89,13 @@ class FileContext:
                 "schema_min": f.decode(r.min), "schema_max": f.decode(r.max), "schema_default": f.decode(r.default)}
 
 
-def is_rvsc(name: str) -> bool:
-    return name.lower().endswith(".rvsc")
-
-
 def build_context(data: bytes, name: str = "<bytes>", assume: Optional[Dict[str, str]] = None) -> FileContext:
     ctx = FileContext(name=name, data=data, assume=dict(assume or {}))
-    ctx.unverified_format = is_rvsc(name)
     try:
         f = RvmsFile.parse(data)
         check_layout(f)
     except RvmsParseError as e:
-        ctx.status, ctx.message = "unparseable", f"not a readable .rvms: {e}"
-        if ctx.unverified_format or b"VEConfig" in data[:64]:
-            ctx.message += " " + RVSC_NOTE
+        ctx.status, ctx.message = "unparseable", f"not a readable .rvms/.rvsc: {e}"
         return ctx
     ctx.file = f
     if not f.all_checksums_ok:

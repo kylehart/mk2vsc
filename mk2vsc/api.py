@@ -232,7 +232,9 @@ def render_summary(cfg: Config, include_unknown: bool = False) -> str:
     notes: Dict[Tuple[str, int], str] = {}
     for s in serials:
         u = units[s]
-        lines.append(f"  {s}: firmware {u.firmware_version}, saved {u.save_datetime.isoformat() if u.save_datetime else '?'}, "
+        hb = f" (word high byte 0x{u.firmware_word_high_byte:02x})" if u.firmware_word_high_byte else ""
+        lines.append(f"  {s}: firmware {u.firmware_version}{hb}, phase {u.phase_summary}, "
+                     f"saved {u.save_datetime.isoformat() if u.save_datetime else '?'}, "
                      f"assistant: {parse_assistant_area(u)['summary']}")
         if schema is not None:
             lines.append(f"    {align_check(u, schema).summary}")

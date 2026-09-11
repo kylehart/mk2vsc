@@ -198,4 +198,4 @@ def test_diagnose_upload_form_and_junk(tmp_path, capsys):
     junk = tmp_path / "x.rvsc"
     junk.write_bytes(b"\x00" * 50)
     assert main(["diagnose", str(junk)]) == 1
-    assert ".rvsc" in capsys.readouterr().out
+    assert "status unparseable" in capsys.readouterr().out
