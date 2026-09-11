@@ -35,7 +35,7 @@ python -m venv .venv
 .venv/bin/pytest
 ```
 
-654 tests, under three seconds.
+674 tests, under three seconds.
 
 ## The corpus and its limits
 
