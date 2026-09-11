@@ -43,3 +43,12 @@ __all__ = [
     "decode_file", "decode_bytes", "set_settings", "set_bits", "WriteRefused", "diff_files", "diff_bytes",
     "qualify_file", "Intent",
 ]
+
+from .parity import (  # noqa: E402,F401
+    ParityMismatch,
+    ParityReport,
+    ParityDifference,
+    check_parity,
+    check_parity_bytes,
+    parity_report_bytes,
+)

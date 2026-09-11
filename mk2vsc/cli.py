@@ -32,6 +32,7 @@ import sys
 
 from . import __version__
 from .sections import RvmsFile, RvmsParseError
+from .parity import parity_report_bytes
 from .units import unit_blocks
 from .fields import FIELDS, ALIASES, lookup, CONFIRMED, HIGH
 from .writer import WriteRefused
@@ -85,6 +86,9 @@ def cmd_show(a):
             print(json.dumps(decode_bytes(cfg.data, include_unknown=a.all), indent=1, default=str))
         else:
             print(cfg.summary(include_unknown=a.all))
+            prep = parity_report_bytes(cfg.data)
+            if prep.comparable and prep.differences:
+                print(prep.render())
             if len(a.files) > 1:
                 print()
     return rc
@@ -225,6 +229,23 @@ def cmd_diagnose(a):
 
 
 # ----------------------------------------------------------------------------- tools
+def cmd_parity(a):
+    """Report pair parity.  Exit 2 when the inverters disagree outside the documented per-unit list."""
+    rc = 0
+    for p in a.files:
+        try:
+            data = open(p, "rb").read()
+        except OSError as e:
+            rc = 1
+            print(f"{p}: {e}", file=sys.stderr)
+            continue
+        rep = parity_report_bytes(data)
+        print(f"{p}: {rep.render()}" if len(a.files) > 1 else rep.render())
+        if rep.comparable and not rep.ok:
+            rc = 2
+    return rc
+
+
 def cmd_validate(a):
     rc = 0
     for p in a.files:
@@ -429,6 +450,10 @@ def build_parser() -> argparse.ArgumentParser:
     s = sub.add_parser("validate", help="structure and checksums only")
     s.add_argument("files", nargs="+", metavar="FILE"); s.add_argument("-v", "--verbose", action="store_true")
     s.set_defaults(fn=cmd_validate)
+
+    s = sub.add_parser("parity", help="do the two inverters of the pair agree where they must?")
+    s.add_argument("files", nargs="+", metavar="FILE")
+    s.set_defaults(fn=cmd_parity)
 
     s = sub.add_parser("fields", help="the settings table: names, aliases, confidence")
     s.add_argument("--all", action="store_true", help="include MEDIUM/LOW/UNKNOWN entries")
