@@ -33,6 +33,8 @@ from .writer import set_settings, set_bits, WriteRefused
 from .diff import diff_files, diff_bytes
 from .qualify import qualify_file, Intent
 from .api import load, loads, verify, Config, Unit
+from .parity import (ParityMismatch, ParityNotComparable, ParityReport, ParityDifference,
+                     check_parity, check_parity_bytes, parity_report_bytes)
 
 __version__ = "0.10.0"
 __all__ = [
@@ -42,4 +44,6 @@ __all__ = [
     "FIELDS", "BY_ID", "BY_NAME", "ALIASES", "lookup", "Field",
     "decode_file", "decode_bytes", "set_settings", "set_bits", "WriteRefused", "diff_files", "diff_bytes",
     "qualify_file", "Intent",
+    "ParityMismatch", "ParityNotComparable", "ParityReport", "ParityDifference",
+    "check_parity", "check_parity_bytes", "parity_report_bytes",
 ]
