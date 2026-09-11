@@ -243,3 +243,29 @@ def test_phase_labels_cover_the_observed_values_and_nothing_else():
     f = RvmsFile.parse(_read(SINGLE_SOURCE))
     assert sorted(u.phase_label for u in unit_blocks(f)) == ["L1", "L2 (split-phase)"]
     assert sorted(u.unit_index for u in unit_blocks(f)) == [0, 1]
+
+
+# ------------------------------------------------------------------ tools/validate_dir.py: aggregate counts only
+def _validate_dir(path, capsys):
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("vd", os.path.join(os.path.dirname(FIXTURES), "tools", "validate_dir.py"))
+    vd = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(vd)
+    rc = vd.main([path])
+    return rc, capsys.readouterr().out
+
+
+def test_validate_dir_prints_aggregates_and_nothing_identifying(capsys):
+    rc, out = _validate_dir(SYN, capsys)
+    assert "3 files, 10 inverter blocks" in out and "HQ0000" not in out and "system_a" not in out and "2026-" not in out
+    assert "1      1" in out and "3      1" in out and "6      1" in out          # by unit count
+    for check in ("parse", "checksums", "round_trip", "layout", "schema_192", "alignment", "census", "flag_nibble_vs_records"):
+        assert any(line.startswith(check) and line.split()[1:] == ["3", "0", "0"] for line in out.splitlines()), check
+    # the single-unit fixture keeps the pair's flag byte f4 (it is a byte prefix); real single-unit files carry
+    # low nibble 0, so the phase-model check fails on it by construction and the exit status says so
+    assert any(line.startswith("phase_model") and line.split()[1:] == ["2", "1", "0"] for line in out.splitlines())
+    assert rc == 1
+    rc, out = _validate_dir(os.path.join(FIXTURES, "system_d"), capsys)
+    assert rc == 0 and "20 files" in out and "HQ0000" not in out
+    assert any(line.startswith("phase_model") and line.split()[1:] == ["0", "0", "20"] for line in out.splitlines()), "pairs are not scored"
+    assert any(line.startswith("alignment") and line.split()[1:] == ["20", "0", "0"] for line in out.splitlines())
