@@ -39,3 +39,4 @@ Source and issues: [github.com/kylehart/mk2vsc](https://github.com/kylehart/mk2v
 ## Background
 
 - [How this came to be](HISTORY.md), [the fixture corpus](FIXTURES.md), [how the project is run](PRACTICES.md).
+- [Donate a configuration file](donate.md): every firmware and topology we have not seen is a test we cannot run.

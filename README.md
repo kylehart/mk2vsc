@@ -2,9 +2,9 @@
 
 [![tests](https://github.com/kylehart/mk2vsc/actions/workflows/test.yml/badge.svg)](https://github.com/kylehart/mk2vsc/actions/workflows/test.yml) [![PyPI](https://img.shields.io/pypi/v/mk2vsc.svg)](https://pypi.org/project/mk2vsc/) [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Read, validate, decode, diff, edit and verify Victron VEConfigure `.rvms` configuration files (the
-files VRM Remote VEConfigure downloads and uploads for MultiPlus and Quattro systems) on macOS, Linux
-or Windows, without VEConfigure. Zero dependencies, Python 3.9+. Includes the file format as we
+Read, validate, decode, diff, edit and verify Victron VEConfigure `.rvsc` and `.rvms` configuration files
+(the files VRM Remote VEConfigure downloads and uploads for MultiPlus and Quattro systems, single-unit and
+multi-unit) on macOS, Linux or Windows, without VEConfigure. Zero dependencies, Python 3.9+. Includes the file format as we
 understand it, the per-section checksum, the settings table with Victron's names, and what the
 `mk2vsc-36`, `mk2vsc-47` and `mk2vsc-49` upload errors mean. Documentation: https://kylehart.github.io/mk2vsc/
 
@@ -33,8 +33,8 @@ built to do that, together with everything we learned about the file along the w
   * edits settings in place, self-verifies that nothing else changed, and never changes file length,
   * qualifies a file against the values you intended before you upload and after you re-download,
   * mines a library of archived downloads into a dated, per-inverter change log (`mk2vsc history`).
-* A corpus of 92 real device files with a manifest, and a test suite that checks every documented
-  claim against that corpus (582 tests).
+* A corpus of 92 real device files with a manifest, three synthetic single-unit and three-phase files built
+  from them, and a test suite that checks every documented claim against the corpus (647 tests).
 * A written account of the format as we understand it, and of what we do not understand.
 
 ## What this is not
@@ -74,7 +74,7 @@ Or from source, with the fixture corpus and tests:
 ```
 git clone https://github.com/kylehart/mk2vsc.git && cd mk2vsc
 python3 -m venv .venv && .venv/bin/pip install -e ".[test]"
-.venv/bin/pytest          # 582 tests against the fixture corpus
+.venv/bin/pytest          # 647 tests against the fixture corpus
 ```
 
 ## Quickstart: one download, one change
@@ -189,10 +189,13 @@ are how we make that safe; docs/CHANGE_CONTROL.md explains each one and the inci
 The `fixtures/` directory holds 92 unique files from 4 split-phase MultiPlus systems (8 inverters,
 firmware 2729560, format version 1.33) collected between June and September 2026, including device
 downloads, GUI exports, files our tools produced, and three deliberately broken files kept as negative
-controls. `fixtures/manifest.json` records each file's hash, origin, state and inverters. The tests in
-`tests/` check structure, checksums, byte-exact round trips, every documented field claim, the writer,
-the diff, the qualifier and the CLI against that corpus. docs/QA.md describes how to verify the same
-things on your own system before trusting the tool with it.
+controls, plus three synthetic files built from those blocks for the single-unit `.rvsc` and the three- and
+six-unit three-phase shapes (`fixtures/synthetic/`). `fixtures/manifest.json` records each file's hash,
+origin, state and inverters. The tests in `tests/` check structure, checksums, byte-exact round trips, every
+documented field claim, the writer, the diff, the qualifier and the CLI against that corpus. Files we may not
+publish are run through `tools/validate_dir.py`, which prints aggregate counts only; the latest table is in
+docs/QA.md. docs/QA.md also describes how to verify the same things on your own system before trusting the
+tool with it.
 
 ## Documentation
 
@@ -214,12 +217,21 @@ things on your own system before trusting the tool with it.
 
 ## Limits and unknowns
 
-* We hold files from one firmware (2729560), one format version (1.33), one product family, one
-  topology (two inverters, split phase). Other hardware may differ; the tests will tell you.
-* We have no `.rvsc` single-unit files and no three-phase or three-plus-unit files.
+* Covered: configuration files of VE.Bus inverter/chargers behind a GX device, single-unit (`.rvsc`) and
+  multi-unit (`.rvms`: parallel, split-phase, three-phase), as VRM Remote VEConfigure downloads them and as
+  Venus OS 3.60+ writes them to `/data/conf/` for its VE.Bus backup (same file, same GX program). Every
+  Observed claim is tested on our own corpus: one firmware (2729560), one format version (1.33), one
+  product family, two-inverter split-phase pairs. Files from other systems that we may not publish (single
+  units, a parallel pair, three-phase systems of three and six units; firmware families 19, 20, 26 and 27;
+  format versions 1.30 to 1.33; 12 V and 48 V; 120 V and 230 V) parse, validate, align and round-trip with
+  the same code; the aggregate table is in docs/QA.md and the per-topology byte patterns in docs/FORMAT.md.
+  No live upload of an edited single-unit or three-phase file has been made.
+* Not covered: VictronConnect settings files (`.vsc`, any product), VEConfigure's local `.vsc` save,
+  VE.Bus Quick Configure files, and installations configured only over an MK3 cable with no GX. There is no
+  sample and no specification for any of those here.
 * A file whose `BareSettingInfo` or `BareSettingData` payload is shorter than the layout we read (another
   firmware or tool build) is refused as `SectionTooShort`, naming the section and the byte counts
-  (docs/ERRORS.md); the 192-record schema length is not generalised beyond our firmware.
+  (docs/ERRORS.md); every file seen so far carries the 192-record schema.
 * About two thirds of the settings array is unnamed or named with low confidence. docs/FIELDS.md
   lists what each value looks like even where we cannot say what it does.
 * The assistant record bodies, the 4001-byte BareSettingInfo section and parts of the block header
@@ -239,7 +251,7 @@ mk2vsc census <your download>.rvms
 Open a "Census report" issue with the output and what the values should be according to VEConfigure or
 VRM. That is the contribution: it tests every claim here on hardware we do not have, and a disagreement
 is a finding. A pair of downloads with one setting changed between them (and which) names a field. See
-CONTRIBUTING.md.
+CONTRIBUTING.md, and docs/donate.md if you can send a file.
 
 ## License and responsible use
 
@@ -261,8 +273,8 @@ What this project took from each of them, and where it landed, is in [ACKNOWLEDG
   specification for single-unit `.rvsc` files, with VEConfigure's internal setting identifiers extracted
   from the application binary. It decoded the same settings schema independently; we adopted its
   identifier table (MIT) for the `VEConfigure identifier` column in docs/FIELDS.md. It does not cover
-  multi-unit `.rvms`, assistants, or editing, and reports no checksum on `.rvsc`, which our `.rvms` files
-  contradict; reconciling the two is open.
+  multi-unit `.rvms`, assistants, or editing. It reports no checksum on `.rvsc`; every real single-unit file
+  we have run (six, outside the repository, docs/QA.md) carries the same per-section word sum as `.rvms`.
 * [xcellsior/ve-bus-programming](https://github.com/xcellsior/ve-bus-programming): the same settings
   over an MK3 cable, live, on Linux.
 

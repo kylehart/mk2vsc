@@ -11,8 +11,8 @@ The one-block file is a corpus fixture with its second block removed through ``R
 parses with one inverter, validates, aligns, and round-trips.  Because a section's pointer is the absolute
 start of the next section, the first block's pointer already equals its own end, so the one-block file is
 byte-for-byte the prefix of the two-block file up to the second block: no pointer or checksum changes.
-That is the container-level claim for single-unit files; the layout claim (whether a device-written
-``.rvsc`` is that shape) is Unknown.
+The same file is committed as fixtures/synthetic/ (tests/test_topologies.py); device-written single-unit files
+run outside the repository have that shape (docs/FORMAT.md 3.1.1, docs/QA.md).
 """
 import os
 import struct

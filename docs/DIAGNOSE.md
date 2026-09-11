@@ -69,15 +69,17 @@ whole device-form corpus (82 files, 164 blocks); the counts below are those test
 | P3 | Upload-form file offered as device state | the 16-byte GUI export blob at +0x45 | INFO | device-confirmed | 7 files | none: diagnose a fresh device download |
 
 Every voltage in this table is the 48 V model's number; a rule reads the file's own schema default and
-range, so it holds on 12 V and 24 V units. No 12 V, 24 V, Quattro, three-phase or single-unit `.rvsc` file
-is in the corpus: on such a file the rules run but nothing has been confirmed (issue #14).
+range, so it holds on 12 V and 24 V units. No 12 V, 24 V or Quattro device file is in the corpus. The rules run
+per block on any number of inverters: on a single-unit file D1, C1, V1, V2 and E1 run and the pair rules D2 and
+E2 are reported as not applicable (`not_applicable` in the report); on three-phase files every rule runs across
+all blocks (tests/test_topologies.py, on the synthetic fixtures). No finding on a single-unit or three-phase
+file has been confirmed against a device.
 
 ## File status
 
 `diagnose` reports one of: `ok`, `unparseable`, `checksum_invalid`, `duplicate_serial`, `upload_form`,
-`no_schema`, `misaligned`. Rules run only on `ok`. A single-unit `.rvsc` saved by VEConfigure on a PC is not
-supported: if it parses, every finding carries the note "unverified on single-unit .rvsc files"; if it does
-not, the message says so and points at issue #14.
+`no_schema`, `misaligned`. Rules run only on `ok`. A rule that compares inverters (D2, E2) needs two blocks; on
+a one-block file it does not run and `not_applicable` says why. The file extension changes nothing.
 
 `editable` says whether the writer would accept the file (checksums, device form, no stub, schema, nominal
 voltage, alignment), and `refusal_reason` carries the writer's own words when it would not. The change sheet
@@ -88,7 +90,7 @@ is produced either way.
 ```
 report_version: 1
 files[]:     name, status, message, serials[], editable, refusal_reason, nominal_voltage, chemistry,
-             chemistry_source (stated | flag:<serials> | unknown), unverified_format
+             chemistry_source (stated | flag:<serials> | unknown), assumptions{}, not_applicable{rule: why}
 findings[]:  id (stable: RULE or RULE:SERIAL[:FIELD]), rule, title, severity (BLOCKS | DEGRADES | FRAGILE | INFO),
              decode_confidence, evidence_class, conditional[] (question ids), serials[],
              evidence[]: serial, field, label, unit, raw, value, schema_min, schema_max, schema_default, confidence, vote,

@@ -1,13 +1,14 @@
 ---
 title: "The fixture corpus"
-description: "92 real .rvms files from four systems, what each is, and the negative controls."
+description: "92 real .rvms files from four systems, what each is, the negative controls, and the three synthetic single-unit and three-phase files."
 ---
 
 # The fixture corpus
 
 `fixtures/` holds every distinct `.rvms` file we collected while operating four inverter systems
-between June and September 2026: 92 unique files (duplicates by SHA-256 were dropped). Every test in
-`tests/` runs against these files, and `fixtures/manifest.json` records what each one is.
+between June and September 2026: 92 unique files (duplicates by SHA-256 were dropped), plus three synthetic
+files built from them (below). Every corpus test in `tests/` runs against the 92 device files, and
+`fixtures/manifest.json` records what each one is.
 
 ## Where the files come from
 
@@ -42,6 +43,7 @@ found:
   them in the manifest), some were never uploaded, and a few are known-defective early attempts
   kept precisely because they were rejected.
 * `experiment`: one file with deliberately stale checksums, kept as a negative control.
+* `synthetic`: built from corpus blocks by `tools/gen_synthetic_fixtures.py` (see "Synthetic files").
 
 **state**
 
@@ -82,6 +84,23 @@ assert that they fail, and how:
 
 Keep them. A parser that accepts these is wrong.
 
+## Synthetic files
+
+`fixtures/synthetic/` holds three files that are not device downloads. They are built from System A blocks
+by `tools/gen_synthetic_fixtures.py` with the same section code the writer uses, and a test checks that the
+files on disk are what the generator produces. They exist so that the single-unit and three-phase code paths
+have a fixture in the repository; the evidence for those shapes is real files run outside the repository
+(docs/QA.md, docs/FORMAT.md 3.1.1). The manifest marks them `origin: synthetic` with a `source` key, and the
+corpus claim tests exclude them.
+
+| file | what it is |
+|---|---|
+| synthetic/system_a_2026-07-20_synthetic_bare_deviceform_1.rvsc | the byte prefix of `system_a_2026-07-20_download_bare_deviceform_1.rvms` up to its second block: one `BareSettingData` (HQ0000A0001). Nothing was rewritten; a section's pointer is the start of the next section, so the first block's pointer already equals its own end. Flag byte `f4` as downloaded; real single-unit files carry `f0`/`e0` |
+| synthetic/system_a_2026-09-03_synthetic_ess_deviceform_1.rvms | the HQ0000A0001 ESS block of `system_a_2026-09-03_download_ess_deviceform_1.rvms` cloned three times, serials HQ0000A0003 to A0005, phase byte +0x35 = `00`/`04`/`08`, unit index +0x37 = 0..2, flags `e8`/`e9`/`ea`; pointers and checksums rebuilt. Every block carries the same 1152-byte record, so it says nothing about assistants on three-phase systems |
+| synthetic/system_a_2026-09-03_synthetic_ess_deviceform_2.rvms | the same with six clones (HQ0000A0003 to A0008, two per phase, unit index 0..5) |
+
+Serials HQ0000A0003 to HQ0000A0008 exist only in these files.
+
 ## Files worth reading
 
 * **The first live proof.** `system_d/system_d_2026-07-20_download_bare_deviceform_1.rvms` is
@@ -118,6 +137,9 @@ fixture and paste the output here.
 
 | file | bytes | state | form | origin | inverters (block length, flag) |
 |---|---:|---|---|---|---|
+| synthetic/system_a_2026-07-20_synthetic_bare_deviceform_1.rvsc | 4571 | bare | deviceform | synthetic | HQ0000A0001 (482, f4) |
+| synthetic/system_a_2026-09-03_synthetic_ess_deviceform_1.rvms | 9202 | ess | deviceform | synthetic | HQ0000A0003 (1705, e8), HQ0000A0004 (1705, e9), HQ0000A0005 (1703, ea) |
+| synthetic/system_a_2026-09-03_synthetic_ess_deviceform_2.rvms | 14317 | ess | deviceform | synthetic | HQ0000A0003 (1705, e8), HQ0000A0004 (1705, e9), HQ0000A0005 (1705, ea), HQ0000A0006 (1705, e8), HQ0000A0007 (1705, e9), HQ0000A0008 (1703, ea) |
 | system_a/system_a_2026-06-18_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ0000A0002 (484, f5), HQ0000A0001 (482, f4) |
 | system_a/system_a_2026-06-18_experiment_bare_deviceform_1.rvms | 5055 | bare | deviceform | experiment | HQ0000A0002 (484, f5), HQ0000A0001 (482, f4) |
 | system_a/system_a_2026-06-19_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ0000A0001 (484, f4), HQ0000A0002 (482, f5) |
@@ -169,6 +191,10 @@ fixture and paste the output here.
 | system_b/system_b_2026-07-24_prepared_ess_deviceform_1.rvms | 7049 | ess | deviceform | prepared | HQ0000B0001 (1257, e5), HQ0000B0002 (1703, e4) |
 | system_b/system_b_2026-07-24_prepared_ess_deviceform_2.rvms | 7049 | ess | deviceform | prepared | HQ0000B0001 (1257, e5), HQ0000B0002 (1703, e4) |
 | system_b/system_b_2026-08-12_download_ess_deviceform_1.rvms | 7049 | ess | deviceform | download | HQ0000B0002 (1705, e4), HQ0000B0001 (1255, e5) |
+| system_b/system_b_2026-09-04_download_ess_deviceform_1.rvms | 7049 | ess | deviceform | download | HQ0000B0002 (1705, e4), HQ0000B0001 (1255, e5) |
+| system_b/system_b_2026-09-04_download_ess_deviceform_2.rvms | 7049 | ess | deviceform | download | HQ0000B0002 (1705, e4), HQ0000B0001 (1255, e5) |
+| system_b/system_b_2026-09-04_download_ess_deviceform_3.rvms | 7049 | ess | deviceform | download | HQ0000B0001 (1257, e5), HQ0000B0002 (1703, e4) |
+| system_b/system_b_2026-09-04_prepared_ess_deviceform_1.rvms | 7049 | ess | deviceform | prepared | HQ0000B0002 (1705, e4), HQ0000B0001 (1255, e5) |
 | system_c/system_c_2026-06-18_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ0000C0001 (484, f4), HQ0000C0002 (482, f5) |
 | system_c/system_c_2026-06-23_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ0000C0002 (484, f5), HQ0000C0001 (482, f4) |
 | system_c/system_c_2026-07-13_gui-export_half-ess_uploadform_1.rvms | 6182 | half-ess | uploadform | gui-export | HQ0000C0002 (484, f5), HQ0000C0001 (1609, e4) |
@@ -202,11 +228,7 @@ fixture and paste the output here.
 | system_d/system_d_2026-08-14_download_ess_deviceform_1.rvms | 7049 | ess | deviceform | download | HQ0000D0001 (1257, e5), HQ0000D0002 (1703, e4) |
 | system_d/system_d_2026-08-14_prepared_bare_deviceform_1.rvms | 5055 | bare | deviceform | prepared | HQ0000D0002 (484, f4), HQ0000D0001 (482, f5) |
 | system_d/system_d_2026-08-14_prepared_bare_deviceform_2.rvms | 5055 | bare | deviceform | prepared | HQ0000D0001 (484, f5), HQ0000D0002 (482, f4) |
-| system_d/system_d_2026-09-04_download_ess_deviceform_1.rvms | 7049 | ess | deviceform | download | HQ0000D0002 (1705, e4), HQ0000D0001 (1255, e5) |
-| system_d/system_d_2026-09-04_prepared_bare_uploadform_1.rvms | 5079 | bare | uploadform | prepared | HQ0000D0002 (496, f4), HQ0000D0001 (494, f5) |
 | system_d/system_d_2026-09-04_download_bare_deviceform_1.rvms | 5055 | bare | deviceform | download | HQ0000D0001 (484, f5), HQ0000D0002 (482, f4) |
+| system_d/system_d_2026-09-04_download_ess_deviceform_1.rvms | 7049 | ess | deviceform | download | HQ0000D0002 (1705, e4), HQ0000D0001 (1255, e5) |
 | system_d/system_d_2026-09-04_download_ess_deviceform_2.rvms | 7049 | ess | deviceform | download | HQ0000D0001 (1257, e5), HQ0000D0002 (1703, e4) |
-| system_b/system_b_2026-09-04_download_ess_deviceform_1.rvms | 7049 | ess | deviceform | download | HQ0000B0002 (1705, e4), HQ0000B0001 (1255, e5) |
-| system_b/system_b_2026-09-04_download_ess_deviceform_2.rvms | 7049 | ess | deviceform | download | HQ0000B0002 (1705, e4), HQ0000B0001 (1255, e5) |
-| system_b/system_b_2026-09-04_download_ess_deviceform_3.rvms | 7049 | ess | deviceform | download | HQ0000B0001 (1257, e5), HQ0000B0002 (1703, e4) |
-| system_b/system_b_2026-09-04_prepared_ess_deviceform_1.rvms | 7049 | ess | deviceform | prepared | HQ0000B0002 (1705, e4), HQ0000B0001 (1255, e5) |
+| system_d/system_d_2026-09-04_prepared_bare_uploadform_1.rvms | 5079 | bare | uploadform | prepared | HQ0000D0002 (496, f4), HQ0000D0001 (494, f5) |

@@ -13,11 +13,23 @@ one of three labels:
 * **Inferred**: the narrowest reading of the observations that we have not verified independently.
 * **Unknown**: bytes we can locate but cannot explain.
 
-The corpus behind every claim: 92 unique files (`fixtures/`, see `docs/FIXTURES.md`), 8 inverters
-(MultiPlus-II class, 48 V battery, 120 V output) in 4 two-inverter split-phase systems, a single firmware
-version (2729560, shown as "v560" in VRM), a single format version ("1.33"). We have no `.rvsc`
-(single-unit) file, no three-phase or 3+ unit file, and no file from any other firmware or tool version.
-Anything outside that envelope is untested.
+The corpus behind every Observed claim: 92 unique device files (`fixtures/`, see `docs/FIXTURES.md`), 8
+inverters (MultiPlus-II class, 48 V battery, 120 V output) in 4 two-inverter split-phase systems, a single
+firmware version (2729560, shown as "v560" in VRM), a single format version ("1.33"). Three synthetic files
+built from those blocks (`fixtures/synthetic/`) exercise the single-unit and three-phase shapes. Files from
+other systems that we may not publish (single-unit, parallel, three-phase; four firmware families; format
+versions 1.30 to 1.33) were run through `tools/validate_dir.py`; where a statement below rests on them it says
+so with the file count, and the aggregate table is in docs/QA.md. Anything outside that envelope is untested.
+
+### Names: `.rvsc`, `.rvms`, and "mk2vsc"
+
+Victron's Remote VEConfigure manual calls the file `.rvsc` throughout, including the archive copy of a
+multi-unit system; the software and the community use `.rvsc` for a single-unit file and `.rvms` for a
+multi-unit one. Both are the same container described here; the only difference is the number of
+`BareSettingData` sections. "mk2vsc" is the name of the program on the GX device that produces and consumes
+the file (`/opt/victronenergy/mk2vsc/mk2vsc`, called by venus-platform's `vebus_backup.cpp`; Venus issue 1431
+"Modify mk2vsc to allow single unit replace (included in v1.32)"), and the version string in `Mk2vscInfo`
+is that program's version, so it follows the GX firmware rather than the VEConfigure build.
 
 ## 1. File grammar
 
@@ -38,7 +50,7 @@ The sections always appear in this order:
 |---|---|---|
 | `Mk2vscInfo` | 10 bytes: `u32 1`, `u16 4`, `"1.33"` | 1 |
 | `BareSettingInfo` | 4001 bytes, byte-identical across all 88 files: the settings schema (scale, offset, default, min, max per setting) | 1 |
-| `BareSettingData` | one inverter's configuration | one per inverter (2 in every corpus file) |
+| `BareSettingData` | one inverter's configuration | one per inverter (2 in every corpus file; 1, 3 and 6 in the synthetic files; 1 to 6 on the files run through `tools/validate_dir.py`) |
 
 A real header, from `fixtures/system_a/system_a_2026-07-20_download_bare_deviceform_1.rvms`:
 
@@ -87,9 +99,11 @@ this field; see `docs/ERRORS.md` and `docs/ASSISTANTS.md`.
 
 ## 2. `Mk2vscInfo` and `BareSettingInfo`
 
-**Observed.** `Mk2vscInfo`'s payload is `u32 1`, `u16 4`, `"1.33"`. We read "1.33" as the format or tool
-version; it is the same in every file, including those written by two different VEConfigure/System
-Configurator builds.
+**Observed.** `Mk2vscInfo`'s payload is `u32 1`, `u16 4`, `"1.33"` in every corpus file, including those
+written by two different VEConfigure/System Configurator builds. It is the version of the GX-side `mk2vsc`
+program (see "Names" above). **Observed** on files outside the corpus (10 files, `tools/validate_dir.py`): the
+string is `"1.3"`, `"1.30"`, `"1.32"` or `"1.33"`, and the `u16` before it is its length; the container and
+the block layout are the same under all four.
 
 **Observed.** `BareSettingInfo`'s 4001-byte payload is byte-identical in every file. It is the settings
 schema for this firmware, the same record Victron's MK2 protocol returns for `CommandGetSettingInfo`
@@ -134,11 +148,11 @@ The same System A file, first unit block:
 | +0x0f | u32 | next-section pointer (see grammar) | Observed |
 | +0x13 | u32 | value 3 in every block | Observed; meaning Unknown |
 | +0x17 | u32 | per-unit constant; bytes +0x18..0x19 track the serial's date code (2022-built units → `19`, 2024-built units → `1b`) | Observed; Inferred: hardware revision / production batch, not firmware |
-| +0x1b | u32 | 2729560 = firmware "v560" | Observed |
+| +0x1b | u32 | firmware word: low 24 bits = the seven-digit firmware number (2729560 = "v560" on the corpus); the high byte is 0 on every corpus block (§3.3) | Observed |
 | +0x1f | 22 | header bytes, e.g. `ff 01 01 58 a6 29 00 06 00 08 19 00 00 fa 1b 02 01 01 03 00 00 00` (contains the firmware word again at +0x22) | Unknown |
-| +0x35 | u8 | slot byte A: `00` or `86` | Observed |
-| +0x36 | u8 | assistant flag: `f4`/`f5` no assistant, `e4`/`e5` assistant present; low nibble follows the slot (4 with A=`00`, 5 with A=`86`) | Observed |
-| +0x37 | u8 | slot byte B: `00` or `01` | Observed |
+| +0x35 | u8 | phase byte: `00` or `86` on the corpus pairs (§3.1.1 for other topologies) | Observed |
+| +0x36 | u8 | assistant flag: high nibble `f` = no assistant, `e` = assistant present; low nibble is a phase/role code (`4` with +0x35=`00`, `5` with `86` on the corpus) | Observed |
+| +0x37 | u8 | unit index: `00` or `01` | Observed |
 | +0x3a | 11 + pad | ASCII inverter serial `HQ...`, zero padded | Observed |
 | +0x45 | 10 | zeros (device form); see §4 for the upload form | Observed |
 | +0x4f | u32 | Unix timestamp stamped when the file was generated (each download of unchanged content carries a new value; the GUI stamps its export). Not an acceptance gate: the device accepted older-stamped files with current content | Observed |
@@ -148,9 +162,32 @@ The same System A file, first unit block:
 | +0x1d9 | var | assistant area (§5) | Observed |
 | last 4 | u32 | section checksum (§1.1) | Observed |
 
-**Observed.** Slot bytes: in every file the two blocks differ, one being (`00`,`00`) and the other
-(`86`,`01`). **Inferred.** They identify the inverter's position in the VE.Bus system (which one is the
-first device). We have no three-unit file to see a third value.
+**Observed.** Slot bytes on the corpus: in every file the two blocks differ, one being (`00`,`00`) and the
+other (`86`,`01`).
+
+#### 3.1.1 Phase and unit bytes on other topologies
+
+**Observed** on files outside the corpus, run through `tools/validate_dir.py` (counts are files; the aggregate
+table is in docs/QA.md):
+
+| topology | +0x35 | +0x37 | flag +0x36 | files (blocks) |
+|---|---|---|---|---|
+| single unit | `00` | `00` | `f0` without, `e0` with assistant records | 6 (6) |
+| two units, parallel, 230 V | `00` on both | `00` and `03` | `e0` on both | 1 (2) |
+| three units, one per phase | `00` / `04` / `08` | `00` / `01` / `02` | `e8` / `e9` / `ea` | 1 (3) |
+| six units, two per phase | `00` / `04` / `08`, each twice | `00`..`05`; +0x35 = 4 × (+0x37 mod 3) | `e8` / `e9` / `ea` | 1 (6) |
+| two units, split phase (corpus) | `00` / `86` | `00` / `01` | `f4` / `f5`, `e4` / `e5` | 89 (178) |
+
+On every one of those 195 blocks the flag's high nibble is `e` exactly when the block carries assistant
+records and `f` otherwise (`UnitBlock.has_assistant_flag`). On the 9 three-phase blocks the flag's low nibble
+is `8 + +0x35 / 4`. **Inferred.** +0x35 encodes the phase the unit serves (`00` L1, `04` L2, `08` L3; `86`
+the 180-degree leg of a split-phase pair) and +0x37 is the unit's index in the system; `mk2vsc census` and
+`show` print them as `phase L2, unit 1`. The `00`/`03` index pair on the parallel file is one observation and
+is not explained. **Unknown.** What the flag's low nibble encodes on a single unit and on a parallel pair
+(`0` on all 8 such blocks), and whether `86` is the only split-phase value.
+
+The synthetic three-phase fixtures (`fixtures/synthetic/`) carry these byte patterns on cloned corpus blocks,
+so the decoding has a test in the repository; they are not evidence for the pattern, the files above are.
 
 **Observed.** Block order is **not** stable. The two blocks of the same system swap file position between
 downloads taken minutes apart, and the length in the "B to next B" convention follows the position (484
@@ -170,6 +207,30 @@ after `_2` had been taken, and then `system_b_2026-09-04_prepared_ess_deviceform
 stamped 16:00, before a file it had just accepted).
 The `mk2vsc-36` rejections of archived files have another cause (docs/ERRORS.md). Build every edit on a
 fresh download anyway: it carries the device's current settings and grid-code words.
+
+### 3.3 The firmware word's high byte
+
+**Observed** on one GUI-saved three-unit file outside the corpus (1 of 10 files run through
+`tools/validate_dir.py`; 0 of 92 corpus files): the u32 at +0x1b reads `eb 17 28 c7`, and the schema header's
+firmware word (`BareSettingInfo` payload offset 4) carries the same `c7` high byte, on all three blocks. The
+copy of the firmware number at +0x22 in the same blocks reads `eb 17 28 00`, and byte +0x2b, `00` on every
+other file, reads `c7`. The low 24 bits are 2627563, a seven-digit number in the same family as the 2627560
+of another file from the same product class.
+
+**Inferred** (1 file). Bits 24..31 of the firmware word are not part of the firmware number: a seven-digit
+number is below 2^24 (9,999,999 < 16,777,216), so no firmware number ever needs them. `UnitBlock.firmware_version`
+and `schema.firmware_of_schema` return the low 24 bits; `firmware_word` and `firmware_word_high_byte` expose the
+rest, and `census` / `show` append `(word high byte 0xc7)` when it is set. The writer does not touch the word.
+On the corpus nothing changes (the high byte is 0 everywhere; tests/test_claims.py). **Unknown.** What the byte
+means; whether it is the "firmware subversion number" that the GX-side `mk2vsc -L` prints (venus-platform
+parses that line); whether a device accepts the file as saved. The same file also has setting 85 at 0xffff,
+above its schema maximum of 65534, which is why `census` reports ALIGNMENT SUSPECT on it: that is a value
+outside its range at the expected offset, not a shifted array, and is independent of the firmware word.
+
+**Observed** on 4 of the 10 outside files (single units on old-microcontroller firmware, 19xx/20xx numbers):
+the block's firmware number and the schema header's firmware number differ (block 20xx552, schema 27xx552;
+block 19xx508, schema 26xx508). **Inferred.** The schema header names the new-microcontroller equivalent of
+the unit's firmware. `census` prints both.
 
 ## 4. Device form and upload form
 
@@ -248,17 +309,29 @@ it does not author record bodies; it removes records and reinstalls the system's
 
 * section grammar, pointer chain contiguous and ending at EOF, every checksum a plain word sum
 * `Mk2vscInfo` and `BareSettingInfo` constant across the corpus
-* serial at +0x3a, firmware 2729560 at +0x1b, `3` at +0x13, `0x0180` at +0x57
+* serial at +0x3a, firmware 2729560 at +0x1b with bits 24..31 clear, `3` at +0x13, `0x0180` at +0x57
 * assistant flag ∈ {f4, f5, e4, e5} with the low nibble tied to the slot bytes
+* a one-block file is the byte prefix of the two-block file up to the second block: the first block's pointer
+  already equals its own end (tests/test_short_files.py, fixtures/synthetic/)
 * upload-form shift of exactly 10 bytes; setting 5 reads 120 (V) on every block under the shifted or
   unshifted offset, which is how the shift was pinned
 * save timestamp plausible on every device-form block
 * assistant area shapes as tabulated; free + body = 2816 on non-ESS blocks; ESS records 704/1152 only
 * block order not stable; content identical by serial
 
+**Observed on files outside the corpus** (10 files: 6 single-unit, 1 parallel pair, 2 three-phase; four firmware
+families; format 1.30 to 1.33; `tools/validate_dir.py`, aggregate table in docs/QA.md)
+
+* the same container, checksum, 192-record schema and block layout on every file; every checksum validates and
+  every file round-trips byte for byte
+* phase and unit bytes and flag nibbles as tabulated in §3.1.1
+* the firmware word's high byte set on one file (§3.3); block and schema firmware numbers differing on four
+
 **Inferred**
 
 * +0x17 word encodes hardware revision / batch (tracks the serial date code; firmware is elsewhere)
+* +0x35 is the phase served and +0x37 the unit index (§3.1.1); the firmware number is the low 24 bits of the
+  word at +0x1b (§3.3, one file)
 * the +0x4f stamp is the file-generation time and not an acceptance gate (tests/test_timestamp_not_a_gate.py)
 * the trailer u16 is a free-space counter over 2816 bytes
 * the assistant body is a fixed template per installation type
@@ -270,9 +343,11 @@ it does not author record bodies; it removes records and reinstalls the system's
 * the 12 constant blob bytes of the upload form and whether they gate an install
 * the ESS record body encoding and the 13-byte ESS trailer
 * settings 128..189 (0xffff on bare blocks; the GUI ESS install writes a value with low byte 1 and high byte 0 to 3 into 128, equal to 191; 129 to 189 stay 0xffff on every block we hold)
-* whether `.rvsc` single-unit files share this layout: we have none. The container code reads a one-block file (a corpus file with its second block removed parses, validates, aligns and round-trips; tests/test_short_files.py); a file whose `BareSettingInfo` or `BareSettingData` payload is shorter than this layout is refused as `SectionTooShort` (docs/ERRORS.md). Schema lengths on other firmware are Unknown: talas9/rvsc-tools reads its 4562-byte single-unit file from a MultiPlus 24/1200 on firmware 2667558 by searching the `BareSettingInfo` header length and treating that section as a master table of which `BareSettingData` covers a window (its rvsc.py `find_alignment`, FORMAT.md section 2)
-* three-phase or 3+ unit files: we have none
-* any other firmware version or format version: we have none
+* the flag's low nibble on single units and parallel pairs, the `00`/`03` unit index pair on the one parallel file, and whether `86` is the only split-phase phase byte (§3.1.1)
+* the firmware word's high byte (§3.3): meaning, and whether a device accepts a file that carries it
+* schema lengths on firmware outside the families seen: every file so far carries the 192-record schema (`BareSettingInfo` payload 3745 to 4001 bytes; the bytes after the records vary in length); a shorter payload is refused as `SectionTooShort` (docs/ERRORS.md). talas9/rvsc-tools reads its 4562-byte single-unit file from a MultiPlus 24/1200 on firmware 2667558 by searching the `BareSettingInfo` header length and treating that section as a master table of which `BareSettingData` covers a window (its rvsc.py `find_alignment`, FORMAT.md section 2); we have not seen that file
+* Quattro files (a second AC input): one outside file populates setting 49 on a single unit; no corpus file does
+* whether the GX checks the section checksum before writing (untested on hardware by anyone we know of)
 
-If you hold a file outside our envelope, `mk2vsc validate` and `mk2vsc show` on it are the most useful
-contributions you can make; see `CONTRIBUTING.md`.
+If you hold a file outside our envelope, `mk2vsc validate` and `mk2vsc census` on it are the most useful
+contributions you can make; see `CONTRIBUTING.md` and docs/donate.md.

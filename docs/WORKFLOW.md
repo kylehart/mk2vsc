@@ -16,10 +16,11 @@ including the parts that still need Windows.
 | `.rvsc` | single inverter | VEConfigure 3 |
 | `.rvms` | multiple inverters (parallel, split-phase, three-phase) | VE.Bus System Configurator |
 
-Both are produced and consumed by Remote VEConfigure on VRM. Every file in our corpus is `.rvms`
-(two-inverter split-phase systems). We hold no `.rvsc` files, so we cannot say whether the
-single-unit layout matches. The file magic string is the same lineage for both
-(`VEConfig setting section file`).
+Both are produced and consumed by Remote VEConfigure on VRM, and both are the same container: one
+`BareSettingData` section per inverter behind the same header and schema (docs/FORMAT.md). Every file in our
+corpus is `.rvms` (two-inverter split-phase systems); `.rvsc` files and three-phase `.rvms` files from other
+systems parse with the same code (docs/QA.md). Victron's Remote VEConfigure manual calls both `.rvsc`. Venus OS
+3.60+ writes the same file to `/data/conf/` on the GX as its VE.Bus backup (docs/QA.md, offline checks).
 
 ## Download
 

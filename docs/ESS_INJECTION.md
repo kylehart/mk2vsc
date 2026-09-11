@@ -305,7 +305,8 @@ None of this touches hardware.
 - **Other assistants.** A file with a different assistant (AC PV, generator start/stop, relay
   assistants) would show how the record length and body identify the assistant and whether every
   assistant writes the same install state.
-- **Other topologies.** A single-unit `.rvsc`, a three-phase `.rvms`, a Quattro. We hold none.
+- **Other topologies.** A single-unit `.rvsc` or a three-phase `.rvms` with an assistant, as a device
+  download we may publish; a Quattro. The repository holds only synthetic files of those shapes.
 - **Another GUI export.** A second export from another system would settle whether BLOB12 and the tail
   words are constants.
 

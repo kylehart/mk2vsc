@@ -24,15 +24,15 @@ exception is that flags mask.
 The 2070 bytes after the records (a per-setting attribute byte table and an offset-indexed set of
 variable-length ``f5 ff 3e 0f`` records) are not decoded; see issue #6.
 
-TODO (other firmware): ``HEADER_LEN``, ``RECORD_LEN`` and ``N_RECORDS`` are the values Observed on the one
-firmware in the corpus (2729560) and are not generalised.  A payload shorter than they imply is refused as
-``SectionTooShort`` with the observed length and the record count it would hold.  Evidence that other
-firmware differs: talas9/rvsc-tools (MIT) reads its reference file, a 4562-byte single-unit save from a
-MultiPlus 24/1200 on firmware 2667558 with VEConfigure 1.33, by searching the ``BareSettingInfo`` header
-length (``info_header_search_range``) and treating ``BareSettingInfo`` as a master table of which
-``BareSettingData`` covers a window (its rvsc.py, ``find_alignment``; its FORMAT.md section 2).  We hold no
-such file; generalising the header or record count waits for one (issues #14 single-unit .rvsc, #16 other
-firmware, #36 schema signature per firmware; CONTRIBUTING.md, "Files from hardware we do not have").
+``HEADER_LEN``, ``RECORD_LEN`` and ``N_RECORDS`` are the values Observed on the corpus firmware (2729560) and
+on every file run through tools/validate_dir.py (10 files, four firmware families, format 1.30 to 1.33; the
+payload after the records varies, 3745 to 4001 bytes in total).  A payload shorter than they imply is refused
+as ``SectionTooShort`` with the observed length and the record count it would hold.  Evidence that some file
+may differ: talas9/rvsc-tools (MIT) reads its reference file, a 4562-byte single-unit save from a MultiPlus
+24/1200 on firmware 2667558 with VEConfigure 1.33, by searching the ``BareSettingInfo`` header length
+(``info_header_search_range``) and treating ``BareSettingInfo`` as a master table of which ``BareSettingData``
+covers a window (its rvsc.py, ``find_alignment``; its FORMAT.md section 2).  We have not seen that file
+(issues #16 other firmware, #36 schema signature per firmware; docs/donate.md).
 """
 from __future__ import annotations
 
