@@ -28,12 +28,18 @@ th{background:var(--code)} blockquote{margin:.6em 0;padding:.3em .9em;border-lef
 """
 
 def inline(s):
+    """Inline markup. Code spans are lifted out first so their contents are rendered verbatim
+    (a glob like `**/fixtures/**` must not become bold)."""
     s = html.escape(s, quote=False)
-    s = re.sub(r"`([^`]+)`", lambda m: "<code>"+m.group(1)+"</code>", s)
+    spans = []
+    def _lift(m):
+        spans.append("<code>" + m.group(1) + "</code>")
+        return f"\x00{len(spans)-1}\x00"
+    s = re.sub(r"`([^`]+)`", _lift, s)
     s = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", s)
     s = re.sub(r"(?<![\w*])\*(?!\s)(.+?)(?<!\s)\*(?![\w*])", r"<em>\1</em>", s)
     s = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r'<a href="\2">\1</a>', s)
-    return s
+    return re.sub(r"\x00(\d+)\x00", lambda m: spans[int(m.group(1))], s)
 
 def convert(md):
     out=[]; lines=md.splitlines(); i=0
@@ -77,8 +83,13 @@ def convert(md):
     return "\n".join(out)
 
 def main():
-    src, dst = sys.argv[1], sys.argv[2]
-    title = sys.argv[sys.argv.index("--title")+1] if "--title" in sys.argv else "Document"
+    import argparse
+    ap = argparse.ArgumentParser(description="Render Markdown with ```mermaid fences to standalone HTML.")
+    ap.add_argument("src", help="input .md")
+    ap.add_argument("dst", help="output .html")
+    ap.add_argument("--title", default="Document")
+    a = ap.parse_args()
+    src, dst, title = a.src, a.dst, a.title
     body = convert(open(src, encoding="utf-8").read())
     page = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{html.escape(title)}</title><style>{CSS}</style>
