@@ -23,8 +23,9 @@ wrong, or a claim test would fail on your file, that is the finding.
 Second: a pair of downloads with exactly one setting changed between them, and a note saying which.
 That names a field. Screenshots of a VEConfigure tab serve the same purpose.
 
-Files themselves are welcome only after a report shows something worth chasing, and only with your
-statement that you may publish them. We do not accept files by email.
+Files themselves are welcome too: docs/donate.md says what to send, what we do with a file, and the consent
+sentence to include. A donated file is run through `tools/validate_dir.py` locally and only aggregate results
+are published; it enters the fixture corpus, pseudonymised, only with your written consent.
 
 
 ## AI assistance, disclosed
@@ -57,16 +58,27 @@ gaps we know about.
 ### 2. Files from hardware we do not have
 
 Every file in the corpus is from a 48 V, 120 V MultiPlus-class inverter, firmware 2729560, format
-version 1.33, in a two-inverter split-phase pair. We would like to see:
+version 1.33, in a two-inverter split-phase pair. Files run locally from other systems (docs/QA.md,
+aggregate table) cover single units, a parallel pair and three-phase systems on four firmware families, but
+none of them may be published, so the repository still lacks device downloads of those shapes. We would
+like to see:
 
-* a single-unit `.rvsc` file,
-* a three-phase or three-plus-unit `.rvms`,
+* a single-unit `.rvsc` file and a three-phase `.rvms` that may be published (pseudonymised),
 * a Quattro (which has a second AC input and populates setting 49),
-* any other firmware version or VEConfigure version,
-* a 230 V system.
+* any firmware family or VEConfigure version not in docs/QA.md's table,
+* a 24 V system; a file with an assistant other than ESS.
 
 Run `mk2vsc validate` and `mk2vsc census` on the file first. If validation fails, that is already a
-finding: it means the checksum model does not hold for your file, and we want to know.
+finding: it means the checksum model does not hold for your file, and we want to know. docs/donate.md is
+the short form of how to send a file.
+
+### Checking a file without the target hardware
+
+Two checks need no connection to the inverters (details and evidence in docs/QA.md): VEConfigure 3 in a
+Windows VM opens any `.rvsc`/`.rvms` and shows the values (open, read, close without saving); and on any GX
+you own, `/opt/victronenergy/mk2vsc/mk2vsc -L -f <file>` over SSH parses a file with Victron's own parser and
+prints its firmware version or reports it corrupt, without touching the VE.Bus (venus-platform source). Venus
+OS 3.60+ keeps its VE.Bus backups in `/data/conf/` in the same format, a second source of files to check.
 
 ### 3. Reproducing our claims on your own system
 
@@ -88,8 +100,9 @@ Fixtures live under `fixtures/<system>/` and are named
 * `date`: the newest save timestamp inside the file (block offset +0x4f, unix time), not the day
   you copied it.
 * `origin`: `download` (a VRM Remote VEConfigure download), `gui-export` (a file VEConfigure or
-  System Configurator wrote for upload), `prepared` (a file produced by tooling), or `experiment`
-  (deliberately malformed).
+  System Configurator wrote for upload), `prepared` (a file produced by tooling), `experiment`
+  (deliberately malformed), or `synthetic` (built from corpus blocks by `tools/gen_synthetic_fixtures.py`;
+  lives under `fixtures/synthetic/`, carries a `source` key, and is excluded from the corpus claim tests).
 * `state`: `bare` (no assistant on any inverter), `half-ess` (assistant on some), `ess` (assistant
   records on every inverter), `stub` (the empty 64-byte container VEConfigure writes after a failed
   by-file install).

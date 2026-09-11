@@ -13,7 +13,7 @@ CHARGER_FIELDS = [f.name for f in FIELDS if f.confidence == CONFIRMED and f.bits
 
 
 def run(ctx: FileContext) -> List[Finding]:
-    if len(ctx.serials) < 2 or ctx.shared_battery is False:      # separate batteries: nothing has to match
+    if ctx.shared_battery is False:      # separate batteries: nothing has to match
         return []
     ev = []
     for name in CHARGER_FIELDS:
@@ -51,4 +51,4 @@ RULE = Rule("D2", "Paired inverters disagree on a shared battery", DEVICE_CONFIR
             "LithiumBattery flag (assistant-state mismatch is E2). The copy source is proposed only when exactly one "
             "block carries a clean lithium profile (zero D1 votes, flag set) and lead-acid was not stated; otherwise the user "
             "chooses. Conditional on the inverters sharing one battery.",
-            "system_a/system_a_2026-07-20_download_bare_deviceform_1.rvms", run)
+            "system_a/system_a_2026-07-20_download_bare_deviceform_1.rvms", run, min_units=2)

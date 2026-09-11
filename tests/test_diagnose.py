@@ -171,18 +171,21 @@ def test_p3_upload_form_is_refused_as_device_state(good_files):
 
 
 # ------------------------------------------------------------------------------------ file status
-def test_unparseable_bytes_and_the_rvsc_spike():
+def test_unparseable_bytes():
     from mk2vsc.diagnose import diagnose_bytes
     rep = diagnose_bytes(b"\x00" * 64, name="junk.rvms")
     assert rep.status == "unparseable" and rep.findings == [] and rep.editable is False
     rep = diagnose_bytes(b"\x1d\x00VEConfig setting section fil\x00" + b"\x00" * 40, name="local.rvsc")
-    assert rep.status == "unparseable" and ".rvsc" in rep.message and "fixture" in rep.message
+    assert rep.status == "unparseable" and "bad magic" in rep.message and rep.not_applicable == {}
 
 
-def test_rvsc_extension_marks_every_finding_unverified(good_files):
+def test_the_file_extension_changes_nothing(good_files):
+    """A .rvsc name is not a format: the same bytes give the same report under either extension."""
     from mk2vsc.diagnose import diagnose_bytes
-    rep = diagnose_bytes(good_files[A_0720], name="local.rvsc")
-    assert rep.findings and all("unverified on single-unit" in f.note for f in rep.findings)
+    a = diagnose_bytes(good_files[A_0720], name="local.rvsc")
+    b = diagnose_bytes(good_files[A_0720], name="local.rvms")
+    assert a.findings and [f.as_dict() | {"file": ""} for f in a.findings] == [f.as_dict() | {"file": ""} for f in b.findings]
+    assert all(f.note == "" for f in a.findings) and a.not_applicable == {} == b.not_applicable
 
 
 # ------------------------------------------------------------------------------------ report contract

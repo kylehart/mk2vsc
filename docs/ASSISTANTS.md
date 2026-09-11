@@ -188,8 +188,10 @@ What this toolkit still does not do:
   `*_download_ess_*` file); locate the embedded parameters (48.00 V is `c0 12`, 10 % is `0a 00`) and see
   whether they track the ESS settings shown on the GX.
 - The 72-byte ESS tail and the `0e 00 8e 01 15 00 76 c4 e8 db` sequence.
-- Files from single-unit systems (`.rvsc`) and three-phase systems. We hold none; the section grammar
-  and checksum probably carry over, the block layout may not.
+- Assistant records on single-unit and three-phase systems: the container, checksum and block layout carry
+  over (docs/FORMAT.md 3.1.1), and the files run outside the repository carry record lengths we have not seen
+  (53 to 2048 bytes, one to three records per system); which assistant each length is, and how a three-phase
+  system distributes them, is open. docs/donate.md says how to send such a file.
 - Files with other assistants (AC PV, generator start/stop, relay assistants) to see how the record
   length and body identify the assistant.
 - A GUI export and its post-upload device download, from a session where exactly one thing was changed.

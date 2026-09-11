@@ -12,11 +12,16 @@ Layout of a device-form block (what VRM's Remote VEConfigure *download* produces
     +0x13  u32  = 3                                unknown; constant 3 in every corpus block
     +0x17  u32  per-unit constant                  bytes +0x18..0x19 track the serial's date code
                                                    (hardware/production batch, NOT firmware)
-    +0x1b  u32  firmware version                   2729560 == "v560" in VRM, constant fleet-wide
+    +0x1b  u32  firmware word                      low 24 bits = the seven-digit VE.Bus firmware number
+                                                   (2729560 == "v560" in VRM on the corpus); the high byte is
+                                                   0 on every corpus block and is reported separately
+                                                   (``firmware_word_high_byte``, docs/FORMAT.md 3.3)
     +0x1f  ...  unknown header bytes
-    +0x35  u8   slot byte A      (00 / 86)         differs between the two blocks of a pair
-    +0x36  u8   assistant flag   f4|f5 = no assistant, e4|e5 = assistant present (low nibble = slot)
-    +0x37  u8   slot byte B      (00 / 01)
+    +0x35  u8   phase byte       00 / 86 on a split-phase pair; 00 / 04 / 08 on three-phase files (L1/L2/L3);
+                                 00 on a single unit
+    +0x36  u8   assistant flag   high nibble f = no assistant, e = assistant present;
+                                 low nibble = a phase/role code (4|5 split-phase pair, 8|9|a three-phase, 0 single)
+    +0x37  u8   unit index       0 / 1 on a pair; 0..n-1 on three-phase files; 0 on a single unit
     +0x3a  ASCII serial number  "HQ..."            11 characters, zero padded
     +0x45  10 zero bytes                            (upload form: a 16-byte blob + 4 zeros instead; +10 shift)
     +0x4f  u32 unix timestamp of file generation    new on every download; NOT an acceptance gate (docs/FORMAT.md 3.2)
@@ -50,9 +55,10 @@ OFF_NEXT_PTR = 0x0F
 OFF_HEADER_CONST = 0x13
 OFF_UNIT_CONST = 0x17
 OFF_FIRMWARE = 0x1B
-OFF_SLOT_A = 0x35
+OFF_SLOT_A = 0x35        # phase byte
 OFF_ASSISTANT_FLAG = 0x36
-OFF_SLOT_B = 0x37
+OFF_SLOT_B = 0x37        # unit index
+FIRMWARE_MASK = 0xFFFFFF  # the seven-digit firmware number never needs bits 24..31 (9,999,999 < 2**24)
 OFF_SERIAL = 0x3A
 OFF_BLOB = 0x45          # 10 zero bytes (device form) or 16-byte blob + 4 zeros (upload form)
 OFF_SAVE_TS_DEVICE = 0x4F
@@ -63,8 +69,18 @@ PREFIX_LEN = 15 + 4       # name + next pointer: the bytes of ``raw`` before the
 SETTINGS_END_DEVICE = OFF_SETTINGS_DEVICE + 2 * N_SETTINGS          # 0x1d9: first byte after the settings array
 MIN_PAYLOAD_DEVICE = SETTINGS_END_DEVICE - PREFIX_LEN               # 454: payload bytes the fixed layout reads
 
-ASSISTANT_FLAGS = {0xE4, 0xE5}
+ASSISTANT_FLAGS = {0xE4, 0xE5}   # the split-phase pair values the writer-side tools (assistant, upload_form) handle
 BARE_FLAGS = {0xF4, 0xF5}
+
+# Phase byte (+0x35) labels.  Observed: 00 on every single-unit block; 00 / 86 on the two blocks of a split-phase
+# pair (corpus); 00 / 04 / 08 on three-phase files, cycling with the unit index.  Inferred: the L1/L2/L3 reading.
+PHASE_LABELS = {0x00: "L1", 0x04: "L2", 0x08: "L3", 0x86: "L2 (split-phase)"}
+
+
+def high_byte_note(high: int) -> str:
+    """The text `census` and `show` append to a firmware number when the stored word carries a non-zero high
+    byte (docs/FORMAT.md 3.3).  Empty when it is zero, so corpus output is unchanged."""
+    return f" (word high byte 0x{high:02x})" if high else ""
 
 # Byte offsets (device form) that change on a re-save with NO setting change.  Never treat as settings.
 VOLATILE_DEVICE = {OFF_NEXT_PTR, OFF_NEXT_PTR + 1, OFF_SAVE_TS_DEVICE, OFF_SAVE_TS_DEVICE + 1,
@@ -120,8 +136,20 @@ class UnitBlock:
         return m.group().decode() if m else "?"
 
     @property
-    def firmware_version(self) -> int:
+    def firmware_word(self) -> int:
+        """The u32 at +0x1b as stored."""
         return self.u32(OFF_FIRMWARE)
+
+    @property
+    def firmware_version(self) -> int:
+        """The seven-digit VE.Bus firmware number: the low 24 bits of the firmware word (``FIRMWARE_MASK``)."""
+        return self.firmware_word & FIRMWARE_MASK
+
+    @property
+    def firmware_word_high_byte(self) -> int:
+        """Bits 24..31 of the firmware word: 0 on every corpus block; 0xc7 on one GUI-saved three-unit file seen
+        outside the corpus (docs/FORMAT.md 3.3).  Not part of the firmware number."""
+        return self.firmware_word >> 24
 
     @property
     def unit_constant(self) -> int:
@@ -133,11 +161,38 @@ class UnitBlock:
 
     @property
     def has_assistant_flag(self) -> bool:
-        return self.assistant_flag in ASSISTANT_FLAGS
+        """High nibble ``e`` of the flag byte: the block is configured for an assistant.
+
+        Observed across the corpus (e4/e5, f4/f5) and the single-unit, parallel and three-phase files run
+        through tools/validate_dir.py (e0, f0, e8, e9, ea): ``f`` on every bare block, and ``e`` on every
+        block that carries assistant records.  ``e`` does NOT imply records: the corpus also holds ``e``
+        blocks whose area is a failed-install stub, an empty container, or empty (the 2026-08 stub downloads;
+        tests/test_claims.py).  For what the area actually holds, read
+        ``assistants.parse_assistant_area(u)["kind"]``; the diagnose rules and the writer's stub guard do.
+        """
+        return (self.assistant_flag >> 4) == 0xE
+
+    @property
+    def phase_byte(self) -> int:
+        return self.u8(OFF_SLOT_A)
+
+    @property
+    def unit_index(self) -> int:
+        return self.u8(OFF_SLOT_B)
 
     @property
     def slot(self) -> tuple:
-        return (self.u8(OFF_SLOT_A), self.u8(OFF_SLOT_B))
+        """``(phase_byte, unit_index)``: the pair as the blocks are keyed by ``upload_form`` and the graft."""
+        return (self.phase_byte, self.unit_index)
+
+    @property
+    def phase_label(self) -> str:
+        return PHASE_LABELS.get(self.phase_byte, f"?0x{self.phase_byte:02x}")
+
+    @property
+    def phase_summary(self) -> str:
+        """``L2, unit 1`` style text for reports: the phase label and the unit index, from +0x35 and +0x37."""
+        return f"{self.phase_label}, unit {self.unit_index}"
 
     # ------------------------------------------------------------- form
     @property
@@ -203,7 +258,10 @@ class UnitBlock:
             "assistant_flag": f"{self.assistant_flag:02x}",
             "assistant_present": self.has_assistant_flag,
             "slot": self.slot,
+            "phase": self.phase_label,
+            "unit_index": self.unit_index,
             "firmware": self.firmware_version,
+            "firmware_word_high_byte": self.firmware_word_high_byte,
             "unit_constant": f"{self.unit_constant:08x}",
             "save_time_utc": self.save_datetime.isoformat() if self.save_datetime else None,
             "assistant_area_bytes": len(self.assistant_area),

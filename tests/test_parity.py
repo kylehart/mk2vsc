@@ -26,15 +26,19 @@ from mk2vsc.sections import RvmsFile
 from mk2vsc.units import N_SETTINGS, SECTION_DATA, unit_blocks
 from mk2vsc.writer import set_settings
 
-from .conftest import all_fixture_paths, rel
+from .conftest import all_fixture_paths, corpus_paths, rel
 
 
 # ----------------------------------------------------------------------------- helpers
 
 def _device_pairs():
-    """Device-form fixtures that hold a comparable set of inverter blocks."""
+    """Device-form corpus fixtures that hold a comparable set of inverter blocks.
+
+    ``corpus_paths()`` excludes ``fixtures/synthetic/`` (see tests/conftest.py): those files are built from
+    corpus blocks to exercise the single-unit and three-phase shapes, so they are deliberately not pairs and
+    would break the two-block assumptions the helpers below make."""
     out = []
-    for p in all_fixture_paths():
+    for p in corpus_paths():
         try:
             cfg = api.load(p)
         except Exception:

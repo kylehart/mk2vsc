@@ -61,7 +61,7 @@ of these rules is docs/PRACTICES.md; this file is the operational checklist.
 
 `format-unknown` (a byte region we cannot explain) - `field-claim` (naming or promoting a setting) -
 `hypothesis` (a testable idea about device behaviour) - `incident` (something that went wrong on
-hardware) - `fixture-wanted` (a file we do not hold: other firmware, Quattro, three-phase, .rvsc) -
+hardware) - `fixture-wanted` (a file we do not hold or may not publish: other firmware, Quattro, publishable three-phase and .rvsc downloads) -
 `experimental` (ESS injection and other unproven work) - `good first issue` - `help wanted` -
 `documentation` - `bug` - `enhancement`.
 

@@ -14,7 +14,10 @@ def test_manifest_matches_files(manifest):
         assert len(data) == e["size"], name
         assert e["state"] in ("bare", "ess", "half-ess", "stub")
         assert e["form"] in ("deviceform", "uploadform")
-        assert e["origin"] in ("download", "prepared", "gui-export", "experiment")
+        assert e["origin"] in ("download", "prepared", "gui-export", "experiment", "synthetic")
+        assert (e["origin"] == "synthetic") == name.startswith("synthetic/"), name
+        if e["origin"] == "synthetic":
+            assert e["source"] in listed and e["notes"].startswith("synthetic from "), name
 
 
 def test_no_duplicate_content(manifest):

@@ -52,6 +52,8 @@ def render(report: Report) -> str:
                    + ("" if fr.editable else f"; the writer refuses this file: {fr.refusal_reason}" if fr.status == "ok" else ""))
         if fr.status == "ok" and not fr.findings:
             out.append("  no findings from the Phase 0 rules (D1, D2, C1, V1, V2, E1, E2)")
+        if fr.not_applicable:
+            out.append("  not applicable: " + "; ".join(f"{rid} ({why})" for rid, why in fr.not_applicable.items()))
         for f in fr.findings:                 # already sorted by severity, rule, serial in the engine
             out.append(render_finding(f))
         out.append("")

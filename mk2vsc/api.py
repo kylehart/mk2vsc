@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 from typing import Dict, Iterable, List, Optional, Tuple
 
 from .sections import RvmsFile
-from .units import UnitBlock, units_by_serial, check_layout
+from .units import UnitBlock, units_by_serial, check_layout, high_byte_note
 from .fields import lookup, FIELDS, Field, CONFIRMED, HIGH, MEDIUM, ALIASES, format_value
 from .writer import set_settings, WriteRefused, Edit
 from .diff import diff_bytes, FileDiff, render as render_diff
@@ -232,7 +232,8 @@ def render_summary(cfg: Config, include_unknown: bool = False) -> str:
     notes: Dict[Tuple[str, int], str] = {}
     for s in serials:
         u = units[s]
-        lines.append(f"  {s}: firmware {u.firmware_version}, saved {u.save_datetime.isoformat() if u.save_datetime else '?'}, "
+        lines.append(f"  {s}: firmware {u.firmware_version}{high_byte_note(u.firmware_word_high_byte)}, phase {u.phase_summary}, "
+                     f"saved {u.save_datetime.isoformat() if u.save_datetime else '?'}, "
                      f"assistant: {parse_assistant_area(u)['summary']}")
         if schema is not None:
             lines.append(f"    {align_check(u, schema).summary}")

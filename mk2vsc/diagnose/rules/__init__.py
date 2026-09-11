@@ -8,7 +8,8 @@ hardware), ``vendor-documented`` (a Victron citation) or ``inferred`` (a corpus 
 certainty does not transfer to behaviour.
 
 Each rule names the corpus fixture that triggers it; tests/test_diagnose.py checks that fixture and counts
-the rule's hits over the whole device-form corpus.
+the rule's hits over the whole device-form corpus.  A rule that compares inverters declares ``min_units``;
+on a file with fewer blocks the engine does not run it and reports it as not applicable.
 """
 from __future__ import annotations
 
@@ -27,6 +28,7 @@ class Rule:
     description: str
     fixture: str                      # a corpus file that triggers it
     run: Callable[[FileContext], List[Finding]]
+    min_units: int = 1                # inverter blocks the rule needs; fewer = not applicable, not silent
 
 
 def load_rules() -> List[Rule]:
