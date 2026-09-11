@@ -249,19 +249,17 @@ def test_block_short_into_the_checksum_trailer_is_not_comparable():
         return f.rebuild(pay).to_bytes()
 
     short = trimmed(6)
-    blk = unit_blocks(RvmsFile.parse(short))[idx - 2]
-    assert len(blk.raw) < blk.settings_offset + 2 * N_SETTINGS + 4
-    assert len(blk.raw) >= blk.settings_offset + 2 * N_SETTINGS, (
-        "this case must be short ONLY inside the checksum reservation -- otherwise it proves nothing")
-    RvmsFile.parse(short)                                # still parses: that is the trap
+    # Since #64 the parser itself refuses a BareSettingData payload this short (SectionTooShort), so
+    # the block never reaches parity's own length guard.  Either way the contract that matters holds:
+    # the file is NOT comparable and NOT ok, and the eager check raises rather than passing quietly.
     rep = parity_report_bytes(short)
     assert not rep.comparable, "a block whose settings run into the checksum must not be compared"
-    assert "before the checksum" in rep.reason
     assert not rep.ok
     with pytest.raises(ParityNotComparable):
         check_parity_bytes(short)
 
-    # and a block that is merely tight (full array + full trailer) is still compared
+    # A block that is merely tight (full array plus full trailer) is still compared: the guard must
+    # reserve the checksum without refusing legitimate files.
     assert parity_report_bytes(trimmed(4)).comparable
 
 
@@ -303,9 +301,11 @@ def test_same_settings_different_firmware_is_not_parity():
 def test_truncated_block_is_not_comparable_not_a_crash():
     p = _agreeing_pair()
     short = _truncate_last_block(open(p, "rb").read())
-    RvmsFile.parse(short)                                    # still parses: the trap this guards
     rep = parity_report_bytes(short)
-    assert not rep.comparable and "needed to hold all 192 settings" in rep.reason
+    # The report form never raises, whether the refusal comes from the parser (SectionTooShort,
+    # added in #64) or from parity's own length guard.
+    assert not rep.comparable and not rep.ok
+    assert rep.reason
     with pytest.raises(ParityNotComparable):
         check_parity_bytes(short)
 
