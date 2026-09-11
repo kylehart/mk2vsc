@@ -31,8 +31,8 @@ firmware differs: talas9/rvsc-tools (MIT) reads its reference file, a 4562-byte 
 MultiPlus 24/1200 on firmware 2667558 with VEConfigure 1.33, by searching the ``BareSettingInfo`` header
 length (``info_header_search_range``) and treating ``BareSettingInfo`` as a master table of which
 ``BareSettingData`` covers a window (its rvsc.py, ``find_alignment``; its FORMAT.md section 2).  We hold no
-such file; generalising the header or record count waits for one (CONTRIBUTING.md, "Files from hardware
-we do not have").
+such file; generalising the header or record count waits for one (issues #14 single-unit .rvsc, #16 other
+firmware, #36 schema signature per firmware; CONTRIBUTING.md, "Files from hardware we do not have").
 """
 from __future__ import annotations
 

@@ -82,10 +82,13 @@ def both_short_file(corpus):
     return build_file([(SECTION_MK2, MK2_PAYLOAD), (SECTION_INFO, info[:SHORT_INFO_LEN]), (SECTION_DATA, bytes(SHORT_DATA_LEN))])
 
 
+# expected "needed" values are literals on purpose: a constant off by one in units.py / schema.py must fail here
+NEED_DEVICE, NEED_UPLOAD, NEED_SCHEMA = 454, 464, 1931
+
 SHAPES = [
-    ("short_block", short_block_file, "BareSettingData", SHORT_DATA_LEN, MIN_PAYLOAD_DEVICE),
-    ("short_schema", short_schema_file, "BareSettingInfo", SHORT_INFO_LEN, SCHEMA_LEN),
-    ("both_short", both_short_file, "BareSettingInfo", SHORT_INFO_LEN, SCHEMA_LEN),   # the schema is checked first
+    ("short_block", short_block_file, "BareSettingData", SHORT_DATA_LEN, NEED_DEVICE),
+    ("short_schema", short_schema_file, "BareSettingInfo", SHORT_INFO_LEN, NEED_SCHEMA),
+    ("both_short", both_short_file, "BareSettingInfo", SHORT_INFO_LEN, NEED_SCHEMA),   # the schema is checked first
 ]
 
 
@@ -167,6 +170,62 @@ def test_cli_verbs_refuse_with_the_existing_exit_codes(short, tmp_path, capsys):
     assert section in capsys.readouterr().out
     # validate is container and checksums only, on purpose: it still reports a well-formed short file as OK
     assert main(["validate", p]) == 0
+
+
+def test_constants_are_the_literal_boundaries():
+    assert (MIN_PAYLOAD_DEVICE, SCHEMA_LEN, HEADER_LEN, RECORD_LEN) == (NEED_DEVICE, NEED_SCHEMA, 11, 10)
+
+
+def _block_payload(n: int, upload_form: bool = False) -> bytes:
+    """An all-zero block payload of ``n`` bytes; ``upload_form`` puts non-zero bytes where the GUI blob sits
+    (raw +0x45..+0x4e is payload index 50..59, the name and pointer being the 19 bytes before the payload)."""
+    p = bytearray(n)
+    if upload_form:
+        p[50:60] = b"\x01" * 10
+    return bytes(p)
+
+
+@pytest.mark.parametrize("n,upload_form,needed", [
+    (453, False, NEED_DEVICE), (463, True, NEED_UPLOAD),
+])
+def test_block_one_byte_short_of_the_boundary_is_refused(corpus, n, upload_form, needed):
+    _, info, _ = corpus
+    data = build_file([(SECTION_MK2, MK2_PAYLOAD), (SECTION_INFO, info), (SECTION_DATA, _block_payload(n, upload_form))])
+    with pytest.raises(SectionTooShort) as ei:
+        unit_blocks(RvmsFile.parse(data))
+    _expect(ei.value, "BareSettingData", n, needed)
+    assert ("+0x63" if upload_form else "+0x59") in str(ei.value)
+
+
+@pytest.mark.parametrize("n,upload_form", [(454, False), (464, True)])
+def test_block_exactly_at_the_boundary_constructs(corpus, n, upload_form):
+    _, info, _ = corpus
+    data = build_file([(SECTION_MK2, MK2_PAYLOAD), (SECTION_INFO, info), (SECTION_DATA, _block_payload(n, upload_form))])
+    u = unit_blocks(RvmsFile.parse(data))[0]
+    assert u.is_upload_form == upload_form and len(u.settings()) == 192 and u.assistant_area == b""
+    assert u.summary()["form"] == ("upload" if upload_form else "device")
+    assert mk2vsc.loads(data).valid
+
+
+@pytest.mark.parametrize("n", [1930, 11, 0])
+def test_schema_payload_short_of_1931_is_refused(corpus, n):
+    _, info, _ = corpus
+    with pytest.raises(SectionTooShort) as ei:
+        parse_schema(info[:n])
+    _expect(ei.value, "BareSettingInfo", n, NEED_SCHEMA)
+    assert f"room for {max(0, (n - 11) // 10)} whole" in str(ei.value)
+
+
+def test_schema_payload_of_exactly_1931_parses(corpus):
+    _, info, _ = corpus
+    assert len(parse_schema(info[:1931])) == 192
+
+
+def test_section_too_short_survives_pickle():
+    import pickle
+    e = SectionTooShort("BareSettingData (inverter block 0)", 22, 454, "detail")
+    back = pickle.loads(pickle.dumps(e))
+    assert (back.section, back.found, back.needed, back.detail) == (e.section, e.found, e.needed, e.detail) and str(back) == str(e)
 
 
 # ------------------------------------------------------------------ the one-block file the container code reads

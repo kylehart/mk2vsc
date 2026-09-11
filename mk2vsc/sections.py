@@ -48,11 +48,14 @@ class SectionTooShort(RvmsParseError):
     """
 
     def __init__(self, section: str, found: int, needed: int, detail: str = ""):
-        self.section, self.found, self.needed = section, found, needed
+        self.section, self.found, self.needed, self.detail = section, found, needed, detail
         msg = (f"{section} payload is {found} bytes; the layout mk2vsc reads needs at least {needed}"
                + (f" ({detail})" if detail else "")
                + ". The file may be from a tool or firmware version mk2vsc has not seen; see docs/ERRORS.md, SectionTooShort.")
         super().__init__(msg)
+
+    def __reduce__(self):
+        return (SectionTooShort, (self.section, self.found, self.needed, self.detail))
 
 
 def sum32_le(data: bytes, start: int = 0, end: Optional[int] = None) -> int:
