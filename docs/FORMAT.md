@@ -174,13 +174,15 @@ table is in docs/QA.md):
 |---|---|---|---|---|
 | single unit | `00` | `00` | `f0` without, `e0` with assistant records | 6 (6) |
 | two units, parallel, 230 V | `00` on both | `00` and `03` | `e0` on both | 1 (2) |
-| three units, one per phase | `00` / `04` / `08` | `00` / `01` / `02` | `e8` / `e9` / `ea` | 1 (3) |
+| three units, one per phase | `00` / `04` / `08` | `00` / `01` / `02` | `e8` / `e9` / `ea` | 2 (6) |
 | six units, two per phase | `00` / `04` / `08`, each twice | `00`..`05`; +0x35 = 4 × (+0x37 mod 3) | `e8` / `e9` / `ea` | 1 (6) |
 | two units, split phase (corpus) | `00` / `86` | `00` / `01` | `f4` / `f5`, `e4` / `e5` | 89 (178) |
 
-On every one of those 195 blocks the flag's high nibble is `e` exactly when the block carries assistant
-records and `f` otherwise (`UnitBlock.has_assistant_flag`). On the 9 three-phase blocks the flag's low nibble
-is `8 + +0x35 / 4`. **Inferred.** +0x35 encodes the phase the unit serves (`00` L1, `04` L2, `08` L3; `86`
+On every one of those 198 blocks the flag's high nibble is `e` on a block that carries assistant records and
+`f` on a bare one (`UnitBlock.has_assistant_flag`). The converse does not hold: our own corpus holds `e` blocks
+whose area is a failed-install stub, an empty container or empty, and two 2026-06 downloads with a 6-byte
+container behind an `f` nibble, so the nibble says the block is configured for an assistant, not that records
+are present (`tests/test_topologies.py`). On the 12 three-phase blocks the flag's low nibble is `8 + +0x35 / 4`. **Inferred.** +0x35 encodes the phase the unit serves (`00` L1, `04` L2, `08` L3; `86`
 the 180-degree leg of a split-phase pair) and +0x37 is the unit's index in the system; `mk2vsc census` and
 `show` print them as `phase L2, unit 1`. The `00`/`03` index pair on the parallel file is one observation and
 is not explained. **Unknown.** What the flag's low nibble encodes on a single unit and on a parallel pair

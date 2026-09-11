@@ -35,7 +35,7 @@ python -m venv .venv
 .venv/bin/pytest
 ```
 
-650 tests, under three seconds.
+654 tests, under three seconds.
 
 ## The corpus and its limits
 
@@ -127,7 +127,7 @@ Checks (pass / fail / not applicable)
 | records_imply_assistant_flag | 10 | 0 | 0 |
 | phase_model | 9 | 0 | 1 |
 
-note: alignment failed on 1 file(s): a value outside its schema range; `mk2vsc census` on that file names the setting
+note: alignment failed on 1 file(s): a value outside its schema range; `mk2vsc census` on that file names the setting; --strict makes that set the exit status
 
 ## Two offline checks for hardware classes with no upload history
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Run mk2vsc's structural checks over every .rvsc/.rvms in a directory and print aggregate counts only.
 
-    python tools/validate_dir.py <dir> [--markdown]
+    python tools/validate_dir.py <dir> [--markdown] [--strict]
 
 This is how files that cannot enter the repository (other people's systems, files without publication
 consent) are exercised: point it at a private folder and paste the tables, which carry no file name, serial,
@@ -15,8 +15,10 @@ family (the first two digits of the block's seven-digit number: 19/20 old microc
 the word's high byte is set, and whether the schema header's firmware number differs from the blocks'.
 
 Exit status 1 when parse, checksums, round trip, layout, schema, the flag nibble or the phase model fail on any
-file.  An alignment or census failure is a finding about a value in the file (census names the setting), not a
-failure of the tool, and does not set the exit status.
+file.  An alignment or census failure is a finding about a VALUE in the file (census names the setting), not a
+failure of the format model, so by default it is reported in the table without setting the exit status -- one
+real file in the set we hold carries a setting above its schema maximum and is otherwise sound.  Pass
+``--strict`` to make any failed check set the exit status, which is what a CI caller wants.
 """
 import collections
 import os
@@ -42,6 +44,11 @@ CHECKS = ["parse", "checksums", "round_trip", "layout", "schema_192", "alignment
 # prepared half-ess files), and two 2026-06 downloads carry a 6-byte empty container behind an ``f`` nibble.
 ASSISTANT_FLAG_RULE = "records present => flag high nibble e (the converse does not hold; see mk2vsc/assistants.py)"
 
+# Mk2vscInfo version strings seen on real files.  The field is free text inside someone else's file, and this
+# tool's whole point is that its output carries nothing from the file that could identify a system, so an
+# unrecognised value is bucketed rather than printed.
+KNOWN_FORMATS = ("1.3", "1.30", "1.31", "1.32", "1.33")
+
 
 def check_file(data: bytes) -> dict:
     """One dict of facts and pass/fail booleans for a file; nothing identifying."""
@@ -57,7 +64,8 @@ def check_file(data: bytes) -> dict:
     r["round_trip"] = f.to_bytes() == data
     try:
         mk = f.section(b"Mk2vscInfo").payload
-        r["format"] = mk[6: 6 + int.from_bytes(mk[4:6], "little")].decode()
+        version = mk[6: 6 + int.from_bytes(mk[4:6], "little")].decode()
+        r["format"] = version if version in KNOWN_FORMATS else "other (not printed)"
     except Exception:  # noqa: BLE001
         pass
     try:
@@ -87,8 +95,10 @@ def check_file(data: bytes) -> dict:
         u = units[0]
         r["phase_model"] = u.slot == (0, 0) and (u.assistant_flag & 0x0F) == 0
     elif len(units) >= 3:
-        r["phase_model"] = all(u.phase_byte == 4 * (u.unit_index % 3) and (u.assistant_flag & 0x0F) == 8 + u.phase_byte // 4
-                               for u in units)
+        indices = sorted(u.unit_index for u in units)
+        r["phase_model"] = (indices == list(range(len(units)))                      # contiguous and unique
+                            and all(u.phase_byte == 4 * (u.unit_index % 3)
+                                    and (u.assistant_flag & 0x0F) == 8 + u.phase_byte // 4 for u in units))
     else:
         r["phase_model"] = None            # two-unit files: two patterns seen (00/86 split-phase, 00/00 parallel); not scored
     r["census"] = census_text(data, "file")[1]
@@ -113,6 +123,7 @@ def _table(title, rows, markdown):
 def main(argv=None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     markdown = "--markdown" in argv
+    strict = "--strict" in argv
     args = [a for a in argv if not a.startswith("--")]
     if len(args) != 1 or not os.path.isdir(args[0]):
         print(__doc__)
@@ -150,10 +161,12 @@ def main(argv=None) -> int:
         vals = [r[c] for r in results]
         rows.append([c, sum(v is True for v in vals), sum(v is False for v in vals), sum(v is None for v in vals)])
     print(_table("Checks (pass / fail / not applicable)", rows, markdown))
-    failed = any(r[c] is False for r in results for c in CHECKS if c not in ("alignment", "census"))  # value findings, not tool failures
+    lenient = () if strict else ("alignment", "census")          # value findings, not format-model failures
+    failed = any(r[c] is False for r in results for c in CHECKS if c not in lenient)
     align_fail = sum(r["alignment"] is False for r in results)
     if align_fail:
-        print(f"\nnote: alignment failed on {align_fail} file(s): a value outside its schema range; `mk2vsc census` on that file names the setting")
+        print(f"\nnote: alignment failed on {align_fail} file(s): a value outside its schema range; `mk2vsc census` on that file names the setting"
+              + ("" if strict else "; --strict makes that set the exit status"))
     return 1 if failed else 0
 
 

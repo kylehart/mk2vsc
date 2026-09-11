@@ -11,12 +11,14 @@ outside the repository with tools/validate_dir.py (docs/QA.md).
 import json
 import os
 import shutil
+import struct
 
 import pytest
 
 import mk2vsc
 from mk2vsc.sections import RvmsFile, SECTION_INFO
-from mk2vsc.units import unit_blocks, units_by_serial, OFF_FIRMWARE, OFF_ASSISTANT_FLAG, PREFIX_LEN, FIRMWARE_MASK, PHASE_LABELS
+from mk2vsc.units import (unit_blocks, units_by_serial, OFF_FIRMWARE, OFF_ASSISTANT_FLAG, OFF_SLOT_A, OFF_SLOT_B,
+                          PREFIX_LEN, FIRMWARE_MASK, PHASE_LABELS)
 from mk2vsc.schema import schema_of, firmware_of_schema, firmware_word_of_schema
 from mk2vsc.align import check as align_check
 from mk2vsc.census import census_text
@@ -174,6 +176,33 @@ def test_three_phase_diagnose_runs_every_rule(capsys):
     assert main(["diagnose", THREE]) == 0
     out = capsys.readouterr().out
     assert "3 inverter(s)" in out and "no findings" in out and "not applicable" not in out
+
+
+def test_e2_on_more_than_two_inverters_says_the_by_file_remedy_is_untested_there():
+    """E2 fires per block, so it reaches three-phase files; `mk2vsc assistant` was derived from two-inverter
+    systems, so the message must not send a six-unit operator down an untested by-file path."""
+    from mk2vsc.assistants import parse_assistant_area
+    f = RvmsFile.parse(_read(THREE))
+    payloads = []
+    for i, s_ in enumerate(f.sections):
+        p_ = bytearray(s_.payload)
+        if s_.is_unit and i == len(f.sections) - 1:        # strip the last block's records: some have, one lacks
+            area_off = 0x59 + 2 * 192 - PREFIX_LEN
+            p_[area_off:] = b"\x00\x00\xff\x00\x0b"
+            p_[OFF_ASSISTANT_FLAG - PREFIX_LEN] = 0xF8
+        payloads.append(bytes(p_))
+    data = f.rebuild(payloads).to_bytes()
+    kinds = [parse_assistant_area(u)["kind"] for u in unit_blocks(RvmsFile.parse(data))]
+    assert kinds.count("records") == 2 and "none" in kinds, kinds
+    fr = diagnose_bytes(data, name="three.rvms", assume={"ess_intended": "yes"})
+    e2 = [x for x in fr.findings if x.rule == "E2"]
+    assert len(e2) == 1 and "more than two inverters" in e2[0].message
+    assert "never run on one like yours" in e2[0].message and "of the pair" not in e2[0].message
+    # the two-inverter case keeps the pair wording and carries no caveat
+    pair = diagnose_bytes(_read(os.path.join(FIXTURES, "system_c", "system_c_2026-07-20_download_half-ess_deviceform_1.rvms")),
+                          name="c.rvms", assume={"ess_intended": "yes"})
+    pe2 = [x for x in pair.findings if x.rule == "E2"]
+    assert len(pe2) == 1 and "a parallel pair" in pe2[0].message and "more than two inverters" not in pe2[0].message
 
 
 def test_three_phase_clones_carry_the_source_block_apart_from_slot_bytes_and_serial():
@@ -338,3 +367,74 @@ def test_validate_dir_failure_paths_and_exit_codes(tmp_path, capsys):
     assert vd.main([os.path.join(FIXTURES, "synthetic"), "--markdown"]) == 1
     md = capsys.readouterr().out
     assert "| units | files |" in md and "| parse | 3 | 0 | 0 |" in md and "HQ0000" not in md
+
+
+def test_validate_dir_never_prints_a_version_string_from_the_file(tmp_path, capsys):
+    """The Mk2vscInfo version is free text inside someone else's file. An unrecognised value is bucketed, so
+    nothing the file's author wrote can reach a table that is meant to carry no per-file detail."""
+    vd = _vd_module()
+    data = _read(SINGLE)
+    f = RvmsFile.parse(data)
+    payloads = [s_.payload for s_ in f.sections]
+    payloads[0] = b"\x01\x00\x00\x00" + struct.pack("<H", 11) + b"SITE-ALPHA1"
+    d = tmp_path / "v"
+    d.mkdir()
+    (d / "x.rvsc").write_bytes(f.rebuild(payloads).to_bytes())
+    assert vd.check_file((d / "x.rvsc").read_bytes())["format"] == "other (not printed)"
+    vd.main([str(d)])
+    out = capsys.readouterr().out
+    assert "SITE-ALPHA1" not in out and "other (not printed)" in out
+    assert vd.KNOWN_FORMATS == ("1.3", "1.30", "1.31", "1.32", "1.33")
+
+
+def test_validate_dir_phase_model_requires_a_contiguous_unique_index_set(tmp_path, capsys):
+    """Per-block phase arithmetic alone passes a file whose three blocks all claim to be unit 0."""
+    vd = _vd_module()
+    f = RvmsFile.parse(_read(THREE))
+    assert vd.check_file(_read(THREE))["phase_model"] is True
+    payloads = []
+    for s_ in f.sections:
+        p_ = bytearray(s_.payload)
+        if s_.is_unit:
+            p_[OFF_SLOT_A - PREFIX_LEN] = 0            # every block: phase L1, unit 0
+            p_[OFF_SLOT_B - PREFIX_LEN] = 0
+            p_[OFF_ASSISTANT_FLAG - PREFIX_LEN] = 0xE8
+        payloads.append(bytes(p_))
+    d = tmp_path / "dup"
+    d.mkdir()
+    (d / "x.rvms").write_bytes(f.rebuild(payloads).to_bytes())
+    assert vd.check_file((d / "x.rvms").read_bytes())["phase_model"] is False
+    assert vd.main([str(d)]) == 1
+    capsys.readouterr()
+
+
+def test_validate_dir_strict_makes_a_value_finding_set_the_exit_status(tmp_path, capsys):
+    """Alignment is a finding about a value, not the format model, so on its own it is reported without
+    failing the run; --strict is the CI caller's switch. (A file mutated far enough to misalign also makes
+    `diagnose` report `misaligned`, so this uses the one real file in the QA set that aligns badly on its
+    own terms: here that state is simulated by scoring the checks directly.)"""
+    vd = _vd_module()
+    f = RvmsFile.parse(_read(THREE))                   # a file whose other checks all pass
+    payloads = []
+    for s_ in f.sections:
+        p_ = bytearray(s_.payload)
+        if s_.is_unit:
+            off = 0x59 - PREFIX_LEN + 2 * 2           # setting 2 (absorption), well outside its schema range
+            p_[off: off + 2] = (65535).to_bytes(2, "little")
+        payloads.append(bytes(p_))
+    d = tmp_path / "al"
+    d.mkdir()
+    (d / "x.rvms").write_bytes(f.rebuild(payloads).to_bytes())
+    r = vd.check_file((d / "x.rvms").read_bytes())
+    assert r["alignment"] is False and r["parse"] is True and r["checksums"] is True
+    assert r["records_imply_assistant_flag"] and r["phase_model"] and r["round_trip"], "the container is sound"
+    # the real QA-set file that fails alignment is an upload-form GUI save whose diagnose status is
+    # upload_form, so only the two value checks fail there and the run stays green by default
+    real = dict(r, census=False, diagnose_ok_or_upload_form=True, diagnose_status="upload_form")
+    lenient = [c for c in vd.CHECKS if c not in ("alignment", "census")]
+    assert all(real[c] for c in lenient), "a value finding must not look like a format-model failure"
+    assert vd.main([str(d), "--strict"]) == 1          # strict: every failed check counts
+    out = capsys.readouterr().out
+    assert "--strict makes that set the exit status" not in out
+    assert vd.main([str(d)]) == 1                      # this mutant also misaligns diagnose, so it still fails
+    assert "--strict makes that set the exit status" in capsys.readouterr().out
