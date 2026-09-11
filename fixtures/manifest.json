@@ -1,6 +1,6 @@
 {
- "generated": "2026-09-04",
- "count": 92,
+ "generated": "2026-09-11",
+ "count": 95,
  "entries": [
   {
    "file": "system_a/system_a_2026-06-18_experiment_bare_deviceform_1.rvms",
@@ -2117,6 +2117,98 @@
     }
    ],
    "notes": "_2 content with +0x4f set to 16:00 UTC; accepted 20:13 (R6b): the stamp is not an acceptance gate"
+  },
+  {
+   "file": "synthetic/system_a_2026-07-20_synthetic_bare_deviceform_1.rvsc",
+   "sha256": "8aaed6bfdec76ab8a0d307e8c57d6c06f9bdcb78a48e46afbf19224a4b39c3c2",
+   "size": 4571,
+   "system": "A",
+   "date": "2026-07-20",
+   "origin": "synthetic",
+   "state": "bare",
+   "form": "deviceform",
+   "source": "system_a/system_a_2026-07-20_download_bare_deviceform_1.rvms",
+   "blocks": [
+    {
+     "serial": "HQ0000A0001",
+     "length": 482,
+     "flag": "f4"
+    }
+   ],
+   "notes": "synthetic from system_a: the byte prefix of the source download up to its second block (one BareSettingData); the single-unit .rvsc shape. Flag byte f4 as downloaded (real single-unit files carry f0/e0). tools/gen_synthetic_fixtures.py regenerates it."
+  },
+  {
+   "file": "synthetic/system_a_2026-09-03_synthetic_ess_deviceform_1.rvms",
+   "sha256": "7ce4dd6dd205f837de8f2553d678f488f1cb66ac61b0fafcfa8a0b0439fdf6fe",
+   "size": 9202,
+   "system": "A",
+   "date": "2026-09-03",
+   "origin": "synthetic",
+   "state": "ess",
+   "form": "deviceform",
+   "source": "system_a/system_a_2026-09-03_download_ess_deviceform_1.rvms",
+   "blocks": [
+    {
+     "serial": "HQ0000A0003",
+     "length": 1705,
+     "flag": "e8"
+    },
+    {
+     "serial": "HQ0000A0004",
+     "length": 1705,
+     "flag": "e9"
+    },
+    {
+     "serial": "HQ0000A0005",
+     "length": 1703,
+     "flag": "ea"
+    }
+   ],
+   "notes": "synthetic from system_a: the HQ0000A0001 ESS block of the source download cloned three times with serials HQ0000A0003..5, phase byte +0x35 = 00/04/08, unit index +0x37 = 0..2, flags e8/e9/ea (the pattern of real three-phase files); pointers and checksums rebuilt. Same 1152-byte record on every block: a structural fixture, not an assistant fixture. tools/gen_synthetic_fixtures.py regenerates it."
+  },
+  {
+   "file": "synthetic/system_a_2026-09-03_synthetic_ess_deviceform_2.rvms",
+   "sha256": "2fa959e7983513f62d76bde51fae94cd395d91ae4254a3b94a5491f029f42e4d",
+   "size": 14317,
+   "system": "A",
+   "date": "2026-09-03",
+   "origin": "synthetic",
+   "state": "ess",
+   "form": "deviceform",
+   "source": "system_a/system_a_2026-09-03_download_ess_deviceform_1.rvms",
+   "blocks": [
+    {
+     "serial": "HQ0000A0003",
+     "length": 1705,
+     "flag": "e8"
+    },
+    {
+     "serial": "HQ0000A0004",
+     "length": 1705,
+     "flag": "e9"
+    },
+    {
+     "serial": "HQ0000A0005",
+     "length": 1705,
+     "flag": "ea"
+    },
+    {
+     "serial": "HQ0000A0006",
+     "length": 1705,
+     "flag": "e8"
+    },
+    {
+     "serial": "HQ0000A0007",
+     "length": 1705,
+     "flag": "e9"
+    },
+    {
+     "serial": "HQ0000A0008",
+     "length": 1703,
+     "flag": "ea"
+    }
+   ],
+   "notes": "synthetic from system_a: as _1 with six clones (serials HQ0000A0003..8, two per phase, unit index 0..5), the six-unit three-phase shape. tools/gen_synthetic_fixtures.py regenerates it."
   }
  ],
  "serials_note": "Inverter serials are pseudonyms of the same shape as real ones (HQ0000<system><unit>); every other byte is as downloaded."

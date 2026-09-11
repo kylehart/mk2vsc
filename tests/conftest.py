@@ -1,7 +1,11 @@
 """
-Shared fixtures.  Every test in this suite runs against the real device files in ``fixtures/``
+Shared fixtures.  Every corpus test in this suite runs against the real device files in ``fixtures/``
 (see fixtures/manifest.json and docs/FIXTURES.md).  Three files there are deliberately malformed and are
 listed in KNOWN_BAD with the reason; tests assert that they *fail* the way the device rejected them.
+
+``fixtures/synthetic/`` holds files built from corpus blocks (single-unit and three-phase shapes; see
+tools/gen_synthetic_fixtures.py).  They are in the manifest and are exercised by tests/test_topologies.py,
+but they are not part of ``good_files`` / ``good_path``: an Observed claim is checked on device files only.
 """
 import glob
 import json
@@ -23,8 +27,20 @@ KNOWN_BAD = {
 }
 
 
+SYNTHETIC_DIR = "synthetic"
+
+
 def all_fixture_paths():
-    return sorted(glob.glob(os.path.join(FIXTURES, "*", "*.rvms")))
+    return sorted(glob.glob(os.path.join(FIXTURES, "*", "*.rvms")) + glob.glob(os.path.join(FIXTURES, "*", "*.rvsc")))
+
+
+def is_synthetic(p):
+    return rel(p).startswith(SYNTHETIC_DIR + "/")
+
+
+def corpus_paths():
+    """Real device files that are well formed: every fixture except KNOWN_BAD and the synthetic ones."""
+    return [p for p in all_fixture_paths() if rel(p) not in KNOWN_BAD and not is_synthetic(p)]
 
 
 def rel(p):
@@ -40,7 +56,12 @@ def manifest():
 
 @pytest.fixture(scope="session")
 def good_paths():
-    return [p for p in all_fixture_paths() if rel(p) not in KNOWN_BAD]
+    return corpus_paths()
+
+
+@pytest.fixture(scope="session")
+def synthetic_paths():
+    return [p for p in all_fixture_paths() if is_synthetic(p)]
 
 
 @pytest.fixture(scope="session")
@@ -50,8 +71,11 @@ def good_files(good_paths):
 
 def pytest_generate_tests(metafunc):
     if "good_path" in metafunc.fixturenames:
-        paths = [p for p in all_fixture_paths() if rel(p) not in KNOWN_BAD]
+        paths = corpus_paths()
         metafunc.parametrize("good_path", paths, ids=[rel(p) for p in paths])
+    if "synthetic_path" in metafunc.fixturenames:
+        paths = [p for p in all_fixture_paths() if is_synthetic(p)]
+        metafunc.parametrize("synthetic_path", paths, ids=[rel(p) for p in paths])
     if "bad_path" in metafunc.fixturenames:
         paths = [p for p in all_fixture_paths() if rel(p) in KNOWN_BAD]
         metafunc.parametrize("bad_path", paths, ids=[rel(p) for p in paths])

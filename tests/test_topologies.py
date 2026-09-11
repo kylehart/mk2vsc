@@ -1,0 +1,245 @@
+"""
+Single-unit and three-phase file shapes, on the synthetic fixtures under fixtures/synthetic/ (built from corpus
+blocks by tools/gen_synthetic_fixtures.py) and on corpus blocks with one header byte altered.
+
+What these tests prove is the container and layout model on those shapes: block count, checksums, alignment
+against the file's own schema, byte-exact round trip, the per-slot phase/unit bytes, the 24-bit firmware
+number, the assistant flag's high nibble, the writer on a one-block file, and that the pair rules D2/E2 are
+reported not applicable on one unit rather than firing or crashing.  The same checks are run on real files
+outside the repository with tools/validate_dir.py (docs/QA.md).
+"""
+import json
+import os
+import shutil
+
+import pytest
+
+import mk2vsc
+from mk2vsc.sections import RvmsFile, SECTION_INFO
+from mk2vsc.units import unit_blocks, units_by_serial, OFF_FIRMWARE, OFF_ASSISTANT_FLAG, PREFIX_LEN, FIRMWARE_MASK, PHASE_LABELS
+from mk2vsc.schema import schema_of, firmware_of_schema, firmware_word_of_schema
+from mk2vsc.align import check as align_check
+from mk2vsc.census import census_text
+from mk2vsc.decode import decode_bytes
+from mk2vsc.diff import diff_bytes
+from mk2vsc.writer import set_settings
+from mk2vsc.diagnose import diagnose_bytes, render, Report
+from mk2vsc.cli import main
+from tests.conftest import FIXTURES
+
+SYN = os.path.join(FIXTURES, "synthetic")
+SINGLE = os.path.join(SYN, "system_a_2026-07-20_synthetic_bare_deviceform_1.rvsc")
+THREE = os.path.join(SYN, "system_a_2026-09-03_synthetic_ess_deviceform_1.rvms")
+SIX = os.path.join(SYN, "system_a_2026-09-03_synthetic_ess_deviceform_2.rvms")
+SINGLE_SOURCE = os.path.join(FIXTURES, "system_a", "system_a_2026-07-20_download_bare_deviceform_1.rvms")
+THREE_SOURCE = os.path.join(FIXTURES, "system_a", "system_a_2026-09-03_download_ess_deviceform_1.rvms")
+
+
+def _read(p):
+    with open(p, "rb") as fh:
+        return fh.read()
+
+
+# ------------------------------------------------------------------ the generator reproduces the files on disk
+def test_synthetic_fixtures_are_what_the_generator_builds():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("gen", os.path.join(os.path.dirname(FIXTURES), "tools", "gen_synthetic_fixtures.py"))
+    gen = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(gen)
+    built = gen.build()
+    assert set(built) == {os.path.relpath(p, FIXTURES).replace(os.sep, "/") for p in (SINGLE, THREE, SIX)}
+    for rel, data in built.items():
+        assert _read(os.path.join(FIXTURES, rel)) == data, rel
+
+
+# ------------------------------------------------------------------ every synthetic file: container, schema, alignment
+def test_synthetic_file_parses_validates_aligns_and_round_trips(synthetic_path):
+    data = _read(synthetic_path)
+    f = RvmsFile.parse(data)
+    assert f.all_checksums_ok and f.to_bytes() == data and f.rebuild().to_bytes() == data
+    assert f.sections[-1].next_ptr == len(data)
+    sch = schema_of(f)
+    units = unit_blocks(f)
+    assert len(units) in (1, 3, 6)
+    for u in units:
+        assert align_check(u, sch).ok and not u.is_upload_form and u.firmware_version == 2729560 and u.firmware_word_high_byte == 0
+    assert len(units_by_serial(f)) == len(units)
+    text, ok = census_text(data, os.path.basename(synthetic_path))
+    assert ok and f"{len(units)} inverter(s)" in text and "alignment OK" in text
+
+
+# ------------------------------------------------------------------ single unit
+def test_single_unit_is_the_byte_prefix_of_its_source():
+    single, src = _read(SINGLE), _read(SINGLE_SOURCE)
+    orig = RvmsFile.parse(src)
+    assert single == src[: orig.unit_sections[1].start]
+    f = RvmsFile.parse(single)
+    assert [s.name for s in f.sections] == [b"Mk2vscInfo", SECTION_INFO, b"BareSettingData"]
+    u = unit_blocks(f)[0]
+    assert u.is_last and u.serial == "HQ0000A0001" and u.slot == (0, 0) and u.phase_summary == "L1, unit 0"
+    assert u.raw == unit_blocks(orig)[0].raw
+
+
+def test_single_unit_census_show_verify_and_check(capsys):
+    single = _read(SINGLE)
+    cfg = mk2vsc.loads(single)
+    assert cfg.valid and cfg.serials == ["HQ0000A0001"] and cfg.form == "device"
+    assert cfg["HQ0000A0001"]["absorption"] == 56.0
+    text, ok = census_text(single, "one.rvsc")
+    assert ok and "1 inverter(s)" in text and "phase L1, unit 0" in text
+    ok, report = mk2vsc.api.verify_bytes(single, single)
+    assert ok and "VERIFIED" in report
+    d = diff_bytes(single, single)
+    assert d.identical
+    ok, res = cfg.check(absorption=56.0, float=54.0)
+    assert ok, res
+    assert main(["show", SINGLE]) == 0
+    out = capsys.readouterr().out
+    assert "1 inverter(s)" in out and "phase L1, unit 0" in out and "alignment OK" in out
+    assert main(["validate", SINGLE]) == 0 and main(["check", SINGLE]) == 0 and main(["census", SINGLE]) == 0
+    capsys.readouterr()
+    assert main(["show", SINGLE, "--json"]) == 0
+    j = json.loads(capsys.readouterr().out)
+    assert len(j["units"]) == 1 and j["units"][0]["phase"] == "L1" and j["units"][0]["unit_index"] == 0
+
+
+def test_single_unit_diagnose_runs_the_block_rules_and_reports_pair_rules_not_applicable(capsys):
+    fr = diagnose_bytes(_read(SINGLE), name="one.rvsc")
+    assert fr.status == "ok" and fr.serials == ["HQ0000A0001"] and fr.chemistry == "lithium"
+    assert not [f for f in fr.findings if f.rule in ("D2", "E2")]
+    assert set(fr.not_applicable) == {"D2", "E2"}
+    assert all("needs 2 or more inverters; this file has 1" == why for why in fr.not_applicable.values())
+    d = Report(files=[fr]).as_dict()
+    assert d["report_version"] == 1 and d["files"][0]["not_applicable"] == fr.not_applicable
+    assert "not applicable: D2 (needs 2 or more inverters; this file has 1); E2 (" in render(Report(files=[fr]))
+    assert main(["diagnose", SINGLE]) == 0
+    assert "not applicable: D2" in capsys.readouterr().out
+    # a pair does not report anything as not applicable
+    pair = diagnose_bytes(_read(SINGLE_SOURCE), name="pair.rvms")
+    assert pair.status == "ok" and pair.not_applicable == {} and any(f.rule == "D2" for f in pair.findings)
+
+
+def test_single_unit_writer_edit_changes_only_the_intended_bytes(tmp_path, capsys):
+    single = _read(SINGLE)
+    out, edits = set_settings(single, [(None, "absorption_V", 56.8), (None, "float_V", 54.1)])
+    assert len(out) == len(single) and len(edits) == 2
+    f = RvmsFile.parse(out)
+    assert f.all_checksums_ok
+    u = unit_blocks(f)[0]
+    assert u.setting(2) == 5680 and u.setting(3) == 5410
+    changed = {i for i in range(len(out)) if out[i] != single[i]}
+    allowed = set()
+    for e in edits:
+        allowed |= {e.offset_in_file, e.offset_in_file + 1}
+    ck = f.unit_sections[0].checksum_offset
+    allowed |= {ck, ck + 1, ck + 2, ck + 3}
+    assert changed <= allowed and changed >= {e.offset_in_file for e in edits}
+    # revert reproduces the fixture byte for byte
+    back, _ = set_settings(out, [(None, "absorption_V", 56.0), (None, "float_V", 54.0)])
+    assert back == single
+    # the CLI keeps the extension: FILE.edited.rvsc next to the input
+    src = tmp_path / "download.rvsc"
+    shutil.copyfile(SINGLE, src)
+    assert main(["edit", str(src), "absorption=56.8"]) == 0
+    assert "download.edited.rvsc" in capsys.readouterr().out and (tmp_path / "download.edited.rvsc").exists()
+    assert main(["verify", str(tmp_path / "download.edited.rvsc"), str(src)]) == 2       # a real change: not bookkeeping
+
+
+# ------------------------------------------------------------------ three-phase
+@pytest.mark.parametrize("path,n", [(THREE, 3), (SIX, 6)])
+def test_three_phase_slot_bytes_decode_per_unit(path, n, capsys):
+    f = RvmsFile.parse(_read(path))
+    units = unit_blocks(f)
+    assert len(units) == n
+    for i, u in enumerate(units):
+        phase = i % 3
+        assert u.slot == (4 * phase, i) and u.unit_index == i and u.phase_byte == 4 * phase
+        assert u.phase_label == ("L1", "L2", "L3")[phase]
+        assert u.assistant_flag == 0xE8 + phase and u.has_assistant_flag and (u.assistant_flag & 0x0F) == 8 + phase
+        assert u.serial == f"HQ0000A{3 + i:04d}"
+    text, ok = census_text(_read(path), "three.rvms")
+    assert ok and "flag e9, phase L2, unit 1" in text and "flag ea, phase L3, unit 2" in text
+    assert main(["show", path]) == 0
+    out = capsys.readouterr().out
+    assert f"{n} inverter(s)" in out and "phase L2, unit 1" in out and "phase L3, unit 2" in out
+    j = decode_bytes(_read(path))
+    assert [u["phase"] for u in j["units"]][:3] == ["L1", "L2", "L3"] and [u["unit_index"] for u in j["units"]] == list(range(n))
+
+
+def test_three_phase_diagnose_runs_every_rule(capsys):
+    for path in (THREE, SIX):
+        fr = diagnose_bytes(_read(path), name=os.path.basename(path))
+        assert fr.status == "ok" and fr.not_applicable == {} and fr.findings == [] and len(fr.serials) in (3, 6)
+        assert fr.editable
+    assert main(["diagnose", THREE]) == 0
+    out = capsys.readouterr().out
+    assert "3 inverter(s)" in out and "no findings" in out and "not applicable" not in out
+
+
+def test_three_phase_clones_carry_the_source_block_apart_from_slot_bytes_and_serial():
+    src = units_by_serial(RvmsFile.parse(_read(THREE_SOURCE)))["HQ0000A0001"]
+    for u in unit_blocks(RvmsFile.parse(_read(THREE))):
+        a, b = bytearray(u.raw), bytearray(src.raw)
+        for off in (0x0F, 0x10, 0x11, 0x12, 0x35, 0x36, 0x37):     # next pointer (position), slot bytes
+            a[off] = b[off] = 0
+        a[0x3A: 0x45] = b[0x3A: 0x45] = b"\x00" * 11
+        assert a[: -4] == b[: -4], u.serial          # everything but the checksum
+        assert u.assistant_area == src.assistant_area and u.settings() == src.settings()
+
+
+# ------------------------------------------------------------------ the firmware word's high byte (docs/FORMAT.md 3.3)
+def _with_firmware_high_byte(data: bytes, high: int) -> bytes:
+    """Every block's firmware word and the schema header's word with bits 24..31 set to ``high``; checksums rebuilt."""
+    f = RvmsFile.parse(data)
+    payloads = []
+    for s in f.sections:
+        p = bytearray(s.payload)
+        if s.name == SECTION_INFO:
+            p[7] = high
+        elif s.is_unit:
+            p[OFF_FIRMWARE + 3 - PREFIX_LEN] = high
+        payloads.append(bytes(p))
+    return f.rebuild(payloads).to_bytes()
+
+
+def test_firmware_number_is_the_low_24_bits_of_the_word(good_files):
+    src = good_files["system_a/system_a_2026-07-20_download_bare_deviceform_1.rvms"]
+    data = _with_firmware_high_byte(src, 0xC7)
+    f = RvmsFile.parse(data)
+    assert f.all_checksums_ok and len(data) == len(src)
+    info = f.section(SECTION_INFO).payload
+    assert firmware_word_of_schema(info) == 0xC7000000 | 2729560 and firmware_of_schema(info) == 2729560
+    for u in unit_blocks(f):
+        assert u.firmware_word == 0xC7000000 | 2729560 and u.firmware_version == 2729560 and u.firmware_word_high_byte == 0xC7
+        assert align_check(u, schema_of(f)).ok, "the settings array is untouched: alignment does not depend on the word"
+        assert u.summary()["firmware"] == 2729560 and u.summary()["firmware_word_high_byte"] == 0xC7
+    text, ok = census_text(data, "hb.rvms")
+    assert ok and "firmware 2729560 (word high byte 0xc7)" in text and "3341293528" not in text
+    assert "schema parsed (192 records, firmware 2729560 (word high byte 0xc7))" in text
+    # the corpus text is unchanged: no note when the high byte is zero
+    plain, _ = census_text(src, "hb.rvms")
+    assert "high byte" not in plain and "firmware 2729560," in plain
+    assert FIRMWARE_MASK == 0xFFFFFF and 9_999_999 < 2 ** 24
+    d = diff_bytes(src, data)
+    assert not d.only_bookkeeping and all(not ud.settings for ud in d.units), "a header byte, never a setting"
+
+
+def test_assistant_flag_is_read_by_its_high_nibble(good_files):
+    src = good_files["system_a/system_a_2026-07-20_download_bare_deviceform_1.rvms"]
+    f = RvmsFile.parse(src)
+    for flag, expect in ((0xF0, False), (0xE0, True), (0xE8, True), (0xEA, True), (0xF4, False), (0xE5, True)):
+        payloads = []
+        for s in f.sections:
+            p = bytearray(s.payload)
+            if s.is_unit:
+                p[OFF_ASSISTANT_FLAG - PREFIX_LEN] = flag
+            payloads.append(bytes(p))
+        for u in unit_blocks(f.rebuild(payloads)):
+            assert u.has_assistant_flag is expect and u.assistant_flag == flag
+
+
+def test_phase_labels_cover_the_observed_values_and_nothing_else():
+    assert PHASE_LABELS == {0x00: "L1", 0x04: "L2", 0x08: "L3", 0x86: "L2 (split-phase)"}
+    f = RvmsFile.parse(_read(SINGLE_SOURCE))
+    assert sorted(u.phase_label for u in unit_blocks(f)) == ["L1", "L2 (split-phase)"]
+    assert sorted(u.unit_index for u in unit_blocks(f)) == [0, 1]

@@ -22,6 +22,7 @@ def test_serial_sits_at_0x3a_and_firmware_at_0x1b(good_files):
         assert u.raw[0x3A:0x3C] == b"HQ", name
         assert len(u.serial) == 11
         assert u.firmware_version == 2729560, f"{name}: firmware word differs -- new firmware in corpus?"
+        assert u.firmware_word_high_byte == 0 and u.firmware_word == 2729560, name    # bits 24..31 clear on every corpus block
         assert u.u32(0x13) == 3
 
 
