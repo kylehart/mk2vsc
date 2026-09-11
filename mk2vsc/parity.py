@@ -21,6 +21,10 @@ configured PER UNIT, and those legitimately differ:
 So the rule is: parity everywhere OUTSIDE that documented exception list.  A difference inside it is
 expected and says nothing; a difference outside it is a finding.
 
+Firmware is checked too, and separately: the units must run the same version, and settings can agree
+word for word while the versions differ.  That is a block-header property rather than a numbered
+register, so it is reported on its own and also fails the eager check.
+
 Why an exception and not a warning string
 -----------------------------------------
 A disagreement changes what a calling program should do -- it is not decoration on a report.  A
@@ -61,6 +65,9 @@ from typing import Dict, List, Optional
 from .fields import FIELDS, GRID_CODE_LOCKED
 from .sections import RvmsFile
 from .units import N_SETTINGS, UnitBlock, unit_blocks
+
+#: bytes of section checksum that trail every block's payload inside ``UnitBlock.raw``
+CHECKSUM_BYTES = 4
 
 __all__ = [
     "ParityMismatch",
@@ -136,6 +143,7 @@ class ParityReport:
     checked: int = 0
     comparable: bool = True      # False when the file does not hold a comparable set of blocks
     reason: str = ""             # why it is not comparable
+    firmware: Dict[str, int] = _dc_field(default_factory=dict)   # serial -> version, ONLY when they disagree
 
     @property
     def unexpected(self) -> List[ParityDifference]:
@@ -146,8 +154,12 @@ class ParityReport:
         return [d for d in self.differences if d.severity == "error"]
 
     @property
+    def firmware_disagrees(self) -> bool:
+        return bool(self.firmware)
+
+    @property
     def ok(self) -> bool:
-        return self.comparable and not self.unexpected
+        return self.comparable and not self.unexpected and not self.firmware_disagrees
 
     @property
     def units(self) -> int:
@@ -158,13 +170,19 @@ class ParityReport:
             return f"parity: NOT CHECKED -- {self.reason}"
         head = " vs ".join(self.serials)
         note = "" if self.units == 2 else f"  [{self.units} units: beyond a pair is untested, see docs/PARITY.md]"
+        fw = ""
+        if self.firmware_disagrees:
+            who = ", ".join(f"{s}={self.firmware[s]}" for s in sorted(self.firmware))
+            fw = f"\n  FAIL  firmware: units DISAGREE ({who}) -- every unit must run the same firmware"
         if not self.differences:
+            if fw:
+                return f"parity: {head}, {self.checked} settings agree{note}{fw}"
             return f"parity OK: {head} agree on all {self.checked} settings{note}"
         lines = [f"parity: {head}, {self.checked} settings compared{note}"]
         for d in sorted(self.differences, key=lambda x: (x.expected, -int(x.shared_battery), x.setting_id)):
             mark = {"error": "FAIL", "warning": "WARN", "expected": "note"}[d.severity]
             lines.append(f"  {mark}  {d.describe()}")
-        return "\n".join(lines)
+        return "\n".join(lines) + fw
 
 
 class ParityMismatch(RuntimeError):
@@ -177,12 +195,15 @@ class ParityMismatch(RuntimeError):
     def __init__(self, report: ParityReport):
         self.report = report
         n = len(report.unexpected)
-        worst = "commissioning error" if report.errors else "difference"
-        super().__init__(
-            f"inverters disagree on {n} setting{'s' if n != 1 else ''} "
-            f"outside the documented per-unit list ({worst}); "
-            f"see .report for detail:\n{report.render()}"
-        )
+        if n:
+            worst = "commissioning error" if report.errors else "difference"
+            head = (f"inverters disagree on {n} setting{'s' if n != 1 else ''} "
+                    f"outside the documented per-unit list ({worst})")
+            if report.firmware_disagrees:
+                head += " and are on different firmware"
+        else:
+            head = "inverters are on different firmware versions"
+        super().__init__(f"{head}; see .report for detail:\n{report.render()}")
 
 
 class ParityNotComparable(RuntimeError):
@@ -220,11 +241,16 @@ def parity_report_bytes(data: bytes) -> ParityReport:
     # and reporting "OK" would be silence dressed as agreement.  (RvmsFile.parse accepts a section
     # with only its pointer and checksum, so this is reachable on a damaged file.)
     for b in blocks:
-        need = b.settings_offset + 2 * N_SETTINGS
+        # +4 reserves the section's checksum trailer, which is part of ``raw``.  Without it a block
+        # short by up to four bytes passes this guard and the last reads interpret checksum bytes as
+        # settings 190 and 191 -- and because those ids are on the per-unit exception list, two
+        # equally damaged blocks could report ok=True.  Silence dressed as agreement is the one
+        # outcome this module exists to prevent.
+        need = b.settings_offset + 2 * N_SETTINGS + CHECKSUM_BYTES
         if len(b.raw) < need:
             rep.comparable = False
             rep.reason = (f"block {b.index} ({b.serial}) is {len(b.raw)} bytes; "
-                          f"{need} needed to hold all {N_SETTINGS} settings")
+                          f"{need} needed to hold all {N_SETTINGS} settings before the checksum")
             return rep
 
     serials = [b.serial for b in blocks]
@@ -234,6 +260,15 @@ def parity_report_bytes(data: bytes) -> ParityReport:
         return rep
 
     rep.serials = serials
+
+    # Victron requires every unit to run the same firmware version.  Settings can agree word for word
+    # while the units are on different firmware, so a settings-only comparison would report parity OK
+    # on a system the manual says is misconfigured.  This is a property of the block header, not of a
+    # numbered register, so it is reported separately from the 192-register comparison.
+    firmwares = {b.serial: b.firmware_version for b in blocks}
+    if len(set(firmwares.values())) > 1:
+        rep.firmware = firmwares
+
     by_id = {f.id: f for f in FIELDS}
 
     for sid in range(N_SETTINGS):

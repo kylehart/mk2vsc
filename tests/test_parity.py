@@ -23,7 +23,7 @@ from mk2vsc.parity import (
     parity_report_bytes,
 )
 from mk2vsc.sections import RvmsFile
-from mk2vsc.units import SECTION_DATA, unit_blocks
+from mk2vsc.units import N_SETTINGS, SECTION_DATA, unit_blocks
 from mk2vsc.writer import set_settings
 
 from .conftest import all_fixture_paths, rel
@@ -228,6 +228,76 @@ def test_three_block_file_is_compared_across_all_units():
         check_parity_bytes(skewed)
     d = next(x for x in exc.value.report.errors if x.setting_id == 2)
     assert set(d.values) == set(rep.serials), "every unit's value must be listed"
+
+
+def test_block_short_into_the_checksum_trailer_is_not_comparable():
+    """A block short by only a few bytes still ends with its 4-byte checksum, so a naive length
+    check accepts it and the last reads take checksum bytes as settings 190/191 -- which are on the
+    per-unit exception list, so two equally damaged blocks could report ok=True.  Guard that."""
+    p = _agreeing_pair()
+    base = open(p, "rb").read()
+    f = RvmsFile.parse(base)
+    idx = max(i for i, sec in enumerate(f.sections) if sec.name == SECTION_DATA)
+    payloads = [sec.payload for sec in f.sections]
+
+    # Trim so the block keeps its checksum trailer but loses the last settings word.  Without the
+    # +4 reservation this file compares "fine": the reads fall into the checksum, and the affected
+    # ids (190, 191) are on the per-unit exception list, so ok would be True.
+    def trimmed(k):
+        pay = list(payloads)
+        pay[idx] = pay[idx][:len(pay[idx]) - k]
+        return f.rebuild(pay).to_bytes()
+
+    short = trimmed(6)
+    blk = unit_blocks(RvmsFile.parse(short))[idx - 2]
+    assert len(blk.raw) < blk.settings_offset + 2 * N_SETTINGS + 4
+    assert len(blk.raw) >= blk.settings_offset + 2 * N_SETTINGS, (
+        "this case must be short ONLY inside the checksum reservation -- otherwise it proves nothing")
+    RvmsFile.parse(short)                                # still parses: that is the trap
+    rep = parity_report_bytes(short)
+    assert not rep.comparable, "a block whose settings run into the checksum must not be compared"
+    assert "before the checksum" in rep.reason
+    assert not rep.ok
+    with pytest.raises(ParityNotComparable):
+        check_parity_bytes(short)
+
+    # and a block that is merely tight (full array + full trailer) is still compared
+    assert parity_report_bytes(trimmed(4)).comparable
+
+
+def test_same_settings_different_firmware_is_not_parity():
+    """Victron requires every unit on the same firmware.  Settings can agree word for word while the
+    versions differ, so a settings-only check would wrongly report parity OK."""
+    p = _agreeing_pair()
+    base = open(p, "rb").read()
+    f = RvmsFile.parse(base)
+    blocks = unit_blocks(f)
+    assert len({b.firmware_version for b in blocks}) == 1, "fixture should start on one firmware"
+    off = blocks[-1].firmware_offset if hasattr(blocks[-1], "firmware_offset") else None
+    data = bytearray(base)
+    # bump the last block's firmware word in place, then rebuild checksums
+    sec = [sec for sec in f.sections if sec.name == SECTION_DATA][-1]
+    payloads = [x.payload for x in f.sections]
+    idx = f.sections.index(sec)
+    pay = bytearray(payloads[idx])
+    fw_rel = blocks[-1].firmware_version
+    # locate the firmware bytes inside the payload by value (u32 little-endian)
+    import struct
+    needle = struct.pack("<I", fw_rel)
+    at = pay.find(needle)
+    assert at >= 0, "firmware word not found in the block payload"
+    struct.pack_into("<I", pay, at, fw_rel + 1)
+    payloads[idx] = bytes(pay)
+    skewed = f.rebuild(payloads).to_bytes()
+
+    rep = parity_report_bytes(skewed)
+    assert rep.comparable and not rep.differences, "settings must still agree; only firmware differs"
+    assert rep.firmware_disagrees
+    assert not rep.ok, "same settings + different firmware is NOT parity"
+    assert "firmware" in rep.render()
+    with pytest.raises(ParityMismatch) as exc:
+        check_parity_bytes(skewed)
+    assert "firmware" in str(exc.value)
 
 
 def test_truncated_block_is_not_comparable_not_a_crash():

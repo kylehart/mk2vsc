@@ -85,7 +85,14 @@ and worth doubting.
   are not on the exception list, so a legitimately per-unit VS configuration that differs only there
   is reported as a `warning`. The list is by whole register on purpose: excusing a flag word would
   also excuse its non-VS bits.
-- A truncated-but-parseable file is reported as not comparable, not as a partial result.
+- A truncated-but-parseable file is reported as not comparable, not as a partial result. The length
+  check reserves the four-byte section checksum: without it a block short by a few bytes would read
+  checksum bytes as settings 190 and 191, which are on the exception list, so two equally damaged
+  blocks could report OK.
+- **Firmware is compared too.** Victron requires every unit on the same version, and settings can
+  agree word for word while the versions differ, so a settings-only check would wrongly pass. It is a
+  block-header property, reported separately from the 192-register comparison, and it fails the
+  eager check.
 
 ## How this condition arises in practice
 
