@@ -1,14 +1,14 @@
-"""Inverter parity: do the two blocks of a pair agree where they must?
+"""Inverter parity: do the inverters of a VE.Bus system agree where they must?
 
 Why this exists
 ---------------
-The two inverters of a parallel or split-phase pair are two halves of one machine: one DC bus, one
-battery, one synchronised AC reference.  Victron's parallel/split-phase manual requires the units to
-be the same type, size, system voltage, feature set and firmware, and states plainly that when they
-disagree the numbers shown on the GX device and VRM "will or can be wrong" and controlling the
-system "will not always work properly either".
+The inverters of a parallel, split-phase or three-phase system are parts of one machine: one DC
+bus, one battery, one synchronised AC reference.  Victron's parallel/split-phase manual requires the
+units to be the same type, size, system voltage, feature set and firmware, and states plainly that
+when they disagree the numbers shown on the GX device and VRM "will or can be wrong" and controlling
+the system "will not always work properly either".
 
-It is NOT a rule that the two blocks are byte-identical.  The same manual names settings that are
+It is NOT a rule that the blocks are byte-identical.  The same manual names settings that are
 configured PER UNIT, and those legitimately differ:
 
   * Virtual Switch      "A unique virtual switch configuration can be configured for each unit"
@@ -25,30 +25,52 @@ Why an exception and not a warning string
 -----------------------------------------
 A disagreement changes what a calling program should do -- it is not decoration on a report.  A
 caller that does not want to handle it should not silently proceed past it.  So the eager entry
-point RAISES :class:`ParityMismatch`, and a caller must either catch it or deliberately ask for the
-report form instead.  ``docs/SAFETY.md`` describes the same reasoning for refusing locked writes.
+point RAISES: :class:`ParityMismatch` when the units disagree outside the exception list, and
+:class:`ParityNotComparable` when the file cannot be judged at all (fewer than two inverter blocks,
+a block too short to hold its settings array, duplicate serials).  Silence on an input the check
+could not examine would be the exact failure this module exists to prevent.  A caller that wants
+the report regardless asks for :func:`parity_report_bytes`, which never raises.
 
-Two honest limits:
+Two-inverter pairs vs. three-phase systems
+------------------------------------------
+The comparison is written for N >= 2 blocks so that a three-phase file is checked rather than
+refused: every setting is compared across all units, and a difference is reported with every
+unit's value.  **Only pairs have been exercised against real hardware.**  Every fixture in this
+repository holds exactly two inverter blocks, and no three-phase system has been read, written or
+verified with this tool.  For N > 2 the exception list is assumed to hold unchanged (it is a
+property of the setting, not of the unit count), but that is an assumption, not an observation.
+Treat N > 2 as unsupported: the code path exists so it fails loudly rather than silently, and the
+tests cover it only with synthetic files built by duplicating a real block.
 
+Honest limits
+-------------
 * **We do not decode every setting.**  Parity is computed over the raw 16-bit words, so a
   disagreement is reported whether or not we have a name for the field.  Not having labelled a
-  setting is not a reason to stay quiet about the two inverters disagreeing on it.
+  setting is not a reason to stay quiet about the units disagreeing on it.
 * **"Expected" is not "correct".**  A grid-code difference is expected per Victron's documentation.
   This module does not claim the value itself is right.
+* **Virtual Switch bits also live in flag words.**  Settings 1, 60 and 62 carry VS-related bits
+  alongside unrelated ones.  Those words are NOT on the exception list, so a legitimately per-unit
+  VS configuration that differs only there is reported as a ``warning``.  The exception list is
+  by whole register, deliberately: excusing a whole flag word would also excuse its non-VS bits.
 """
 
 from dataclasses import dataclass, field as _dc_field
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, List, Optional
 
-from .fields import FIELDS, GRID_CODE_LOCKED, lookup
+from .fields import FIELDS, GRID_CODE_LOCKED
 from .sections import RvmsFile
-from .units import UnitBlock, unit_blocks
+from .units import N_SETTINGS, UnitBlock, unit_blocks
 
 __all__ = [
     "ParityMismatch",
+    "ParityNotComparable",
     "ParityDifference",
     "ParityReport",
     "EXPECTED_PER_UNIT",
+    "SHARED_BATTERY_IDS",
+    "VIRTUAL_SWITCH_IDS",
+    "DC_LOW_SHUTDOWN_IDS",
     "check_parity",
     "check_parity_bytes",
     "parity_report_bytes",
@@ -56,7 +78,8 @@ __all__ = [
 
 #: Settings Victron documents as configured per unit, so a difference is EXPECTED.
 #: Grid code is 81 and 128-191 (``GRID_CODE_LOCKED`` already carries exactly that set).
-#: Virtual Switch registers are listed explicitly rather than by name prefix so the set is auditable.
+#: Virtual Switch registers are listed explicitly rather than by name prefix so the set is auditable
+#: (tests assert it against the ``vs_`` fields in ``fields.py``).
 VIRTUAL_SWITCH_IDS = frozenset(
     {15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33,
      34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 52, 53, 54, 55, 56, 57, 58, 59, 70}
@@ -68,17 +91,17 @@ DC_LOW_SHUTDOWN_IDS = frozenset({11, 12})
 EXPECTED_PER_UNIT = frozenset(GRID_CODE_LOCKED) | VIRTUAL_SWITCH_IDS | DC_LOW_SHUTDOWN_IDS
 
 #: Differences here are treated as a probable commissioning error rather than a configuration
-#: choice: both inverters act on ONE shared battery, so two different targets is not a tuning.
+#: choice: every inverter acts on ONE shared battery, so two different targets is not a tuning.
 SHARED_BATTERY_IDS = frozenset({2, 3, 4, 5, 6, 7, 8, 9, 64, 65, 72, 74})
 
 
 @dataclass(frozen=True)
 class ParityDifference:
-    """One setting on which the pair disagrees."""
+    """One setting on which the units disagree."""
 
     setting_id: int
     name: Optional[str]          # None when we have no label for this register
-    values: Dict[str, int]       # serial -> raw 16-bit word
+    values: Dict[str, int]       # serial -> raw 16-bit word, one entry per unit
     decoded: Dict[str, object]   # serial -> decoded value, empty when undecodable
     expected: bool               # documented per-unit (grid code / VS / DC low shutdown)
     shared_battery: bool         # acts on the shared battery: a probable commissioning error
@@ -102,12 +125,16 @@ class ParityDifference:
 
 @dataclass
 class ParityReport:
-    """The result of comparing a pair.  ``ok`` is False when anything unexpected differs."""
+    """The result of comparing the units.
+
+    ``ok`` is True only when the file was comparable AND nothing unexpected differs.  A report
+    that could not compare anything is never ``ok``: silence is not agreement.
+    """
 
     serials: List[str] = _dc_field(default_factory=list)
     differences: List[ParityDifference] = _dc_field(default_factory=list)
     checked: int = 0
-    comparable: bool = True      # False when the file does not hold a comparable pair
+    comparable: bool = True      # False when the file does not hold a comparable set of blocks
     reason: str = ""             # why it is not comparable
 
     @property
@@ -120,14 +147,20 @@ class ParityReport:
 
     @property
     def ok(self) -> bool:
-        return not self.unexpected
+        return self.comparable and not self.unexpected
+
+    @property
+    def units(self) -> int:
+        return len(self.serials)
 
     def render(self) -> str:
         if not self.comparable:
-            return f"parity: not checked -- {self.reason}"
+            return f"parity: NOT CHECKED -- {self.reason}"
+        head = " vs ".join(self.serials)
+        note = "" if self.units == 2 else f"  [{self.units} units: beyond a pair is untested, see docs/PARITY.md]"
         if not self.differences:
-            return f"parity OK: {' vs '.join(self.serials)} agree on all {self.checked} settings"
-        lines = [f"parity: {' vs '.join(self.serials)}, {self.checked} settings compared"]
+            return f"parity OK: {head} agree on all {self.checked} settings{note}"
+        lines = [f"parity: {head}, {self.checked} settings compared{note}"]
         for d in sorted(self.differences, key=lambda x: (x.expected, -int(x.shared_battery), x.setting_id)):
             mark = {"error": "FAIL", "warning": "WARN", "expected": "note"}[d.severity]
             lines.append(f"  {mark}  {d.describe()}")
@@ -135,7 +168,7 @@ class ParityReport:
 
 
 class ParityMismatch(RuntimeError):
-    """Raised when the two inverters disagree outside the documented per-unit exception list.
+    """Raised when the units disagree outside the documented per-unit exception list.
 
     Carries the full :class:`ParityReport` as ``.report`` so a caller that catches it can decide
     what to do without re-reading the file.
@@ -152,53 +185,74 @@ class ParityMismatch(RuntimeError):
         )
 
 
-def _blocks(data: bytes) -> List[UnitBlock]:
-    return list(unit_blocks(RvmsFile.parse(data)))
+class ParityNotComparable(RuntimeError):
+    """Raised when parity could not be judged at all, so that not-checked is never mistaken for OK.
+
+    Fewer than two inverter blocks, a block too short to hold its settings array, or duplicate
+    serials.  ``.report`` carries the reason.
+    """
+
+    def __init__(self, report: ParityReport):
+        self.report = report
+        super().__init__(f"parity not comparable: {report.reason}")
 
 
 def parity_report_bytes(data: bytes) -> ParityReport:
-    """Compare the pair and RETURN a report.  Never raises for a mismatch."""
+    """Compare every inverter block and RETURN a report.  Never raises for a mismatch.
+
+    Parse errors are reported as ``comparable=False`` rather than raised, so a display command can
+    always print something; use :func:`check_parity_bytes` when silence must be impossible.
+    """
     rep = ParityReport()
     try:
-        blocks = _blocks(data)
-    except Exception as exc:                                  # pragma: no cover - parse guarded above
+        blocks: List[UnitBlock] = list(unit_blocks(RvmsFile.parse(data)))
+    except Exception as exc:
         rep.comparable = False
         rep.reason = f"file could not be parsed ({exc})"
         return rep
 
     if len(blocks) < 2:
         rep.comparable = False
-        rep.reason = f"only {len(blocks)} inverter block(s); parity needs a pair"
-        return rep
-    if len(blocks) > 2:
-        rep.comparable = False
-        rep.reason = f"{len(blocks)} inverter blocks; this check handles pairs only"
+        rep.reason = f"only {len(blocks)} inverter block(s); parity needs at least two"
         return rep
 
-    a, b = blocks
-    rep.serials = [a.serial, b.serial]
+    # Fail closed on a block that cannot hold the whole settings array: comparing a partial array
+    # and reporting "OK" would be silence dressed as agreement.  (RvmsFile.parse accepts a section
+    # with only its pointer and checksum, so this is reachable on a damaged file.)
+    for b in blocks:
+        need = b.settings_offset + 2 * N_SETTINGS
+        if len(b.raw) < need:
+            rep.comparable = False
+            rep.reason = (f"block {b.index} ({b.serial}) is {len(b.raw)} bytes; "
+                          f"{need} needed to hold all {N_SETTINGS} settings")
+            return rep
+
+    serials = [b.serial for b in blocks]
+    if len(set(serials)) != len(serials):
+        rep.comparable = False
+        rep.reason = f"duplicate inverter serial in file: {serials}"
+        return rep
+
+    rep.serials = serials
     by_id = {f.id: f for f in FIELDS}
 
-    for sid in range(192):
-        try:
-            va, vb = a.setting(sid), b.setting(sid)
-        except (IndexError, ValueError):
-            continue
+    for sid in range(N_SETTINGS):
+        values = {b.serial: b.setting(sid) for b in blocks}
         rep.checked += 1
-        if va == vb:
+        if len(set(values.values())) == 1:
             continue
         fld = by_id.get(sid)
         decoded: Dict[str, object] = {}
         if fld is not None:
             try:
-                decoded = {a.serial: fld.decode(va), b.serial: fld.decode(vb)}
+                decoded = {s: fld.decode(v) for s, v in values.items()}
             except Exception:
                 decoded = {}
         rep.differences.append(
             ParityDifference(
                 setting_id=sid,
                 name=fld.name if fld is not None else None,
-                values={a.serial: va, b.serial: vb},
+                values=values,
                 decoded=decoded,
                 expected=sid in EXPECTED_PER_UNIT,
                 shared_battery=sid in SHARED_BATTERY_IDS,
@@ -208,10 +262,18 @@ def parity_report_bytes(data: bytes) -> ParityReport:
 
 
 def check_parity_bytes(data: bytes, *, raise_on_mismatch: bool = True) -> ParityReport:
-    """Eager parity check.  Raises :class:`ParityMismatch` unless told not to."""
+    """Eager parity check.
+
+    Raises :class:`ParityNotComparable` when the file cannot be judged and :class:`ParityMismatch`
+    when the units disagree outside the documented per-unit list.  ``raise_on_mismatch=False``
+    turns both raises off and returns the report for the caller to inspect.
+    """
     rep = parity_report_bytes(data)
-    if raise_on_mismatch and rep.comparable and not rep.ok:
-        raise ParityMismatch(rep)
+    if raise_on_mismatch:
+        if not rep.comparable:
+            raise ParityNotComparable(rep)
+        if not rep.ok:
+            raise ParityMismatch(rep)
     return rep
 
 

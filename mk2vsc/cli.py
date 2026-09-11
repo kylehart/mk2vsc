@@ -87,7 +87,7 @@ def cmd_show(a):
         else:
             print(cfg.summary(include_unknown=a.all))
             prep = parity_report_bytes(cfg.data)
-            if prep.comparable and prep.differences:
+            if prep.differences or not prep.comparable:
                 print(prep.render())
             if len(a.files) > 1:
                 print()
@@ -230,19 +230,27 @@ def cmd_diagnose(a):
 
 # ----------------------------------------------------------------------------- tools
 def cmd_parity(a):
-    """Report pair parity.  Exit 2 when the inverters disagree outside the documented per-unit list."""
+    """Report inverter parity.
+
+    Exit 2 when the units disagree outside the documented per-unit list, 1 when a file could not be
+    read or could not be compared (a not-checked file is never a pass), 0 only when every file was
+    compared and agrees.  A mismatch anywhere in the batch wins over a read error, whatever the
+    argument order.
+    """
     rc = 0
     for p in a.files:
         try:
             data = open(p, "rb").read()
         except OSError as e:
-            rc = 1
+            rc = max(rc, 1)
             print(f"{p}: {e}", file=sys.stderr)
             continue
         rep = parity_report_bytes(data)
         print(f"{p}: {rep.render()}" if len(a.files) > 1 else rep.render())
-        if rep.comparable and not rep.ok:
-            rc = 2
+        if not rep.comparable:
+            rc = max(rc, 1)
+        elif not rep.ok:
+            rc = max(rc, 2)
     return rc
 
 

@@ -1,6 +1,6 @@
 # Inverter parity
 
-The two inverters of a parallel or split-phase pair are two halves of one machine: one DC bus, one
+The inverters of a parallel, split-phase or three-phase system are parts of one machine: one DC bus, one
 battery, one synchronised AC reference. Victron's parallel/split-phase manual requires them to be the
 same type, size, system voltage, feature set and firmware, and warns that when settings disagree the
 values shown on the GX and VRM "will or can be wrong" and control "will not always work properly".
@@ -31,9 +31,16 @@ tuning.
 
 ## Why an exception rather than a warning string
 
-A disagreement changes what a calling program should do. `check_parity()` therefore **raises**
-`ParityMismatch`; a caller either catches it (the exception carries the full `ParityReport` as
-`.report`) or explicitly asks for `parity_report_bytes()`, which never raises.
+A disagreement changes what a calling program should do. `check_parity()` therefore **raises**:
+
+| exception | when |
+|---|---|
+| `ParityMismatch` | the units disagree on a setting outside the documented per-unit list |
+| `ParityNotComparable` | the file could not be judged: fewer than two inverter blocks, a block too short to hold its 192-word settings array, or duplicate serials |
+
+Both carry the full `ParityReport` as `.report`. The second exists so that *not checked* can never be
+mistaken for *OK*: a report that compared nothing has `ok == False`. A caller that wants the report
+regardless asks for `parity_report_bytes()`, which never raises.
 
 ```python
 from mk2vsc import check_parity, ParityMismatch
@@ -45,14 +52,40 @@ except ParityMismatch as e:
         print(d.describe())
 ```
 
-CLI: `mk2vsc parity FILE...` exits 2 on a mismatch; `mk2vsc show` prints the report when the pair
-differs but keeps its exit code, being a display command.
+CLI: `mk2vsc parity FILE...` exits 2 on a mismatch, 1 when a file could not be read or compared, 0 only
+when every file was compared and agrees; a mismatch anywhere in a batch wins over a read error whatever
+the argument order. `mk2vsc show` prints the report when the units differ (or when the file could not
+be compared) but keeps its exit code, being a display command.
 
-## Two limits, stated plainly
+## Three-phase systems: written for N units, exercised only for pairs
+
+The comparison is written for **N >= 2 inverter blocks**, so a three-phase file is checked rather than
+refused: every setting is compared across all units and a difference lists every unit's value.
+
+**What is and is not established:**
+
+| | status |
+|---|---|
+| Two-inverter pairs (parallel / split-phase) | **Observed** on real hardware: the whole fixture corpus, and controlled one-sided writes |
+| Three or more units | **Not established.** No three-phase system has been read, written or verified with this tool. Every fixture holds exactly two blocks. The tests cover N > 2 only with a synthetic file built by duplicating a real block under a placeholder serial |
+| The exception list for N > 2 | **Assumed** unchanged: it is a property of the setting, not of the unit count. That is an assumption, not an observation |
+
+Treat N > 2 as **unsupported**. The code path exists so that a three-phase file fails loudly on a real
+disagreement rather than silently passing as "not a pair"; it is not a claim that the tool understands
+three-phase configuration. If you hold a three-phase download, a comparison result is worth reading,
+and worth doubting.
+
+
+## Limits, stated plainly
 
 - Parity is computed over the raw 16-bit words, so a register we have **not** named is still
   compared. Not having a label is not a reason to stay silent about a disagreement.
 - "Expected" means *documented as per-unit*. It does not mean the value is correct.
+- **Virtual Switch bits also live in flag words 1, 60 and 62**, alongside unrelated bits. Those words
+  are not on the exception list, so a legitimately per-unit VS configuration that differs only there
+  is reported as a `warning`. The list is by whole register on purpose: excusing a flag word would
+  also excuse its non-VS bits.
+- A truncated-but-parseable file is reported as not comparable, not as a partial result.
 
 ## How this condition arises in practice
 
