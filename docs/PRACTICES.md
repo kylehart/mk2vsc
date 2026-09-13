@@ -14,7 +14,10 @@ is the readable version.
 Everything that matters is on GitHub, in the open:
 
 - **Pull requests** for every change to `main`, including the maintainer's own. The PR says what
-  changed, why, what evidence supports it, and which issue it closes.
+  changed, why, what evidence supports it, and which issue it closes. Pull requests are merged with a
+  merge commit, never squashed or rebased, so the individual commits and the corrections made during
+  review stay in the history of `main`. A review finding that changed the work is part of the record,
+  not scaffolding to be discarded at merge.
 - **Issues** for every open question. Each unknown byte region, each unnamed setting, each hypothesis
   about device behaviour, each incident on our own hardware, and each file we wish we had is an issue
   with a label. The issue list is the honest map of what is and is not known.

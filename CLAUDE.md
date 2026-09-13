@@ -7,7 +7,9 @@ of these rules is docs/PRACTICES.md; this file is the operational checklist.
 ## 1. Everything goes through the public record
 
 - Every change lands on `main` through a pull request, even from the maintainer. The PR description
-  says what changed, why, what evidence supports it, and which issue it closes.
+  says what changed, why, what evidence supports it, and which issue it closes. Merge with a merge
+  commit (`gh pr merge --merge`); squash and rebase are disabled on the repository so that the commits
+  and the review corrections behind a change remain readable on `main`.
 - Every open question, unknown byte, hypothesis, incident, and idea is a GitHub issue with a label.
   If we discuss something worth remembering, it becomes an issue or a doc change the same day.
 - Decisions are recorded where they were made: an issue comment, a PR description, or a doc. Nothing
