@@ -9,7 +9,10 @@ of these rules is docs/PRACTICES.md; this file is the operational checklist.
 - Every change lands on `main` through a pull request, even from the maintainer. The PR description
   says what changed, why, what evidence supports it, and which issue it closes. Merge with a merge
   commit (`gh pr merge --merge`); squash and rebase are disabled on the repository so that the commits
-  and the review corrections behind a change remain readable on `main`.
+  and the review corrections behind a change remain readable on `main`. Build the branch one claim per
+  commit, each with the tests that support it: the commits are permanent, so they are written to be
+  read, not as a diary of attempts. Fold a fix for unshipped work into the commit it corrects; keep a
+  correction as its own commit when it changes a claim that was already made.
 - Every open question, unknown byte, hypothesis, incident, and idea is a GitHub issue with a label.
   If we discuss something worth remembering, it becomes an issue or a doc change the same day.
 - Decisions are recorded where they were made: an issue comment, a PR description, or a doc. Nothing
